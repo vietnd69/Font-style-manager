@@ -1,0 +1,11 @@
+{
+  "name": "Font style manager",
+  "id": "1207158658871865087",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "editorType": [
+    "figma"
+  ],
+  "containsWidget": true,
+  "widgetApi": "1.0.0"
+}
