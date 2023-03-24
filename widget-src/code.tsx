@@ -17,6 +17,7 @@ const searchActive = `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmln
 const searchDisable = `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="46" height="46" x="0" y="0" viewBox="0 0 32 32" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><path d="M18.337 18.348c-.851.851-1.98 1.319-3.184 1.319s-2.333-.468-3.184-1.319c-.851-.85-1.318-1.98-1.318-3.183s.468-2.333 1.318-3.184c.851-.851 1.98-1.319 3.184-1.319s2.333.468 3.184 1.319c.851.85 1.318 1.981 1.318 3.184s-.467 2.333-1.318 3.183zm13.601-2.285c0 8.822-7.178 16-16 16s-16-7.178-16-16 7.178-16 16-16 16 7.177 16 16zm-8.881 5.568-2.646-2.653a6.444 6.444 0 0 0 1.244-3.814c0-1.737-.676-3.37-1.904-4.598s-2.86-1.905-4.598-1.905-3.37.677-4.598 1.905-1.904 2.861-1.904 4.598.677 3.37 1.904 4.597a6.459 6.459 0 0 0 4.598 1.905 6.45 6.45 0 0 0 3.849-1.27l2.639 2.646a.995.995 0 0 0 .708.294 1 1 0 0 0 .708-1.705z" fill="#888" data-original="#888" class=""></path></g></svg>`;
 
 function Widget() {
+	
 	useEffect(() => {
 		if (isFirstLoadFont && localFonts.length === 0) {
 			loadLocalFont();
@@ -75,6 +76,18 @@ function Widget() {
 		description: "",
 	});
 
+	useEffect(() => {
+		figma.ui.onmessage = (msg) => {
+			if (msg.type === "setFont") {
+				// console.log(msg)
+				setCheckedFamily(msg.data)
+			}
+			if (msg.type === "close") {
+				figma.closePlugin();
+			}
+		};
+	});
+
 	// const [findKeys, setFindKeys] = useSyncedState("findKeys", { family: "", style: "" });
 
 	const toggleSearchBar = () => {
@@ -96,7 +109,7 @@ function Widget() {
 		}
 
 		setCleanFont(data);
-		console.log(data);
+		// console.log(data);
 	};
 
 	const getLocalTextStyle = () => {
