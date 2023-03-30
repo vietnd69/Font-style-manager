@@ -1,27 +1,84 @@
 <style>
 	body {
 		margin: 0;
+		font-family: "roboto", sans-serif;
 	}
 	.module {
 		display: none !important;
+		height: 100%;
+		flex-direction: column;
 	}
 	.show {
-		display: block !important;
+		display: flex !important;
+	}
+	#choiceFont input {
+		width: 100%;
+		padding: 10px 12px 10px 36px;
+		border: none;
+		
+		font-size: 14px;
+	}
+	#choiceFont .font-name, #choiceFont .font-weight {
+		position: relative;
+		border-bottom: solid 1px #ccc;
+		
+	}
+	#choiceFont .font-name .icon, #choiceFont .font-weight .icon {
+		position: absolute;
+		left: 8px;
+		top: 9px;
 	}
 	#choiceFont .search:focus ~ .font-list {
 		display: block;
 	}
 	#choiceFont .font-list {
 		display: none;
-		height: 200px;
+		height: 160px;
 		overflow: auto;
+		flex-direction: column;
 	}
 	#choiceFont .font-list:hover {
-		display: block;
+		display: flex;
 	}
-	/* #choiceFont .font-list:active {
-		display: none;
-	} */
+	#choiceFont .font-list .name {
+		cursor: pointer;
+		padding: 6px 12px;
+		margin: 0;
+		font-size: 14px;
+	}
+	#choiceFont .font-list .name:hover {
+		background-color: #ccc;
+	}
+	#choiceFont .font-weight .weight-select {
+		width: 100%;
+		padding: 10px 12px 10px 32px;
+		margin: 0;
+		border: none;
+		font-size: 14px;
+	}
+
+	.action {
+		border-top: solid 1px #ccc;
+		width: 100%;
+		margin-top: auto;
+		margin-bottom: 0;
+		display: flex;
+		justify-content: space-between;
+	}
+	.action button {
+		border: none;
+		width: 50%;
+		padding: 14px;
+		cursor: pointer;
+		background-color: white;
+	}
+	.action button:hover {
+		filter: brightness(0.9);
+	}
+	.action .ok {
+		background-color: #0b68d6;
+		color: white;
+	}
 </style>
 <div class="module" id="buyCoffee">
 	<div style="width: 100%; height: 100%; display: flex; flex-direction: column">
@@ -50,39 +107,69 @@
 
 <div class="module" id="choiceFont">
 	<div class="font-name">
-		<input type="text" class="search" placeholder="Choice font" />
+		<svg
+			class="icon"
+			xmlns="http://www.w3.org/2000/svg"
+			version="1.1"
+			xmlns:xlink="http://www.w3.org/1999/xlink"
+			xmlns:svgjs="http://svgjs.com/svgjs"
+			width="18"
+			height="18"
+			x="0"
+			y="0"
+			viewBox="0 0 511.948 511.948"
+			style="enable-background: new 0 0 512 512"
+			xml:space="preserve"
+			class=""
+		>
+			<g>
+				<path
+					d="M370.203 438.175 229.05 73.066a17.503 17.503 0 0 0-16.419-11.299h-54.554a17.654 17.654 0 0 0-16.419 11.299L.592 438.175a8.828 8.828 0 0 0 8.21 12.006h55.702a8.932 8.932 0 0 0 8.298-5.65l29.396-76.977a8.827 8.827 0 0 1 8.21-5.65H260.3a8.932 8.932 0 0 1 8.298 5.65l29.396 76.977a8.827 8.827 0 0 0 8.21 5.65h55.702a8.887 8.887 0 0 0 8.297-12.006zM232.228 300.112h-93.749a9.251 9.251 0 0 1-8.651-12.623l46.874-122.615a9.226 9.226 0 0 1 17.302 0l46.963 122.615a9.341 9.341 0 0 1-8.739 12.623zM511.356 438.175l-71.592-188.469a17.655 17.655 0 0 0-16.508-11.388h-25.6a17.656 17.656 0 0 0-16.508 11.388l-32.132 84.568 21.363 55.437a8.219 8.219 0 0 1 4.59-1.324h70.974a8.83 8.83 0 0 1 8.21 5.561l20.303 50.67a8.827 8.827 0 0 0 8.21 5.561h20.48a8.828 8.828 0 0 0 8.21-12.004zm-79.713-85.098h-42.284a4.46 4.46 0 0 1-4.149-6.18l21.098-52.789a4.414 4.414 0 0 1 8.298 0l21.186 52.789a4.491 4.491 0 0 1-.435 4.191 4.49 4.49 0 0 1-3.714 1.989z"
+					fill="#555555"
+					data-original="#000000"
+				></path>
+			</g>
+		</svg>
+
+		<input type="text" class="search" placeholder="Find font" />
 		<div class="font-list"></div>
 	</div>
+	<div class="font-weight">
+		<svg
+		class="icon"
+			xmlns="http://www.w3.org/2000/svg"
+			version="1.1"
+			xmlns:xlink="http://www.w3.org/1999/xlink"
+			xmlns:svgjs="http://svgjs.com/svgjs"
+			width="18"
+			height="18"
+			x="0"
+			y="0"
+			viewBox="0 0 512 512"
+			style="enable-background: new 0 0 512 512"
+			xml:space="preserve"
+			class=""
+		>
+			<g>
+				<path
+					d="M15 114.235c8.284 0 15-6.716 15-15V30h69.235c8.284 0 15-6.716 15-15s-6.716-15-15-15H15C6.716 0 0 6.716 0 15v84.235c0 8.285 6.716 15 15 15zM497 0h-84.235c-8.284 0-15 6.716-15 15s6.716 15 15 15H482v69.235c0 8.284 6.716 15 15 15s15-6.716 15-15V15c0-8.284-6.716-15-15-15zM497 397.765c-8.284 0-15 6.716-15 15V482h-69.235c-8.284 0-15 6.716-15 15s6.716 15 15 15H497c8.284 0 15-6.716 15-15v-84.235c0-8.285-6.716-15-15-15zM99.235 482H30v-69.235c0-8.284-6.716-15-15-15s-15 6.716-15 15V497c0 8.284 6.716 15 15 15h84.235c8.284 0 15-6.716 15-15s-6.715-15-15-15zM419.66 191.38V96.65c0-4.7-3.81-8.51-8.52-8.51H100.86c-4.71 0-8.52 3.81-8.52 8.51v94.73c0 4.71 3.81 8.52 8.52 8.52h45.24c4.7 0 8.51-3.81 8.51-8.52v-32.45a8.52 8.52 0 0 1 8.52-8.52h53.21c4.71 0 8.52 3.81 8.52 8.52v234.14c0 4.71-3.81 8.52-8.52 8.52h-23.27c-4.71 0-8.52 3.81-8.52 8.52v45.24c0 4.7 3.81 8.51 8.52 8.51h125.86c4.71 0 8.52-3.81 8.52-8.51v-45.24c0-4.71-3.81-8.52-8.52-8.52h-23.27c-4.71 0-8.52-3.81-8.52-8.52V158.93c0-4.71 3.81-8.52 8.52-8.52h53.21c4.7 0 8.52 3.81 8.52 8.52v32.45c0 4.71 3.81 8.52 8.51 8.52h45.24c4.71 0 8.52-3.81 8.52-8.52z"
+					fill="#555555"
+					data-original="#000000"
+					class=""
+				></path>
+			</g>
+		</svg>
+
+		<select class="weight-select" placeholder="Choice style"></select>
+	</div>
 	<div class="action">
-		<button>Cancel</button>
-		<button id="ok">OK</button>
+		<button class="close">Cancel</button>
+		<button class="ok">OK</button>
 	</div>
 </div>
 <script>
 	const modules = document.querySelectorAll(".module");
 	const buyCoffee = document.getElementById("buyCoffee");
-
-	const listFontName = document.querySelector("#choiceFont .font-name .font-list");
-	const inputFontName = document.querySelector("#choiceFont .search");
-	const okBtn = document.getElementById("ok");
-
-	okBtn.onclick = () => {
-		parent.postMessage({ pluginMessage: { type: "setFont", data: inputFontName.value } }, "*");
-	};
-
-	const findFontName = (name, listFont) =>
-		listFont.forEach((font) => {
-			if (font.innerText.toUpperCase().indexOf(name.toUpperCase()) > -1) {
-				font.style.display = "block";
-			} else {
-				font.style.display = "none";
-			}
-		});
-
-	handdleChoiceFontName = (value) => (inputFontName.value = value);
-
-	const mapFontName = (data) =>
-		data.map((font) => `<p onClick="handdleChoiceFontName(this.innerText)" class="name">${font.family}</p>`).join("");
 
 	const openModule = (id) => {
 		modules.forEach((md) => {
@@ -98,14 +185,123 @@
 			openModule("buyCoffee");
 		}
 		if (e.data.pluginMessage.moduleName === "choiceFont") {
+			const listFontName = document.querySelector("#choiceFont .font-name .font-list");
+			const inputFontName = document.querySelector("#choiceFont .search");
+			const okBtn = document.querySelector("#choiceFont .action .ok");
+			const closeBtn = document.querySelector("#choiceFont .action .close");
+			const listFontWeight = document.querySelector("#choiceFont .font-weight .weight-select");
+			const boxFontWeight = document.querySelector("#choiceFont .font-weight");
+
+			okBtn.onclick = () => {
+				parent.postMessage({ pluginMessage: { type: "setFamilyAndWeight", data: {family: inputFontName.value , weight: listFontWeight.value} } }, "*");
+			};
+			closeBtn.onclick = () => {
+				parent.postMessage({ pluginMessage: { type: "close" } }, "*");
+			}
+			const setViewFontWeight = (input) => boxFontWeight.style.display = input ? "block" : "none"
+
+			const findFontName = (name, listFont) =>
+				listFont.forEach((font) => {
+					if (font.innerText.toUpperCase().indexOf(name.toUpperCase()) > -1) {
+						font.style.display = "block";
+					} else {
+						font.style.display = "none";
+					}
+				});
+
+			const getFontWeightList = (font) => e.data.pluginMessage.data.find((fontList) => fontList.family === font).styles;
+
+			const getFontWeightStyleAndWidth = (input) => {
+				const fontWeights = {
+					thin: 100,
+					hairline: 100,
+					extralight: 200,
+					"extra-light": 200,
+					ultralight: 200,
+					"ultra-light": 200,
+					light: 300,
+					normal: 400,
+					regular: 400,
+					medium: 500,
+					semibold: 600,
+					"semi-bold": 600,
+					demibold: 600,
+					"demi-bold": 600,
+					bold: 700,
+					extrabold: 800,
+					"extra-bold": 800,
+					ultrabold: 800,
+					"ultra-bold": 800,
+					black: 900,
+					heavy: 900,
+				};
+
+				const fontStyles = ["italic"];
+
+				const fontWidths = ["condensed"];
+
+				const words = input.toLowerCase().split(" ");
+
+				let fontWeight = 400;
+				let fontStyle;
+				let fontWidth;
+
+				for (const word of words) {
+					if (word in fontWeights) {
+						fontWeight = fontWeights[word];
+					} else if (fontStyles.includes(word)) {
+						fontStyle = word;
+					} else if (fontWidths.includes(word)) {
+						fontWidth = word;
+					}
+				}
+
+				return { fontWeight, fontStyle, fontWidth };
+			};
+
+			const sortFontNames = (fontNames) => {
+				return fontNames.sort((a, b) => {
+					const aInfo = getFontWeightStyleAndWidth(a);
+					const bInfo = getFontWeightStyleAndWidth(b);
+					if (aInfo.fontStyle !== bInfo.fontStyle) {
+						return aInfo.fontStyle === undefined ? -1 : 1;
+					}
+					if (aInfo.fontWidth !== bInfo.fontWidth) {
+						return aInfo.fontWidth === undefined ? -1 : 1;
+					}
+
+					if (aInfo.fontWeight !== bInfo.fontWeight) {
+						return aInfo.fontWeight - bInfo.fontWeight;
+					}
+
+					return a.localeCompare(b);
+				});
+			};
+			setViewFontWeight()
+			handdleChoiceFontName = (value) => {
+				inputFontName.value = value;
+				// console.log(value);
+				listFontWeight.innerHTML = mapFontWeight(sortFontNames(getFontWeightList(value)));
+				setViewFontWeight(inputFontName.value !== "")
+			};
+
+			const mapFontName = (data) =>
+				data.map((font) => `<p onClick="handdleChoiceFontName(this.innerText)" class="name">${font.family}</p>`).join("");
+
+			const mapFontWeight = (data) => data.map((weight) => `<option value="${weight}">${weight}</option>`).join("");
+
 			let timeout;
 			openModule("choiceFont");
 			listFontName.innerHTML = mapFontName(e.data.pluginMessage.data);
 			const listFont = document.querySelectorAll("#choiceFont .font-list .name");
-			// console.log(listFont);
+			// console.log(e.data.pluginMessage.data);
 			inputFontName.addEventListener("keyup", (e) => {
 				clearTimeout(timeout);
-				timeout = setTimeout(() => findFontName(e.target.value, listFont), 500);
+				timeout = setTimeout(() => findFontName(e.target.value, listFont), 350);
+			});
+			inputFontName.addEventListener("keyup", (e) => {
+				// console.log("run")
+				setViewFontWeight(inputFontName.value !== "")
 			});
 		}
 	};

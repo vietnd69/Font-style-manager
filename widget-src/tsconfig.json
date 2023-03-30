@@ -5,6 +5,7 @@
     "jsxFragmentFactory": "figma.widget.Fragment",
     "target": "es6",
     "lib": [
+      "es2016",
       "es6",
       "DOM"
     ],
