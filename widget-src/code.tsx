@@ -194,7 +194,7 @@ function Widget() {
 		});
 	};
 
-	const updateStyle = () => {
+	const updateStyle = async () => {
 		for (let style of filterStyles) {
 			try {
 				const cache = cacheStyle.find((i) => i.id === style.id);
@@ -209,17 +209,17 @@ function Widget() {
 						textStyle.description = cache.description;
 					}
 					if (cache.fontName.family !== style.fontName.family || cache.fontName.style !== style.fontName.style) {
-						figma.loadFontAsync({ ...cache.fontName }).then((res) => {
+						await figma.loadFontAsync({ ...cache.fontName }).then((res) => {
 							textStyle.fontName = { ...cache.fontName };
 						});
 					}
 					if (cache.fontSize !== style.fontSize) {
-						figma.loadFontAsync({ ...cache.fontName }).then((res) => {
+						await figma.loadFontAsync({ ...cache.fontName }).then((res) => {
 							textStyle.fontSize = cache.fontSize;
 						});
 					}
 					if (cache.lineHeight !== style.lineHeight) {
-						figma.loadFontAsync({ ...cache.fontName }).then((res) => {
+						await figma.loadFontAsync({ ...cache.fontName }).then((res) => {
 							textStyle.lineHeight = cache.lineHeight;
 						});
 					}
