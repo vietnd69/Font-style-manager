@@ -1,0 +1,57 @@
+#choiceFont  {
+    min-height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+#choiceFont .input {
+    width: 100%;
+    margin-bottom: 4px;
+    
+    font-size: 14px;
+}
+#choiceFont .label {
+margin-bottom: 8px;
+}
+
+#choiceFont .font-name, #choiceFont .font-weight {
+    position: relative;
+    border-bottom: solid 1px #ccc;
+    
+}
+#choiceFont .font-name .icon, #choiceFont .font-weight .icon {
+    position: absolute;
+    left: 8px;
+    top: 9px;
+    z-index: 1;
+    width: 16px;
+}
+#choiceFont .search:focus ~ .font-list {
+    display: block;
+}
+#choiceFont .font-list {
+    display: none;
+    height: 160px;
+    overflow: auto;
+    flex-direction: column;
+}
+#choiceFont .font-list:hover {
+    display: flex;
+}
+#choiceFont .font-list .name {
+    cursor: pointer;
+    padding: 6px 12px;
+    margin: 0;
+    font-size: 14px;
+}
+#choiceFont .font-list .name:hover {
+    background-color: #ccc;
+}
+#choiceFont .font-weight .weight-select {
+    width: 100%;
+    padding: 10px 12px 10px 32px;
+    margin: 0;
+    border: none;
+    font-size: 14px;
+}
+

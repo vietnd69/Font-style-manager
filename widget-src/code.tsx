@@ -18,6 +18,7 @@ const coffeeSvg = `<svg data-v-7970f380="" width="30" height="40" viewBox="0 0 2
 const searchActive = `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="46" height="46" x="0" y="0" viewBox="0 0 32 32" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><path d="M18.337 18.348c-.851.851-1.98 1.319-3.184 1.319s-2.333-.468-3.184-1.319c-.851-.85-1.318-1.98-1.318-3.183s.468-2.333 1.318-3.184c.851-.851 1.98-1.319 3.184-1.319s2.333.468 3.184 1.319c.851.85 1.318 1.981 1.318 3.184s-.467 2.333-1.318 3.183zm13.601-2.285c0 8.822-7.178 16-16 16s-16-7.178-16-16 7.178-16 16-16 16 7.177 16 16zm-8.881 5.568-2.646-2.653a6.444 6.444 0 0 0 1.244-3.814c0-1.737-.676-3.37-1.904-4.598s-2.86-1.905-4.598-1.905-3.37.677-4.598 1.905-1.904 2.861-1.904 4.598.677 3.37 1.904 4.597a6.459 6.459 0 0 0 4.598 1.905 6.45 6.45 0 0 0 3.849-1.27l2.639 2.646a.995.995 0 0 0 .708.294 1 1 0 0 0 .708-1.705z" fill="#0B68D6" data-original="#0B68D6" class=""></path></g></svg>`;
 const searchDisable = `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="46" height="46" x="0" y="0" viewBox="0 0 32 32" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><path d="M18.337 18.348c-.851.851-1.98 1.319-3.184 1.319s-2.333-.468-3.184-1.319c-.851-.85-1.318-1.98-1.318-3.183s.468-2.333 1.318-3.184c.851-.851 1.98-1.319 3.184-1.319s2.333.468 3.184 1.319c.851.85 1.318 1.981 1.318 3.184s-.467 2.333-1.318 3.183zm13.601-2.285c0 8.822-7.178 16-16 16s-16-7.178-16-16 7.178-16 16-16 16 7.177 16 16zm-8.881 5.568-2.646-2.653a6.444 6.444 0 0 0 1.244-3.814c0-1.737-.676-3.37-1.904-4.598s-2.86-1.905-4.598-1.905-3.37.677-4.598 1.905-1.904 2.861-1.904 4.598.677 3.37 1.904 4.597a6.459 6.459 0 0 0 4.598 1.905 6.45 6.45 0 0 0 3.849-1.27l2.639 2.646a.995.995 0 0 0 .708.294 1 1 0 0 0 .708-1.705z" fill="#888" data-original="#888" class=""></path></g></svg>`;
 const listSvg = `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="24" height="24" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><path d="M276 374c0 11.046-8.954 20-20 20H138c-11.046 0-20-8.954-20-20s8.954-20 20-20h118c11.046 0 20 8.954 20 20zm236-253.85v234.183c0 30.708-11.958 59.576-33.672 81.289l-42.706 42.707C413.909 500.042 385.041 512 354.333 512H120.15C53.739 512 0 458.255 0 391.85v-271.7C0 53.739 53.745 0 120.15 0h271.7C458.261 0 512 53.745 512 120.15zm-42.683 254.183h-54.984c-22.056 0-40 17.944-40 40v54.984c12.362-3.4 23.692-9.961 33.004-19.272l42.707-42.708c9.312-9.312 15.873-20.642 19.273-33.004zM472 120.15C472 75.849 436.149 40 391.85 40h-271.7C75.849 40 40 75.851 40 120.15v271.7C40 436.151 75.851 472 120.15 472h214.183v-57.667c0-44.112 35.888-80 80-80H472zM374 236H138c-11.046 0-20 8.954-20 20s8.954 20 20 20h236c11.046 0 20-8.954 20-20s-8.954-20-20-20zm0-118H138c-11.046 0-20 8.954-20 20s8.954 20 20 20h236c11.046 0 20-8.954 20-20s-8.954-20-20-20z" fill="#555" data-original="#555" class=""></path></g></svg>`;
+const lineHeightSvg = `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="24" height="24" x="0" y="0" viewBox="0 0 24 24" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><path d="M3 4.5h18c.6 0 1-.4 1-1s-.4-1-1-1H3c-.6 0-1 .4-1 1s.4 1 1 1zm18 15H3c-.6 0-1 .4-1 1s.4 1 1 1h18c.6 0 1-.4 1-1s-.4-1-1-1zM12.8 6c0-.1-.1-.1-.1-.2-.1-.1-.1-.1-.2-.1l-.1-.1h-.8c-.1 0-.1.1-.1.1-.1 0-.1.1-.2.1-.1.1-.1.1-.1.2l-.1.1-5 11c-.2.5 0 1.1.5 1.3.1.1.3.1.4.1.4 0 .7-.2.9-.6L9.2 15h5.5l1.3 2.9c.2.4.5.6.9.6.1 0 .3 0 .4-.1.5-.2.7-.8.5-1.3l-5-11c.1-.1.1-.1 0-.1zm-2.7 7L12 8.9l1.9 4.1z" fill="#555555" data-original="#555555" class=""></path></g></svg>`;
 
 function Widget() {
 	useEffect(() => {
@@ -39,11 +40,17 @@ function Widget() {
 	const [searchFamily, setSearchFamily] = useSyncedState("searchFamily", "");
 	const [searchStyle, setSearchStyle] = useSyncedState("searchStyle", "");
 	const [searchFontSize, setSearchFontSize] = useSyncedState("searchFontSize", "");
+	const [searchLineHeight, setSearchLineHeight] = useSyncedState<{ unit: string; value?: number }>("searchLineHeight", {
+		unit: "",
+	});
 
 	const [checkedGroup, setCheckedGroup] = useSyncedState("checkedGroup", "");
 	const [checkedFamily, setCheckedFamily] = useSyncedState("checkedFamily", "");
 	const [checkedStyle, setCheckedStyle] = useSyncedState("checkedStyle", "");
 	const [checkedFontSize, setCheckedFontSize] = useSyncedState("checkedFontSize", "");
+	const [checkedLineHeight, setCheckedLineHeight] = useSyncedState<{ unit: string; value?: number }>("checkedLineHeight", {
+		unit: "",
+	});
 
 	const [stylesChecked, setStylesChecked] = useSyncedState<string[]>("stylesChecked", []);
 	const [hasCheckAll, setHasCheckAll] = useSyncedState<boolean>("hasCheckAll", false);
@@ -80,13 +87,15 @@ function Widget() {
 
 	useEffect(() => {
 		figma.ui.onmessage = (msg) => {
+			// console.log(msg.type)
 			if (msg.type === "setFamilyAndWeight") {
-				// console.log(msg)
+				// console.log(msg);
 				setCheckedFamily(msg.data.family);
 				setCheckedStyle(msg.data.weight);
 				figma.closePlugin();
 			}
 			if (msg.type === "close") {
+				// console.log("ok")
 				figma.closePlugin();
 			}
 		};
@@ -150,6 +159,7 @@ function Widget() {
 					style: data?.fontName?.style,
 				},
 				fontSize: data.fontSize,
+				lineHeight: data.lineHeight,
 				description: data.description,
 			};
 		} else {
@@ -208,6 +218,11 @@ function Widget() {
 							textStyle.fontSize = cache.fontSize;
 						});
 					}
+					if (cache.lineHeight !== style.lineHeight) {
+						figma.loadFontAsync({ ...cache.fontName }).then((res) => {
+							textStyle.lineHeight = cache.lineHeight;
+						});
+					}
 				}
 			} catch (err) {
 				console.log(err);
@@ -222,6 +237,7 @@ function Widget() {
 		setCheckedGroup("");
 		setCheckedStyle("");
 		setCheckedFontSize("");
+		setCheckedLineHeight({ unit: "" });
 		setFilterStyles(textStyles);
 		setCacheStyle(textStyles);
 		setStylesChecked([]);
@@ -298,7 +314,14 @@ function Widget() {
 		}
 	};
 
-	const findAll = (data: { group: string; name: string; family: string; style: string; fontSize: number }) => {
+	const findAll = (data: {
+		group: string;
+		name: string;
+		family: string;
+		style: string;
+		fontSize: number;
+		lineHeight: { unit: string; value?: number };
+	}) => {
 		let styles = [...textStyles];
 		if (data.group !== "") {
 			styles = styles.filter((style) => {
@@ -327,6 +350,21 @@ function Widget() {
 		if (data.fontSize !== 0 || isNaN(data.fontSize)) {
 			styles = styles.filter((style) => style.fontSize === data.fontSize);
 		}
+		if (data.lineHeight.unit !== "") {
+			styles = styles.filter((style) => {
+				if (data.lineHeight.unit === "AUTO") {
+					return style.lineHeight.unit === data.lineHeight.unit;
+				} else {
+					const checkUnit = style.lineHeight.unit === data.lineHeight.unit;
+					const checkValue =
+						data.lineHeight.value &&
+						style.lineHeight.value &&
+						parseFloat(style.lineHeight.value.toPrecision(3).toString()) ===
+							parseFloat(data.lineHeight.value.toPrecision(3).toString());
+					return checkUnit && checkValue;
+				}
+			});
+		}
 
 		setFilterStyles(styles);
 		setCacheStyle(styles);
@@ -340,6 +378,7 @@ function Widget() {
 		setSearchFamily("");
 		setSearchStyle("");
 		setSearchFontSize("");
+		setSearchLineHeight({ unit: "" });
 		setFilterStyles(textStyles);
 		setCacheStyle(textStyles);
 		setStylesChecked([]);
@@ -353,6 +392,7 @@ function Widget() {
 			family: searchFamily,
 			style: searchStyle,
 			fontSize: Number(searchFontSize),
+			lineHeight: searchLineHeight,
 		});
 	};
 
@@ -374,6 +414,9 @@ function Widget() {
 				if (checkedFontSize != "" || isNaN(Number(checkedFontSize))) {
 					cache.fontSize = Number(checkedFontSize);
 				}
+				if (checkedLineHeight.unit != "") {
+					cache.lineHeight = checkedLineHeight;
+				}
 				setCacheStyle((prev) => prev.map((i) => (i.id === style ? cache : i)));
 			}
 		}
@@ -388,6 +431,19 @@ function Widget() {
 			});
 			figma.ui.postMessage({ moduleName, data });
 		});
+
+	const getLineHeight = (data: string) => {
+		const unit = data === "auto" ? "AUTO" : data.endsWith("px") ? "PIXELS" : data.endsWith("%") ? "PERCENT" : "";
+		const value =
+			unit === "AUTO"
+				? { unit: "AUTO" }
+				: unit === "PIXELS"
+				? { value: Number(data.replace("px", "")), unit: unit }
+				: unit === "PERCENT"
+				? { value: Number(data.replace("%", "")), unit: unit }
+				: { unit: "" };
+		return value;
+	};
 
 	return (
 		<AutoLayout
@@ -444,7 +500,7 @@ function Widget() {
 					>
 						<SVG src={closeSvg} />
 					</AutoLayout>
-					<AutoLayout spacing={12} width={1360} verticalAlignItems={"end"}>
+					<AutoLayout spacing={12} width={1458} verticalAlignItems={"end"}>
 						<AutoLayout width={470} spacing={12} direction={"vertical"}>
 							<AutoLayout
 								padding={16}
@@ -494,7 +550,7 @@ function Widget() {
 							verticalAlignItems={"end"}
 							stroke={"#ccc"}
 							strokeWidth={1}
-							width={"fill-parent"}
+							width={195}
 						>
 							<SVG src={fontFamilySvg} />
 							<Input
@@ -512,10 +568,11 @@ function Widget() {
 							verticalAlignItems={"end"}
 							stroke={"#ccc"}
 							strokeWidth={1}
-							width={378}
+							width={373}
 						>
 							<SVG src={fontStyleSvg} />
-							<Input width={"fill-parent"}
+							<Input
+								width={"fill-parent"}
 								fontSize={22}
 								value={searchStyle}
 								onTextEditEnd={(e) => setSearchStyle(e.characters)}
@@ -530,14 +587,42 @@ function Widget() {
 							verticalAlignItems={"end"}
 							stroke={"#ccc"}
 							strokeWidth={1}
-							width={180}
+							width={175}
 						>
 							<SVG src={fontSizeSvg} />
-							<Input width={"fill-parent"}
+							<Input
+								width={"fill-parent"}
 								fontSize={22}
 								value={searchFontSize}
 								onTextEditEnd={(e) => setSearchFontSize(e.characters)}
 								placeholder="Find size"
+							/>
+						</AutoLayout>
+						<AutoLayout
+							padding={16}
+							fill={"#eee"}
+							cornerRadius={8}
+							spacing={12}
+							verticalAlignItems={"end"}
+							stroke={"#ccc"}
+							strokeWidth={1}
+							width={195}
+						>
+							<SVG src={lineHeightSvg} />
+							<Input
+								width={"fill-parent"}
+								fontSize={22}
+								value={
+									searchLineHeight.unit !== ""
+										? searchLineHeight.value
+											? searchLineHeight.unit === "PIXELS"
+												? searchLineHeight.value.toString() + "px"
+												: searchLineHeight.value.toString() + "%"
+											: "auto"
+										: ""
+								}
+								onTextEditEnd={(e) => setSearchLineHeight(getLineHeight(e.characters))}
+								placeholder="Line height"
 							/>
 						</AutoLayout>
 					</AutoLayout>
@@ -650,6 +735,33 @@ function Widget() {
 								/>
 							</AutoLayout>
 							<AutoLayout
+								padding={16}
+								fill={"#eee"}
+								cornerRadius={8}
+								width={"fill-parent"}
+								spacing={12}
+								verticalAlignItems={"end"}
+								stroke={"#ccc"}
+								strokeWidth={1}
+							>
+								<SVG src={lineHeightSvg} />
+								<Input
+									width={"fill-parent"}
+									fontSize={22}
+									value={
+										checkedLineHeight.unit !== ""
+											? checkedLineHeight.value
+												? checkedLineHeight.unit === "PIXELS"
+													? checkedLineHeight.value.toString() + "px"
+													: checkedLineHeight.value.toString() + "%"
+												: "auto"
+											: ""
+									}
+									onTextEditEnd={(e) => setCheckedLineHeight(getLineHeight(e.characters))}
+									placeholder="Change line height"
+								/>
+							</AutoLayout>
+							<AutoLayout
 								onClick={() => handleChangeSelectedStyle()}
 								padding={{ top: 14, bottom: 14, right: 24, left: 24 }}
 								verticalAlignItems={"center"}
@@ -688,22 +800,34 @@ function Widget() {
 						Font family
 					</Text>
 					<Rectangle width={1} height={60} fill={"#ccc"} />
-					<AutoLayout  width={360}>
-						<Text fontSize={24} fontFamily={"Roboto"} fill={"#ccc"} >
+					<AutoLayout width={360}>
+						<Text fontSize={24} fontFamily={"Roboto"} fill={"#ccc"}>
 							Style
 						</Text>
-						<Text fontSize={24} fontFamily={"Roboto"} fill={"#ccc"}  horizontalAlignText={"right"} width={"fill-parent"}>
+						<Text
+							fontSize={24}
+							fontFamily={"Roboto"}
+							fill={"#ccc"}
+							horizontalAlignText={"right"}
+							width={"fill-parent"}
+						>
 							Weight
 						</Text>
 					</AutoLayout>
 					<Rectangle width={1} height={60} fill={"#ccc"} />
 
-					<Text fontSize={24}  width={160} fontFamily={"Roboto"}  fill={"#ccc"} >
+					<Text fontSize={24} width={160} fontFamily={"Roboto"} fill={"#ccc"}>
 						Size
 					</Text>
 
 					<Rectangle width={1} height={60} fill={"#ccc"} />
-					<Text fontSize={24}  fontFamily={"Roboto"} width={"fill-parent"} fill={"#eee"}>
+					<AutoLayout width={180}>
+						<Text fontSize={24} fontFamily={"Roboto"} fill={"#ccc"}>
+							Line height
+						</Text>
+					</AutoLayout>
+					<Rectangle width={1} height={60} fill={"#ccc"} />
+					<Text fontSize={24} fontFamily={"Roboto"} width={"fill-parent"} fill={"#eee"}>
 						Description
 					</Text>
 				</AutoLayout>
@@ -713,7 +837,7 @@ function Widget() {
 							// console.log(style)
 							const cache = cacheStyle.find((i) => i.id === style.id);
 							const check = checkFontName(cache);
-							// console.log(check);
+							// console.log(cache.lineHeight.value);
 							return (
 								<AutoLayout key={style.id} width={"fill-parent"} direction={"vertical"}>
 									<AutoLayout
@@ -795,6 +919,49 @@ function Widget() {
 											fontFamily={"Roboto"}
 											width={160}
 										/>
+										<Rectangle width={1} height={50} fill={"#ccc"} />
+										<AutoLayout width={180} verticalAlignItems={"center"} spacing={6}>
+											{/* <Text fontSize={22} fontFamily={"Roboto"} horizontalAlignText={"left"}>
+												{cache.lineHeight.value ? cache.lineHeight.value : "Auto"}
+											</Text> */}
+											<Input
+												value={
+													cache.lineHeight.value
+														? cache.lineHeight.unit === "PIXELS"
+															? cache.lineHeight.value.toString() + "px"
+															: parseFloat(cache.lineHeight.value.toPrecision(3).toString()) + "%"
+														: "auto"
+												}
+												onTextEditEnd={(e) => {
+													const data = e.characters.replaceAll(" ", "").toLowerCase();
+													const value = getLineHeight(data);
+
+													// console.log(value);
+													if (value.unit !== "") {
+														setCacheStyle((prev) =>
+															prev.map((i) =>
+																i.id === style.id
+																	? {
+																			...i,
+																			lineHeight: { ...value },
+																	  }
+																	: i
+															)
+														);
+													}
+												}}
+												fontSize={22}
+												fontFamily={"Roboto"}
+												width={"fill-parent"}
+											/>
+											<Text fontSize={20} fill={"#666"} fontFamily={"Roboto"} horizontalAlignText={"right"}>
+												{cache.lineHeight.value
+													? cache.lineHeight.unit === "PERCENT"
+														? parseFloat((cache.lineHeight.value / 100).toPrecision(3))
+														: ""
+													: ""}
+											</Text>
+										</AutoLayout>
 										<Rectangle width={1} height={50} fill={"#ccc"} />
 										<Input
 											value={cache.description}

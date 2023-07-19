@@ -4,26 +4,9 @@
     "jsxFactory": "figma.widget.h",
     "jsxFragmentFactory": "figma.widget.Fragment",
     "target": "es6",
-    "lib": [
-      "es2016",
-      "es6",
-      "DOM"
-    ],
-    "useDefineForClassFields": true,
-    "allowJs": false,
-    "skipLibCheck": true,
-    "esModuleInterop": false,
-    "allowSyntheticDefaultImports": true,
-
-    "forceConsistentCasingInFileNames": true,
-    "module": "ESNext",
-    "moduleResolution": "Node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
+    "lib": ["es6", "ES2021"],
     "strict": true,
     "typeRoots": [
-      "../node_modules/@types",
       "../node_modules/@figma"
     ]
   }
