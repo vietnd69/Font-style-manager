@@ -17,6 +17,7 @@ const CheckBox = ({ isCheck, onClick }: { isCheck: Boolean; onClick?: any }) => 
 				cornerRadius={8}
 				strokeWidth={isCheck ? 0 : 1}
 				stroke={"#999"}
+				hoverStyle={{fill: "#D1D1D1"}}
 			>
 				{isCheck && <SVG src={checkSvg} />}
 			</AutoLayout>

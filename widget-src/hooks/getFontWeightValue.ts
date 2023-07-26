@@ -22,9 +22,10 @@ type FontWeight =
 	| "heavy";
 type FontStyle = "italic";
 type FontWidth = "condensed";
+export type FontWeightNumerical = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
 
-const getFontWeightValue = (fontWeightName: string): { fontWeight?: number; fontStyle?: FontStyle; fontWidth?: FontWidth } => {
-	const fontWeights: { [key: string]: number } = {
+const getFontWeightValue = (fontWeightName: string): { fontWeight?: FontWeightNumerical; fontStyle?: FontStyle; fontWidth?: FontWidth } => {
+	const fontWeights: { [key: string]: FontWeightNumerical } = {
 		thin: 100,
 		hairline: 100,
 		extralight: 200,
@@ -52,7 +53,7 @@ const getFontWeightValue = (fontWeightName: string): { fontWeight?: number; font
 	const fontWidths: FontWidth[] = ["condensed"];
 	const words = fontWeightName.toLowerCase().split(" ");
 
-	let fontWeight = 400;
+	let fontWeight : FontWeightNumerical = 400;
 	let fontStyle: FontStyle | undefined;
 	let fontWidth: FontWidth | undefined;
 
