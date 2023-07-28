@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./styles/App.css";
 import BuyMeACoffee from "./BuyMeACoffee";
 import ChoiceFont from "./ChoiceFont";
+import EditShowGroup from "./EditShowGroup";
 
 function App() {
 	const [module, setModule] = useState<string>("");
@@ -16,6 +17,7 @@ function App() {
 		<div className="App">
 			{module === "buyCoffee" && <BuyMeACoffee />}
 			{module === "choiceFont" && <ChoiceFont data={data} />}
+			{module === "editShowGroup" && <EditShowGroup data={data} />}
 		</div>
 	);
 }

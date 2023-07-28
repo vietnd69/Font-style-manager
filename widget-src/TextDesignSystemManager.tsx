@@ -1,9 +1,10 @@
+const { widget } = figma;
+const { AutoLayout, Text, Rectangle, useSyncedState, Input, SVG, Fragment } = widget;
+
+import { textStyleType } from "./code";
 import CheckBox from "./components/CheckBox";
 
 import getFontWeightValue from "./hooks/getFontWeightValue";
-
-const { widget } = figma;
-const { AutoLayout, Text, Rectangle, useSyncedState, Input, SVG, Fragment } = widget;
 
 import {
 	uploadSvg,
@@ -16,25 +17,25 @@ import {
 	folderSvg,
 	nameSvg,
 	listSvg,
-	lineHeightSvg
+	lineHeightSvg,
 } from "./svg";
 
 type textDesignManagerType = {
-	textStyles: any[];
-	showUi: (moduleName: string, name: string, data?: any) => Promise<unknown>,
-    getLocalTextStyle: () => void,
-    setHasReloadLocalFont: (newValue: boolean | ((currValue: boolean) => boolean)) => void
+	textStyles: textStyleType[];
+	showUi: (moduleName: string, name: string, data?: any) => Promise<unknown>;
+	getLocalTextStyle: () => void;
+	setHasReloadLocalFont: (newValue: boolean | ((currValue: boolean) => boolean)) => void;
 };
-const TextDesignManager = ({ value }: {value: textDesignManagerType}) => {
-    const {textStyles, showUi, getLocalTextStyle, setHasReloadLocalFont} = value
-	const [filterStyles, setFilterStyles] = useSyncedState<any[]>("filterStyles", []);
+const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
+	const { textStyles, showUi, getLocalTextStyle, setHasReloadLocalFont } = value;
+	const [filterStyles, setFilterStyles] = useSyncedState<textStyleType[]>("filterStyles", []);
 
 	const [searchName, setSearchName] = useSyncedState("searchName", "");
 	const [searchGroup, setSearchGroup] = useSyncedState("searchGroup", "");
 	const [searchFamily, setSearchFamily] = useSyncedState("searchFamily", "");
 	const [searchStyle, setSearchStyle] = useSyncedState("searchStyle", "");
 	const [searchFontSize, setSearchFontSize] = useSyncedState("searchFontSize", "");
-	const [searchLineHeight, setSearchLineHeight] = useSyncedState<{ unit: string; value?: number }>("searchLineHeight", {
+	const [searchLineHeight, setSearchLineHeight] = useSyncedState<LineHeight | { unit: "" }>("searchLineHeight", {
 		unit: "",
 	});
 
@@ -42,21 +43,19 @@ const TextDesignManager = ({ value }: {value: textDesignManagerType}) => {
 	const [checkedFamily, setCheckedFamily] = useSyncedState("checkedFamily", "");
 	const [checkedStyle, setCheckedStyle] = useSyncedState("checkedStyle", "");
 	const [checkedFontSize, setCheckedFontSize] = useSyncedState("checkedFontSize", "");
-	const [checkedLineHeight, setCheckedLineHeight] = useSyncedState<{ unit: string; value?: number }>("checkedLineHeight", {
+	const [checkedLineHeight, setCheckedLineHeight] = useSyncedState<LineHeight | { unit: "" }>("checkedLineHeight", {
 		unit: "",
 	});
 
 	const [stylesChecked, setStylesChecked] = useSyncedState<string[]>("stylesChecked", []);
 	const [hasCheckAll, setHasCheckAll] = useSyncedState<boolean>("hasCheckAll", false);
 
-	const [cacheStyle, setCacheStyle] = useSyncedState<any[]>("cacheStyle", []);
+	const [cacheStyle, setCacheStyle] = useSyncedState<textStyleType[]>("cacheStyle", []);
 
 	const [localFonts, setLocalFonts] = useSyncedState<any[]>("localFonts", []);
 	const [cleanFont, setCleanFont] = useSyncedState<any[]>("cleanFont", []);
 
-
 	const [isOpenSearchBar, setIsOpenSearchBar] = useSyncedState("isOpenSearchBar", true);
-
 
 	const handleCheck = (id: string) => {
 		const hasStyleInList = stylesChecked.find((idStyle) => idStyle === id) ? true : false;
@@ -180,7 +179,7 @@ const TextDesignManager = ({ value }: {value: textDesignManagerType}) => {
 		family: string;
 		style: string;
 		fontSize: number;
-		lineHeight: { unit: string; value?: number };
+		lineHeight: LineHeight | { readonly unit: "" };
 	}) => {
 		let styles = [...textStyles];
 		if (data.group !== "") {
@@ -217,10 +216,13 @@ const TextDesignManager = ({ value }: {value: textDesignManagerType}) => {
 				} else {
 					const checkUnit = style.lineHeight.unit === data.lineHeight.unit;
 					const checkValue =
-						data.lineHeight.value &&
-						style.lineHeight.value &&
-						parseFloat(style.lineHeight.value.toPrecision(3).toString()) ===
-							parseFloat(data.lineHeight.value.toPrecision(3).toString());
+						data.lineHeight.unit !== "" &&
+						!!data.lineHeight.value &&
+						style.lineHeight.unit !== "AUTO" &&
+						!!style.lineHeight.value &&
+						parseFloat(style.lineHeight.value?.toPrecision(3).toString()) ===
+							parseFloat(data.lineHeight.value.toPrecision(3).toString()) &&
+						true;
 					return checkUnit && checkValue;
 				}
 			});
@@ -260,24 +262,26 @@ const TextDesignManager = ({ value }: {value: textDesignManagerType}) => {
 		// console.log(stylesChecked)
 		if (stylesChecked.length !== 0) {
 			for (let style of stylesChecked) {
-				const cache = cacheStyle.find((i) => i.id === style);
+				const cache = cacheStyle.find((i) => i.id === style) as textStyleType;
 				// console.log(cache);
-				if (checkedGroup != "") {
-					cache.name = checkedGroup + "/" + getNameStyle(cache.name);
+				if (cache) {
+					if (checkedGroup != "") {
+						cache.name = checkedGroup + "/" + getNameStyle(cache.name);
+					}
+					if (checkedFamily != "") {
+						cache.fontName = { ...cache.fontName, family: checkedFamily };
+					}
+					if (checkedStyle != "") {
+						cache.fontName = { ...cache.fontName, style: checkedStyle };
+					}
+					if (checkedFontSize != "" || isNaN(Number(checkedFontSize))) {
+						cache.fontSize = Number(checkedFontSize);
+					}
+					if (checkedLineHeight.unit != "") {
+						cache.lineHeight = checkedLineHeight;
+					}
+					setCacheStyle((prev) => prev.map((i) => (i.id === style ? cache : i)));
 				}
-				if (checkedFamily != "") {
-					cache.fontName.family = checkedFamily;
-				}
-				if (checkedStyle != "") {
-					cache.fontName.style = checkedStyle;
-				}
-				if (checkedFontSize != "" || isNaN(Number(checkedFontSize))) {
-					cache.fontSize = Number(checkedFontSize);
-				}
-				if (checkedLineHeight.unit != "") {
-					cache.lineHeight = checkedLineHeight;
-				}
-				setCacheStyle((prev) => prev.map((i) => (i.id === style ? cache : i)));
 			}
 		}
 	};
@@ -292,7 +296,7 @@ const TextDesignManager = ({ value }: {value: textDesignManagerType}) => {
 				: unit === "PERCENT"
 				? { value: Number(data.replace("%", "")), unit: unit }
 				: { unit: "" };
-		return value;
+		return value as LineHeight | { unit: "" };
 	};
 
 	return (
@@ -422,7 +426,7 @@ const TextDesignManager = ({ value }: {value: textDesignManagerType}) => {
 								fontSize={22}
 								value={
 									searchLineHeight.unit !== ""
-										? searchLineHeight.value
+										? searchLineHeight.unit !== "AUTO" && searchLineHeight.value
 											? searchLineHeight.unit === "PIXELS"
 												? searchLineHeight.value.toString() + "px"
 												: searchLineHeight.value.toString() + "%"
@@ -558,7 +562,7 @@ const TextDesignManager = ({ value }: {value: textDesignManagerType}) => {
 									fontSize={22}
 									value={
 										checkedLineHeight.unit !== ""
-											? checkedLineHeight.value
+											? checkedLineHeight.unit !== "AUTO" && checkedLineHeight.value
 												? checkedLineHeight.unit === "PIXELS"
 													? checkedLineHeight.value.toString() + "px"
 													: checkedLineHeight.value.toString() + "%"
@@ -589,271 +593,254 @@ const TextDesignManager = ({ value }: {value: textDesignManagerType}) => {
 					</AutoLayout>
 				</Fragment>
 			)}
-			
-					<AutoLayout direction={"vertical"} width={"fill-parent"}>
-						<AutoLayout
-							verticalAlignItems={"center"}
-							spacing={12}
+
+			<AutoLayout direction={"vertical"} width={"fill-parent"}>
+				<AutoLayout
+					verticalAlignItems={"center"}
+					spacing={12}
+					width={"fill-parent"}
+					fill={"#333"}
+					cornerRadius={{ topLeft: 16, topRight: 16 }}
+					padding={{ left: 12, right: 12 }}
+				>
+					<CheckBox isCheck={hasCheckAll} onClick={() => handleCheckAll()} />
+					<Rectangle width={1} height={60} fill={"#ccc"} />
+					<Text fontSize={24} fontFamily={"Roboto"} width={450} fill={"#eee"}>
+						Name
+					</Text>
+					<Rectangle width={1} height={60} fill={"#ccc"} />
+					<Text fontSize={24} fontFamily={"Roboto"} width={"fill-parent"} fill={"#eee"}>
+						Font family
+					</Text>
+					<Rectangle width={1} height={60} fill={"#ccc"} />
+					<AutoLayout width={360}>
+						<Text fontSize={24} fontFamily={"Roboto"} fill={"#ccc"}>
+							Style
+						</Text>
+						<Text
+							fontSize={24}
+							fontFamily={"Roboto"}
+							fill={"#ccc"}
+							horizontalAlignText={"right"}
 							width={"fill-parent"}
-							fill={"#333"}
-							cornerRadius={{ topLeft: 16, topRight: 16 }}
-							padding={{ left: 12, right: 12 }}
 						>
-							<CheckBox isCheck={hasCheckAll} onClick={() => handleCheckAll()} />
-							<Rectangle width={1} height={60} fill={"#ccc"} />
-							<Text fontSize={24} fontFamily={"Roboto"} width={450} fill={"#eee"}>
-								Name
-							</Text>
-							<Rectangle width={1} height={60} fill={"#ccc"} />
-							<Text fontSize={24} fontFamily={"Roboto"} width={"fill-parent"} fill={"#eee"}>
-								Font family
-							</Text>
-							<Rectangle width={1} height={60} fill={"#ccc"} />
-							<AutoLayout width={360}>
-								<Text fontSize={24} fontFamily={"Roboto"} fill={"#ccc"}>
-									Style
-								</Text>
-								<Text
-									fontSize={24}
-									fontFamily={"Roboto"}
-									fill={"#ccc"}
-									horizontalAlignText={"right"}
-									width={"fill-parent"}
-								>
-									Weight
-								</Text>
-							</AutoLayout>
-							<Rectangle width={1} height={60} fill={"#ccc"} />
+							Weight
+						</Text>
+					</AutoLayout>
+					<Rectangle width={1} height={60} fill={"#ccc"} />
 
-							<Text fontSize={24} width={160} fontFamily={"Roboto"} fill={"#ccc"}>
-								Size
-							</Text>
+					<Text fontSize={24} width={160} fontFamily={"Roboto"} fill={"#ccc"}>
+						Size
+					</Text>
 
-							<Rectangle width={1} height={60} fill={"#ccc"} />
-							<AutoLayout width={180}>
-								<Text fontSize={24} fontFamily={"Roboto"} fill={"#ccc"}>
-									Line height
-								</Text>
-							</AutoLayout>
-							<Rectangle width={1} height={60} fill={"#ccc"} />
-							<Text fontSize={24} fontFamily={"Roboto"} width={"fill-parent"} fill={"#eee"}>
-								Description
-							</Text>
-						</AutoLayout>
-						<AutoLayout direction={"vertical"} spacing={0} width={"fill-parent"}>
-							{filterStyles.length !== 0 && cacheStyle.length !== 0 && cacheStyle.length === filterStyles.length ? (
-								filterStyles.map((style) => {
-									// console.log(style)
-									const cache = cacheStyle.find((i) => i.id === style.id);
-									const check = checkFontName(cache);
-									// console.log(cache.lineHeight.value);
-									return (
-										<AutoLayout key={style.id} width={"fill-parent"} direction={"vertical"}>
-											<AutoLayout
-												verticalAlignItems={"center"}
-												spacing={12}
+					<Rectangle width={1} height={60} fill={"#ccc"} />
+					<AutoLayout width={180}>
+						<Text fontSize={24} fontFamily={"Roboto"} fill={"#ccc"}>
+							Line height
+						</Text>
+					</AutoLayout>
+					<Rectangle width={1} height={60} fill={"#ccc"} />
+					<Text fontSize={24} fontFamily={"Roboto"} width={"fill-parent"} fill={"#eee"}>
+						Description
+					</Text>
+				</AutoLayout>
+				<AutoLayout direction={"vertical"} spacing={0} width={"fill-parent"}>
+					{filterStyles.length !== 0 && cacheStyle.length !== 0 && cacheStyle.length === filterStyles.length ? (
+						filterStyles.map((style) => {
+							// console.log(style)
+							const cache = cacheStyle.find((i) => i.id === style.id) as textStyleType;
+							const check = checkFontName(cache);
+							// console.log(cache.lineHeight.value);
+							return (
+								<AutoLayout key={style.id} width={"fill-parent"} direction={"vertical"}>
+									<AutoLayout
+										verticalAlignItems={"center"}
+										spacing={12}
+										width={"fill-parent"}
+										padding={{ left: 12, right: 12 }}
+									>
+										<CheckBox
+											isCheck={stylesChecked.find((id) => id === style.id) ? true : false}
+											onClick={() => handleCheck(style.id)}
+										/>
+										<Rectangle width={1} height={50} fill={"#ccc"} />
+										<Input
+											value={cache.name}
+											onTextEditEnd={(e) => {
+												setCacheStyle((prev) =>
+													prev.map((i) => (i.id === style.id ? { ...i, name: e.characters } : i))
+												);
+											}}
+											placeholder="Type name"
+											fontSize={22}
+											fontFamily={"Roboto"}
+											width={450}
+										/>
+										<Rectangle width={1} height={50} fill={"#ccc"} />
+										<AutoLayout width={"fill-parent"} verticalAlignItems={"center"} spacing={6}>
+											{!check.check && check.status === "family" && <SVG src={warningSvg} />}
+											<Input
+												value={cache.fontName.family}
+												onTextEditEnd={(e) => {
+													setCacheStyle((prev) =>
+														prev.map((i) =>
+															i.id === style.id
+																? {
+																		...i,
+																		fontName: { ...i.fontName, family: e.characters },
+																  }
+																: i
+														)
+													);
+												}}
+												fontSize={22}
+												fontFamily={"Roboto"}
 												width={"fill-parent"}
-												padding={{ left: 12, right: 12 }}
-											>
-												<CheckBox
-													isCheck={stylesChecked.find((id) => id === style.id) ? true : false}
-													onClick={() => handleCheck(style.id)}
-												/>
-												<Rectangle width={1} height={50} fill={"#ccc"} />
-												<Input
-													value={cache.name}
-													onTextEditEnd={(e) => {
-														setCacheStyle((prev) =>
-															prev.map((i) =>
-																i.id === style.id ? { ...i, name: e.characters } : i
-															)
-														);
-													}}
-													placeholder="Type name"
-													fontSize={22}
-													fontFamily={"Roboto"}
-													width={450}
-												/>
-												<Rectangle width={1} height={50} fill={"#ccc"} />
-												<AutoLayout width={"fill-parent"} verticalAlignItems={"center"} spacing={6}>
-													{!check.check && check.status === "family" && <SVG src={warningSvg} />}
-													<Input
-														value={cache.fontName.family}
-														onTextEditEnd={(e) => {
-															setCacheStyle((prev) =>
-																prev.map((i) =>
-																	i.id === style.id
-																		? {
-																				...i,
-																				fontName: { ...i.fontName, family: e.characters },
-																		  }
-																		: i
-																)
-															);
-														}}
-														fontSize={22}
-														fontFamily={"Roboto"}
-														width={"fill-parent"}
-													/>
-												</AutoLayout>
-												<Rectangle width={1} height={50} fill={"#ccc"} />
-												<AutoLayout width={360} verticalAlignItems={"center"} spacing={6}>
-													{!check.check && <SVG src={warningSvg} />}
-													<Input
-														value={cache.fontName.style}
-														onTextEditEnd={(e) => {
-															setCacheStyle((prev) =>
-																prev.map((i) =>
-																	i.id === style.id
-																		? {
-																				...i,
-																				fontName: { ...i.fontName, style: e.characters },
-																		  }
-																		: i
-																)
-															);
-														}}
-														fontSize={22}
-														fontFamily={"Roboto"}
-														width={"fill-parent"}
-													/>
-													<Text
-														fontSize={20}
-														fill={"#666"}
-														fontFamily={"Roboto"}
-														horizontalAlignText={"right"}
-													>
-														{getFontWeightValue(cache.fontName.style).fontWeight}
-													</Text>
-												</AutoLayout>
-												<Rectangle width={1} height={50} fill={"#ccc"} />
-												<Input
-													value={cache.fontSize.toString()}
-													onTextEditEnd={(e) => {
-														setCacheStyle((prev) =>
-															prev.map((i) =>
-																i.id === style.id ? { ...i, fontSize: Number(e.characters) } : i
-															)
-														);
-													}}
-													placeholder="Type size"
-													fontSize={22}
-													fontFamily={"Roboto"}
-													width={160}
-												/>
-												<Rectangle width={1} height={50} fill={"#ccc"} />
-												<AutoLayout width={180} verticalAlignItems={"center"} spacing={6}>
-													{/* <Text fontSize={22} fontFamily={"Roboto"} horizontalAlignText={"left"}>
+											/>
+										</AutoLayout>
+										<Rectangle width={1} height={50} fill={"#ccc"} />
+										<AutoLayout width={360} verticalAlignItems={"center"} spacing={6}>
+											{!check.check && <SVG src={warningSvg} />}
+											<Input
+												value={cache.fontName.style}
+												onTextEditEnd={(e) => {
+													setCacheStyle((prev) =>
+														prev.map((i) =>
+															i.id === style.id
+																? {
+																		...i,
+																		fontName: { ...i.fontName, style: e.characters },
+																  }
+																: i
+														)
+													);
+												}}
+												fontSize={22}
+												fontFamily={"Roboto"}
+												width={"fill-parent"}
+											/>
+											<Text fontSize={20} fill={"#666"} fontFamily={"Roboto"} horizontalAlignText={"right"}>
+												{getFontWeightValue(cache.fontName.style).fontWeight}
+											</Text>
+										</AutoLayout>
+										<Rectangle width={1} height={50} fill={"#ccc"} />
+										<Input
+											value={cache.fontSize.toString()}
+											onTextEditEnd={(e) => {
+												setCacheStyle((prev) =>
+													prev.map((i) =>
+														i.id === style.id ? { ...i, fontSize: Number(e.characters) } : i
+													)
+												);
+											}}
+											placeholder="Type size"
+											fontSize={22}
+											fontFamily={"Roboto"}
+											width={160}
+										/>
+										<Rectangle width={1} height={50} fill={"#ccc"} />
+										<AutoLayout width={180} verticalAlignItems={"center"} spacing={6}>
+											{/* <Text fontSize={22} fontFamily={"Roboto"} horizontalAlignText={"left"}>
 												{cache.lineHeight.value ? cache.lineHeight.value : "Auto"}
 											</Text> */}
-													<Input
-														value={
-															cache.lineHeight.value
-																? cache.lineHeight.unit === "PIXELS"
-																	? cache.lineHeight.value.toString() + "px"
-																	: parseFloat(
-																			cache.lineHeight.value.toPrecision(3).toString()
-																	  ) + "%"
-																: "auto"
-														}
-														onTextEditEnd={(e) => {
-															const data = e.characters.replaceAll(" ", "").toLowerCase();
-															const value = getLineHeight(data);
+											<Input
+												value={
+													cache.lineHeight.unit !== "AUTO" && cache.lineHeight.value
+														? cache.lineHeight.unit === "PIXELS"
+															? cache.lineHeight.value.toString() + "px"
+															: parseFloat(cache.lineHeight.value.toPrecision(3).toString()) + "%"
+														: "auto"
+												}
+												onTextEditEnd={(e) => {
+													const data = e.characters.replaceAll(" ", "").toLowerCase();
+													const value = getLineHeight(data);
 
-															// console.log(value);
-															if (value.unit !== "") {
-																setCacheStyle((prev) =>
-																	prev.map((i) =>
-																		i.id === style.id
-																			? {
-																					...i,
-																					lineHeight: { ...value },
-																			  }
-																			: i
-																	)
-																);
-															}
-														}}
-														fontSize={22}
-														fontFamily={"Roboto"}
-														width={"fill-parent"}
-													/>
-													<Text
-														fontSize={20}
-														fill={"#666"}
-														fontFamily={"Roboto"}
-														horizontalAlignText={"right"}
-													>
-														{cache.lineHeight.value
-															? cache.lineHeight.unit === "PERCENT"
-																? parseFloat((cache.lineHeight.value / 100).toPrecision(3))
-																: ""
-															: ""}
-													</Text>
-												</AutoLayout>
-												<Rectangle width={1} height={50} fill={"#ccc"} />
-												<Input
-													value={cache.description}
-													onTextEditEnd={(e) => {
+													// console.log(value);
+													if (value.unit !== "") {
 														setCacheStyle((prev) =>
 															prev.map((i) =>
-																i.id === style.id ? { ...i, description: e.characters } : i
+																i.id === style.id
+																	? {
+																			...i,
+																			lineHeight: { ...value },
+																	  }
+																	: i
 															)
 														);
-													}}
-													placeholder="Type description"
-													fontSize={22}
-													fontFamily={"Roboto"}
-													width={"fill-parent"}
-												/>
-											</AutoLayout>
-											<Rectangle width={"fill-parent"} height={1} fill={"#ccc"} />
+													}
+												}}
+												fontSize={22}
+												fontFamily={"Roboto"}
+												width={"fill-parent"}
+											/>
+											<Text fontSize={20} fill={"#666"} fontFamily={"Roboto"} horizontalAlignText={"right"}>
+												{cache.lineHeight.unit !== "AUTO" && cache.lineHeight.value
+													? cache.lineHeight.unit === "PERCENT"
+														? parseFloat((cache.lineHeight.value / 100).toPrecision(3))
+														: ""
+													: ""}
+											</Text>
 										</AutoLayout>
-									);
-								})
-							) : (
-								<Text
-									fontSize={20}
-									width={"fill-parent"}
-									height={40}
-									horizontalAlignText={"center"}
-									verticalAlignText={"center"}
-								>
-									No style
-								</Text>
-							)}
-						</AutoLayout>
-					</AutoLayout>
-					<AutoLayout spacing={"auto"} width={"fill-parent"}>
-						<AutoLayout
-							padding={24}
-							fill={"#333"}
-							cornerRadius={12}
-							onClick={() => getLocalTextStyle()}
-							spacing={16}
-							hoverStyle={{ fill: "#4A4A4A" }}
+										<Rectangle width={1} height={50} fill={"#ccc"} />
+										<Input
+											value={cache.description}
+											onTextEditEnd={(e) => {
+												setCacheStyle((prev) =>
+													prev.map((i) => (i.id === style.id ? { ...i, description: e.characters } : i))
+												);
+											}}
+											placeholder="Type description"
+											fontSize={22}
+											fontFamily={"Roboto"}
+											width={"fill-parent"}
+										/>
+									</AutoLayout>
+									<Rectangle width={"fill-parent"} height={1} fill={"#ccc"} />
+								</AutoLayout>
+							);
+						})
+					) : (
+						<Text
+							fontSize={20}
+							width={"fill-parent"}
+							height={40}
+							horizontalAlignText={"center"}
+							verticalAlignText={"center"}
 						>
-							<SVG src={loadSvg} />
-							<Text fontSize={26} fill={"#fff"} horizontalAlignText={"center"}>
-								{textStyles.length === 0 ? "Load local text styles" : "Reload local text styles"}
-							</Text>
-						</AutoLayout>
+							No style
+						</Text>
+					)}
+				</AutoLayout>
+			</AutoLayout>
+			<AutoLayout spacing={"auto"} width={"fill-parent"}>
+				<AutoLayout
+					padding={24}
+					fill={"#333"}
+					cornerRadius={12}
+					onClick={() => getLocalTextStyle()}
+					spacing={16}
+					hoverStyle={{ fill: "#4A4A4A" }}
+				>
+					<SVG src={loadSvg} />
+					<Text fontSize={26} fill={"#fff"} horizontalAlignText={"center"}>
+						{textStyles.length === 0 ? "Load local text styles" : "Reload local text styles"}
+					</Text>
+				</AutoLayout>
 
-						<AutoLayout
-							padding={24}
-							fill={"#0B68D6"}
-							cornerRadius={12}
-							onClick={() => updateStyle()}
-							spacing={16}
-							hoverStyle={{ fill: "#1A7CF0" }}
-						>
-							<SVG src={uploadSvg} />
-							<Text fontSize={26} fill={"#fff"} horizontalAlignText={"center"}>
-								Update styles
-							</Text>
-						</AutoLayout>
-					</AutoLayout>
-
+				<AutoLayout
+					padding={24}
+					fill={"#0B68D6"}
+					cornerRadius={12}
+					onClick={() => updateStyle()}
+					spacing={16}
+					hoverStyle={{ fill: "#1A7CF0" }}
+				>
+					<SVG src={uploadSvg} />
+					<Text fontSize={26} fill={"#fff"} horizontalAlignText={"center"}>
+						Update styles
+					</Text>
+				</AutoLayout>
+			</AutoLayout>
 		</Fragment>
 	);
 };

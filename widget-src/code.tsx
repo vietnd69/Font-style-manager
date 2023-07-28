@@ -1,11 +1,42 @@
 const { widget } = figma;
-const { AutoLayout, Text, Rectangle, useSyncedState, useEffect, SVG, usePropertyMenu, useWidgetId } = widget;
+const { AutoLayout, Text, Rectangle, useSyncedState, useEffect, SVG, usePropertyMenu, useWidgetId, Fragment } = widget;
 
 import TextDesignList from "./TextDesignSystemList";
 import TextDesignManager from "./TextDesignSystemManager";
 
 import { coffeeSvg, searchActive, searchDisable, listViewActive, listViewDisable, listSvg } from "./svg";
 
+export type msgType =
+	| {
+			type: "close";
+	  }
+	| {
+			type: "setFamilyAndWeight";
+			data: {
+				family: any;
+				weight: any;
+			};
+	  }
+	| {
+			type: "setShowTypoGroup";
+			data: {
+				group: any;
+			};
+	  };
+
+export type textStyleType = {
+	id: string;
+	name: string;
+	fontName: FontName;
+	fontSize: number;
+	lineHeight: LineHeight;
+	description: string;
+};
+
+type CleanFontType = {
+	family: string;
+	styles: string[];
+};
 function Widget() {
 	useEffect(() => {
 		if (isFirstLoadFont && localFonts.length === 0) {
@@ -19,18 +50,18 @@ function Widget() {
 	});
 
 	const [mode, setMode] = useSyncedState<"edit" | "view">("mode", "edit");
-	const [textStyles, setTextStyles] = useSyncedState<any[]>("textStyles", []);
+	const [textStyles, setTextStyles] = useSyncedState<textStyleType[]>("textStyles", []);
 
-	const [filterStyles, setFilterStyles] = useSyncedState<any[]>("filterStyles", []);
+	const [filterStyles, setFilterStyles] = useSyncedState<textStyleType[]>("filterStyles", []);
 
 	const [checkedFamily, setCheckedFamily] = useSyncedState("checkedFamily", "");
 	const [checkedStyle, setCheckedStyle] = useSyncedState("checkedStyle", "");
 
-	const [cacheStyle, setCacheStyle] = useSyncedState<any[]>("cacheStyle", []);
+	const [cacheStyle, setCacheStyle] = useSyncedState<textStyleType[]>("cacheStyle", []);
 
 	const [isFirstLoadFont, setIsFirstLoadFont] = useSyncedState("isFirstLoadFont", true);
-	const [localFonts, setLocalFonts] = useSyncedState<any[]>("localFonts", []);
-	const [cleanFont, setCleanFont] = useSyncedState<any[]>("cleanFont", []);
+	const [localFonts, setLocalFonts] = useSyncedState<Font[]>("localFonts", []);
+	const [cleanFont, setCleanFont] = useSyncedState<CleanFontType[]>("cleanFont", []);
 
 	const [showGroup, setShowGroup] = useSyncedState<string[]>("showGroup", []);
 
@@ -40,11 +71,11 @@ function Widget() {
 
 	const widgetId = useWidgetId();
 
-	const handleCloneWidget = async (showGroup?: string[]) => {
+	const handleCloneWidget = (showGroup?: string[]) => {
 		const widgetNode = figma.getNodeById(widgetId) as WidgetNode;
 		const clonedWidget = widgetNode.clone();
 
-		await clonedWidget.setWidgetSyncedState({
+		clonedWidget.setWidgetSyncedState({
 			mode: "view",
 			textStyles,
 			filterStyles,
@@ -54,7 +85,6 @@ function Widget() {
 			isFirstLoadFont,
 			localFonts,
 			cleanFont,
-			showGroup : showGroup,
 		});
 		// Position the cloned widget beside this widget
 		widgetNode.parent!.appendChild(clonedWidget);
@@ -111,18 +141,24 @@ function Widget() {
 	useEffect(() => {
 		figma.ui.onmessage = (msg) => {
 			// console.log(msg.type)
-			if (msg.type === "setFamilyAndWeight") {
-				// console.log(msg);
-				setCheckedFamily(msg.data.family);
-				setCheckedStyle(msg.data.weight);
-				figma.closePlugin();
-			}
-			if (msg.type === "close") {
-				// console.log("ok")
-				figma.closePlugin();
-			}
+			handleGetUiMessage(msg);
 		};
 	});
+
+	const handleGetUiMessage = (msg: msgType) => {
+		if (msg.type === "setFamilyAndWeight") {
+			// console.log(msg);
+			setCheckedFamily(msg.data.family);
+			setCheckedStyle(msg.data.weight);
+			figma.closePlugin();
+		}
+		if (msg.type === "setShowTypoGroup") {
+		}
+		if (msg.type === "close") {
+			// console.log("ok")
+			figma.closePlugin();
+		}
+	};
 
 	// const [findKeys, setFindKeys] = useSyncedState("findKeys", { family: "", style: "" });
 
@@ -130,15 +166,17 @@ function Widget() {
 		setIsOpenSearchBar((prev) => !prev);
 	};
 
-	const fontsClean = (fonts: any) => {
-		let fontFamily = "";
-		let data = [];
-		let fontStyles = [];
+	const fontsClean = (fonts: Font[]) => {
+		let fontFamily: string = "";
+		let data: CleanFontType[] = [];
+		let fontStyles: string[] = [];
 		for (let font of fonts) {
 			if (fontFamily === font.fontName.family) {
 				fontStyles.push(font.fontName.style);
 			} else {
-				data.push({ family: fontFamily, styles: fontStyles });
+				if (fontFamily != "" && fontStyles.length != 0) {
+					data.push({ family: fontFamily, styles: fontStyles });
+				}
 				fontStyles = [font.fontName.style];
 				fontFamily = font.fontName.family;
 			}
@@ -149,9 +187,9 @@ function Widget() {
 	};
 
 	const getLocalTextStyle = () => {
-		const styles: any[] = figma.getLocalTextStyles();
+		const styles: TextStyle[] = figma.getLocalTextStyles();
 		// console.log(styles);
-		const data = styles ? styles.map((style) => getDataStyle(style.id)) : [];
+		const data = styles ? styles.map((style) => getDataStyle(style.id) as textStyleType) : [];
 		// console.log(data)
 		setTextStyles(data);
 		setCacheStyle(data);
@@ -159,7 +197,7 @@ function Widget() {
 	};
 
 	const getDataStyle = (id: string) => {
-		const data: any = figma.getStyleById(id);
+		const data = figma.getStyleById(id) as TextStyle;
 
 		if (data) {
 			return {
@@ -226,11 +264,11 @@ function Widget() {
 	// 	}
 	// };
 
-	const showUi = (moduleName: string, name: string, data?: any) =>
+	const showUi = (moduleName: string, name: string, data?: any, size?: { width: number; height: number }) =>
 		new Promise((resolve) => {
 			figma.showUI(__html__, {
-				width: 300,
-				height: 300,
+				width: size?.width || 300,
+				height: size?.height || 300,
 				title: name,
 			});
 			figma.ui.postMessage({ moduleName, data });
@@ -284,14 +322,21 @@ function Widget() {
 							tooltip={isOpenSearchBar ? "Hidden search tool" : "Show search tool"}
 						/>
 					)}
-					{mode === "view" && <SVG src={listSvg} />}
+					{mode === "view" && (
+						<Fragment>
+							<SVG
+								src={listSvg}
+								onClick={() => showUi("editShowGroup", "Choice Group of Typo", textStyles, { width: 400, height: 450 })}
+							/>
+						</Fragment>
+					)}
 					<Rectangle width={"fill-parent"} height={1} fill={"#888"} />
 					<SVG src={coffeeSvg} tooltip={"Buy me a coffee"} onClick={() => showUi("buyCoffee", "Buy me a coffee")} />
 				</AutoLayout>
 			</AutoLayout>
 
 			{mode === "edit" && <TextDesignManager value={{ textStyles, showUi, getLocalTextStyle, setHasReloadLocalFont }} />}
-			{mode === "view" && <TextDesignList value={{textStyles, showGroup}} />}
+			{mode === "view" && <TextDesignList value={{ textStyles, showGroup }} />}
 		</AutoLayout>
 	);
 }

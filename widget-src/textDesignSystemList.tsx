@@ -2,25 +2,28 @@ import getFontWeightValue from "./hooks/getFontWeightValue";
 import type { FontWeightNumerical } from "./hooks/getFontWeightValue";
 
 const { widget } = figma;
-const { AutoLayout, Text, Rectangle } = widget;
+const { AutoLayout, Text, Rectangle, useSyncedState, useEffect } = widget;
 
 type TextDesignSystemListType = {
 	textStyles: any[];
-	showGroup: string[]
-}
+	showGroup: string[];
+};
 
 const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
+	const { textStyles, showGroup } = value;
+	const styleList = textStyles;
 
-	const { textStyles } = value
+	if (showGroup.length !== 0) {
+	}
 
 	return (
 		<AutoLayout direction={"vertical"} width={"fill-parent"}>
-			{textStyles.length !== 0 &&
-				textStyles.map((style) => {
+			{styleList.length !== 0 &&
+				styleList.map((style: any, index: number) => {
 					// console.log(style)
 					// console.log(cache.lineHeight.value);
 					return (
-						<AutoLayout width={"fill-parent"} direction={"vertical"}>
+						<AutoLayout key={index} width={"fill-parent"} direction={"vertical"}>
 							<AutoLayout
 								width={"fill-parent"}
 								height={"hug-contents"}

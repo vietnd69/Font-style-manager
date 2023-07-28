@@ -91,16 +91,18 @@ const ChoiceFont = (data: any) => {
 	};
 
 	const mapFontWeights = (data: any[]) => data.map((weight) => ({ value: weight, label: weight }));
+
 	useEffect(() => {
 		if (inputFontName !== "") {
 			setListFontWeight(mapFontWeights(sortFontNames(getFontWeightList(inputFontName?.value))));
 		}
 		// console.log(inputFontName);
 	}, [inputFontName]);
+	useEffect(() => { setInputFontWeight(listFontWeight[0])},[listFontWeight])
 
 	const fontList = data?.data.map((font: any) => ({ value: font.family, label: font.family }));
 
-	const handleSelectFont = (data: any) => setInputFontName(data);
+	const handleSelectFont = (data: any) => {setInputFontName(data)}
 	const handleSelectWeight = (data: any) => setInputFontWeight(data);
 
 	return (
@@ -126,6 +128,7 @@ const ChoiceFont = (data: any) => {
 						placeholder="Choice style"
 						value={inputFontWeight}
 						onChange={handleSelectWeight}
+						// defaultValue={}
 						// isSearchable={true}
 					/>
 
