@@ -1,7 +1,7 @@
 const { widget } = figma;
 const { AutoLayout, Text, Rectangle, useSyncedState, Input, SVG, Fragment } = widget;
 
-import { textStyleType } from "./code";
+import { CleanFontType, textStyleType } from "./code";
 import CheckBox from "./components/CheckBox";
 
 import getFontWeightValue from "./hooks/getFontWeightValue";
@@ -25,9 +25,12 @@ type textDesignManagerType = {
 	showUi: (moduleName: string, name: string, data?: any) => Promise<unknown>;
 	getLocalTextStyle: () => void;
 	setHasReloadLocalFont: (newValue: boolean | ((currValue: boolean) => boolean)) => void;
+	localFonts: Font[];
+	cleanFont: CleanFontType[];
+	isOpenSearchBar: boolean
 };
 const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
-	const { textStyles, showUi, getLocalTextStyle, setHasReloadLocalFont } = value;
+	const { textStyles, showUi, getLocalTextStyle, setHasReloadLocalFont, localFonts, cleanFont , isOpenSearchBar} = value;
 	const [filterStyles, setFilterStyles] = useSyncedState<textStyleType[]>("filterStyles", []);
 
 	const [searchName, setSearchName] = useSyncedState("searchName", "");
@@ -52,10 +55,6 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
 
 	const [cacheStyle, setCacheStyle] = useSyncedState<textStyleType[]>("cacheStyle", []);
 
-	const [localFonts, setLocalFonts] = useSyncedState<any[]>("localFonts", []);
-	const [cleanFont, setCleanFont] = useSyncedState<any[]>("cleanFont", []);
-
-	const [isOpenSearchBar, setIsOpenSearchBar] = useSyncedState("isOpenSearchBar", true);
 
 	const handleCheck = (id: string) => {
 		const hasStyleInList = stylesChecked.find((idStyle) => idStyle === id) ? true : false;
@@ -370,6 +369,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
 								value={searchFamily}
 								onTextEditEnd={(e) => setSearchFamily(e.characters)}
 								placeholder="Find family"
+								width={"fill-parent"}
 							/>
 						</AutoLayout>
 						<AutoLayout

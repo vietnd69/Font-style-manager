@@ -33,7 +33,7 @@ export type textStyleType = {
 	description: string;
 };
 
-type CleanFontType = {
+export type CleanFontType = {
 	family: string;
 	styles: string[];
 };
@@ -67,7 +67,7 @@ function Widget() {
 
 	const [hasReloadLocalFont, setHasReloadLocalFont] = useSyncedState("hasReloadLocalFont", false);
 
-	const [isOpenSearchBar, setIsOpenSearchBar] = useSyncedState("isOpenSearchBar", true);
+	const [isOpenSearchBar, setIsOpenSearchBar] = useSyncedState<boolean>("isOpenSearchBar", true);
 
 	const widgetId = useWidgetId();
 
@@ -83,8 +83,6 @@ function Widget() {
 			checkedStyle,
 			cacheStyle,
 			isFirstLoadFont,
-			localFonts,
-			cleanFont,
 		});
 		// Position the cloned widget beside this widget
 		widgetNode.parent!.appendChild(clonedWidget);
@@ -326,7 +324,9 @@ function Widget() {
 						<Fragment>
 							<SVG
 								src={listSvg}
-								onClick={() => showUi("editShowGroup", "Choice Group of Typo", textStyles, { width: 400, height: 450 })}
+								onClick={() =>
+									showUi("editShowGroup", "Choice Group of Typo", textStyles, { width: 500, height: 650 })
+								}
 							/>
 						</Fragment>
 					)}
@@ -335,7 +335,19 @@ function Widget() {
 				</AutoLayout>
 			</AutoLayout>
 
-			{mode === "edit" && <TextDesignManager value={{ textStyles, showUi, getLocalTextStyle, setHasReloadLocalFont }} />}
+			{mode === "edit" && (
+				<TextDesignManager
+					value={{
+						textStyles,
+						showUi,
+						getLocalTextStyle,
+						setHasReloadLocalFont,
+						localFonts,
+						cleanFont,
+						isOpenSearchBar,
+					}}
+				/>
+			)}
 			{mode === "view" && <TextDesignList value={{ textStyles, showGroup }} />}
 		</AutoLayout>
 	);
