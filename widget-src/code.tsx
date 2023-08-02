@@ -1,10 +1,10 @@
 const { widget } = figma;
-const { AutoLayout, Text, Rectangle, useSyncedState, useEffect, SVG, usePropertyMenu, useWidgetId, Fragment } = widget;
+const { AutoLayout, Text, Rectangle, useSyncedState, useEffect, SVG, usePropertyMenu, useWidgetId, Fragment, Input } = widget;
 
 import TextDesignList from "./TextDesignSystemList";
 import TextDesignManager from "./TextDesignSystemManager";
 
-import { coffeeSvg, searchActive, searchDisable, listViewActive, listViewDisable, listSvg } from "./svg";
+import { coffeeSvg, searchActive, searchDisable, listViewActive, listViewDisable, listSvg, editSvg } from "./svg";
 
 export type msgType =
 	| {
@@ -19,9 +19,11 @@ export type msgType =
 	  }
 	| {
 			type: "setShowTypoGroup";
-			data: {
-				group: any;
-			};
+			data: textStyleType[];
+	  }
+	| {
+			type: "setShowDuplicateTypoGroup";
+			data: textStyleType[];
 	  };
 
 export type textStyleType = {
@@ -65,13 +67,15 @@ function Widget() {
 
 	const [showGroup, setShowGroup] = useSyncedState<string[]>("showGroup", []);
 
+	const [showStyle, setShowStyle] = useSyncedState<textStyleType[]>("showStyle", []);
+
 	const [hasReloadLocalFont, setHasReloadLocalFont] = useSyncedState("hasReloadLocalFont", false);
 
 	const [isOpenSearchBar, setIsOpenSearchBar] = useSyncedState<boolean>("isOpenSearchBar", true);
 
 	const widgetId = useWidgetId();
 
-	const handleCloneWidget = (showGroup?: string[]) => {
+	const handleCloneWidget = (showStyleData: textStyleType[] = showStyle) => {
 		const widgetNode = figma.getNodeById(widgetId) as WidgetNode;
 		const clonedWidget = widgetNode.clone();
 
@@ -83,6 +87,7 @@ function Widget() {
 			checkedStyle,
 			cacheStyle,
 			isFirstLoadFont,
+			showStyle: showStyleData,
 		});
 		// Position the cloned widget beside this widget
 		widgetNode.parent!.appendChild(clonedWidget);
@@ -151,6 +156,11 @@ function Widget() {
 			figma.closePlugin();
 		}
 		if (msg.type === "setShowTypoGroup") {
+			setShowStyle(msg.data);
+		}
+		if (msg.type === "setShowDuplicateTypoGroup") {
+			handleCloneWidget(msg.data);
+			figma.closePlugin();
 		}
 		if (msg.type === "close") {
 			// console.log("ok")
@@ -192,6 +202,7 @@ function Widget() {
 		setTextStyles(data);
 		setCacheStyle(data);
 		setFilterStyles(data);
+		setShowStyle(data);
 	};
 
 	const getDataStyle = (id: string) => {
@@ -290,13 +301,35 @@ function Widget() {
 			// canvasStacking={"first-on-top"}
 		>
 			{/* <Text onClick={() => showUi("choiceFont", "font", cleanFont)}>aaaa</Text> */}
-			<AutoLayout width={"fill-parent"} horizontalAlignItems={"center"} direction={"vertical"} padding={{ bottom: 6 }}>
-				<Text fontSize={46} fontWeight={700} onClick={() => handleCloneWidget()}>
-					FONT STYLES MANAGER
-				</Text>
-				<Text fontSize={18}>{mode === "edit" ? "Choose styles you want to change" : "Typography list"}</Text>
+			<AutoLayout width={"fill-parent"}>
+				<AutoLayout
+					width={"fill-parent"}
+					horizontalAlignItems={mode === "edit" ? "center" : "start"}
+					direction={"vertical"}
+					padding={{ bottom: 6 }}
+				>
+					<Text fontSize={46} fontWeight={700}>
+						{mode === "edit" ? "FONT STYLES MANAGER" : "FONT STYLES LIST"}
+					</Text>
+					{mode === "edit" ? (
+						<Text fontSize={18}>Choose styles you want to change</Text>
+					) : (
+						<Input
+							width={600}
+							fontSize={18}
+							value={"Change to your subHeadings"}
+							onTextEditEnd={() => {}}
+							placeholder={"Change subHeadings"}
+						/>
+					)}
+				</AutoLayout>
+				{mode === "view" && (
+					<SVG
+						src={editSvg}
+						onClick={() => showUi("editShowGroup", "Choice Group of Typo", textStyles, { width: 500, height: 550 })}
+					/>
+				)}
 			</AutoLayout>
-
 			<AutoLayout positioning={"absolute"} x={mode === "edit" ? 1815 : 1215} y={120} width={82}>
 				<AutoLayout
 					width={"fill-parent"}
@@ -325,7 +358,7 @@ function Widget() {
 							<SVG
 								src={listSvg}
 								onClick={() =>
-									showUi("editShowGroup", "Choice Group of Typo", textStyles, { width: 500, height: 650 })
+									showUi("editShowGroup", "Choice Group of Typo", textStyles, { width: 450, height: 550 })
 								}
 							/>
 						</Fragment>
@@ -348,7 +381,7 @@ function Widget() {
 					}}
 				/>
 			)}
-			{mode === "view" && <TextDesignList value={{ textStyles, showGroup }} />}
+			{mode === "view" && <TextDesignList value={{ showStyle, showGroup }} />}
 		</AutoLayout>
 	);
 }

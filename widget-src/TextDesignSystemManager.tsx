@@ -22,15 +22,23 @@ import {
 
 type textDesignManagerType = {
 	textStyles: textStyleType[];
-	showUi: (moduleName: string, name: string, data?: any) => Promise<unknown>;
+	showUi: (
+		moduleName: string,
+		name: string,
+		data?: any,
+		size?: {
+			width: number;
+			height: number;
+		}
+	) => Promise<unknown>;
 	getLocalTextStyle: () => void;
 	setHasReloadLocalFont: (newValue: boolean | ((currValue: boolean) => boolean)) => void;
 	localFonts: Font[];
 	cleanFont: CleanFontType[];
-	isOpenSearchBar: boolean
+	isOpenSearchBar: boolean;
 };
 const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
-	const { textStyles, showUi, getLocalTextStyle, setHasReloadLocalFont, localFonts, cleanFont , isOpenSearchBar} = value;
+	const { textStyles, showUi, getLocalTextStyle, setHasReloadLocalFont, localFonts, cleanFont, isOpenSearchBar } = value;
 	const [filterStyles, setFilterStyles] = useSyncedState<textStyleType[]>("filterStyles", []);
 
 	const [searchName, setSearchName] = useSyncedState("searchName", "");
@@ -54,7 +62,6 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
 	const [hasCheckAll, setHasCheckAll] = useSyncedState<boolean>("hasCheckAll", false);
 
 	const [cacheStyle, setCacheStyle] = useSyncedState<textStyleType[]>("cacheStyle", []);
-
 
 	const handleCheck = (id: string) => {
 		const hasStyleInList = stylesChecked.find((idStyle) => idStyle === id) ? true : false;
@@ -504,7 +511,9 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
 								<SVG
 									src={listSvg}
 									tooltip="Choice font"
-									onClick={() => showUi("choiceFont", "Choice in font list", cleanFont)}
+									onClick={() =>
+										showUi("choiceFont", "Choice in font list", cleanFont, { width: 350, height: 400 })
+									}
 								/>
 							</AutoLayout>
 							<AutoLayout

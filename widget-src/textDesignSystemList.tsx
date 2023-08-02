@@ -1,20 +1,29 @@
+import { textStyleType } from "./code";
 import getFontWeightValue from "./hooks/getFontWeightValue";
 import type { FontWeightNumerical } from "./hooks/getFontWeightValue";
 
 const { widget } = figma;
-const { AutoLayout, Text, Rectangle, useSyncedState, useEffect } = widget;
+const { AutoLayout, Text, Rectangle, } = widget;
 
 type TextDesignSystemListType = {
-	textStyles: any[];
+	showStyle: textStyleType[];
 	showGroup: string[];
 };
 
-const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
-	const { textStyles, showGroup } = value;
-	const styleList = textStyles;
-
-	if (showGroup.length !== 0) {
+const getOnlyName = (name: string) => {
+	if (name.includes("/")) {
+		const onlyName: string | undefined = name.split("/").pop();
+		return onlyName ? onlyName : "";
+	} else {
+		return name;
 	}
+}
+
+const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
+	const { showStyle, showGroup } = value;
+	const styleList = showStyle;
+
+	
 
 	return (
 		<AutoLayout direction={"vertical"} width={"fill-parent"}>
@@ -39,7 +48,7 @@ const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
 									>
 										Ag
 									</Text>
-									<Text fontSize={22}>{style.name}</Text>
+									<Text fontSize={22}>{getOnlyName(style.name)}</Text>
 								</AutoLayout>
 								<AutoLayout
 									width={"fill-parent"}

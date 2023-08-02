@@ -1,0 +1,61 @@
+.edit-show {
+    position: relative;
+    padding-bottom: 100px;
+    width: 100%;
+    overflow-x: hidden;
+}
+.edit-show .title {
+    width: 100%;
+    display: block;
+    font-size: 22px;
+    font-weight: 600;
+    text-align: center;
+    padding: 16px 0;
+    border-bottom: solid 1px #dfdfdf;
+}
+.edit-show .action{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+
+    
+}
+.edit-show label{
+    user-select: none;
+    padding-left: 18px;
+}
+
+.edit-show ul, .edit-show li{
+    list-style: none;
+    margin-left: 0;
+    padding: 0;
+}
+
+.edit-show li.item {
+    display: flex;
+    align-items: center;
+    padding:  8px 16px;
+    border-bottom: solid 1px #dfdfdf;
+    border-left: solid 1px #dfdfdf;
+    cursor: pointer;
+}
+.edit-show li.item:hover {
+    background-color: #eee;
+}
+
+
+.edit-show ul.group {
+    padding: 0;
+    margin-top: 16px;
+    position: relative;
+    margin-bottom: 0;
+    border-top:  solid 1px #dfdfdf;
+}
+
+
+.style-list {
+    position: relative;
+    /* padding: 0 16px; */
+}
