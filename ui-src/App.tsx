@@ -3,6 +3,7 @@ import "./styles/App.css";
 import BuyMeACoffee from "./BuyMeACoffee";
 import ChoiceFont from "./ChoiceFont";
 import EditShowGroup from "./EditShowGroup";
+import { cleanFontType } from "../widget-src/code";
 
 function App() {
 	const [module, setModule] = useState<string>("");

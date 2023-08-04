@@ -1,7 +1,10 @@
-import React, { Children, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { Tree } from "antd";
+
 import "./styles/EditShowGroup.css";
 
 import type { textStyleType } from "../widget-src/code";
+import type { DataNode, TreeProps } from "antd/es/tree";
 
 type groupsType = textStyleType & {
 	groups: string[];
@@ -45,8 +48,33 @@ const EditShowGroup = ({ data }: { data: textStyleType[] }) => {
 
 	const [showStyle, setShowStyle] = useState<(textStyleType & { isShow: Boolean })[]>([]);
 
+	const [treeData, setTreeData] = useState<DataNode[]>([]);
+
 	const [showGroup, setShowGroup] = useState<showGroupType[]>([]);
 	const [isShowAll, setIsShowAll] = useState<boolean>(true);
+
+	const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
+	const [checkedKeys, setCheckedKeys] = useState<React.Key[]>([]);
+	const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
+	const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
+
+	const onExpand = (expandedKeysValue: React.Key[]) => {
+		console.log("onExpand", expandedKeysValue);
+		// if not set autoExpandParent to false, if children expanded, parent can not collapse.
+		// or, you can remove all expanded children keys.
+		setExpandedKeys(expandedKeysValue);
+		setAutoExpandParent(false);
+	};
+
+	const onCheck = (checkedKeysValue: React.Key[]) => {
+		console.log("onCheck", checkedKeysValue);
+		setCheckedKeys(checkedKeysValue);
+	};
+
+	const onSelect = (selectedKeysValue: React.Key[], info: any) => {
+		console.log("onSelect", info);
+		setSelectedKeys(selectedKeysValue);
+	};
 
 	useEffect(() => {
 		const value: groupsType[] = data.map((style) => ({
@@ -57,6 +85,7 @@ const EditShowGroup = ({ data }: { data: textStyleType[] }) => {
 		const showStyleData = data.map((textStyle) => ({ ...textStyle, isShow: true }));
 		setShowStyle(showStyleData);
 		setGroups(value);
+		// console.log(data);
 		setShowGroup(Array.from(Array(10).keys()).map((index) => ({ id: index, isShow: true })));
 	}, [data]);
 
@@ -78,9 +107,14 @@ const EditShowGroup = ({ data }: { data: textStyleType[] }) => {
 		}
 		levels.sort((a, b) => (a.levelNumber - b.levelNumber && b.groupName.startsWith(a.groupName) ? -1 : 1));
 		setLevels(levels);
+		// console.log(levels);
+		convertToTreeData(levels, maxLevels);
 		// console.log(maxLevels, levels);
 	}, [groups]);
 
+	const convertToTreeData = (levels: levelsType[], maxLevel: number) => {
+		
+	};
 	const isShowStyle = (id: string) => !!showStyle.find((style) => style.id === id && style.isShow);
 
 	const isShowGroup = (id: number) => !!showGroup.find((group) => group.id === id && group.isShow);
@@ -167,6 +201,7 @@ const EditShowGroup = ({ data }: { data: textStyleType[] }) => {
 	return (
 		<div className="edit-show">
 			<span className="title">Choice of group display or Typography style</span>
+			<Tree treeData={treeData} />
 			<div className="style-list">
 				<li
 					onClick={() => toggleShowAll()}

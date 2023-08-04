@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
 import Select from "react-select";
+
 import "./styles/ChoiceFont.css";
 import fontFamilySvg from "./styles/assets/font-family.png";
 import fontWeightSvg from "./styles/assets/font-weight.png";
+import { cleanFontType } from "../widget-src/code";
 
-const ChoiceFont = (data: any) => {
+const ChoiceFont = ({ data }: { data: cleanFontType[] }) => {
 	const [inputFontName, setInputFontName] = useState<any>("");
 	const [listFontWeight, setListFontWeight] = useState<any>("");
 	const [inputFontWeight, setInputFontWeight] = useState<any>("");
-
+	
 	const handleClose = () => parent.postMessage({ pluginMessage: { type: "close" } }, "*");
 
 	const handleSave = () =>
@@ -22,7 +24,12 @@ const ChoiceFont = (data: any) => {
 			"*"
 		);
 
-	const getFontWeightList = (font: string) => data?.data.find((fontList: any) => fontList.family === font).styles;
+	// console.log(data)
+
+	const getFontWeightList = (fontName: string) => {
+		const font = data.find((fontList: cleanFontType) => fontList.family === fontName);
+		return font ? font.styles : [];
+	};
 	const getFontWeightStyleAndWidth = (input: string) => {
 		const fontWeights = {
 			thin: 100,
@@ -90,7 +97,7 @@ const ChoiceFont = (data: any) => {
 		});
 	};
 
-	const mapFontWeights = (data: any[]) => data.map((weight) => ({ value: weight, label: weight }));
+	const mapFontWeights = (data: cleanFontType[]) => data.map((weight) => ({ value: weight, label: weight }));
 
 	useEffect(() => {
 		if (inputFontName !== "") {
@@ -98,18 +105,23 @@ const ChoiceFont = (data: any) => {
 		}
 		// console.log(inputFontName);
 	}, [inputFontName]);
-	useEffect(() => { setInputFontWeight(listFontWeight[0])},[listFontWeight])
+	useEffect(() => {
+		setInputFontWeight(listFontWeight[0]);
+	}, [listFontWeight]);
 
-	const fontList = data?.data.map((font: any) => ({ value: font.family, label: font.family }));
+	const fontList = data.map((font: cleanFontType) => ({ value: font.family, label: font.family }));
 
-	const handleSelectFont = (data: any) => {setInputFontName(data)}
-	const handleSelectWeight = (data: any) => setInputFontWeight(data);
+	const handleSelectFont = (data: cleanFontType) => {
+		setInputFontName(data);
+	};
+	const handleSelectWeight = (data: cleanFontType) => setInputFontWeight(data);
 
+	
 	return (
 		<div id="choiceFont">
 			<div className="font-name input">
 				<img className="icon" src={fontFamilySvg} alt="font-family" />
-                {/* <FontFamilySvg className="icon"/> */}
+				{/* <FontFamilySvg className="icon"/> */}
 				<Select
 					classNamePrefix="react-select"
 					options={fontList}
@@ -135,6 +147,7 @@ const ChoiceFont = (data: any) => {
 					{/* <select className="weight-select" placeholder="Choice style" /> */}
 				</div>
 			)}
+			
 			<div className="action">
 				<button className="close" onClick={() => handleClose()}>
 					Cancel

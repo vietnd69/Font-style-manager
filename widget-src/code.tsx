@@ -35,7 +35,7 @@ export type textStyleType = {
 	description: string;
 };
 
-export type CleanFontType = {
+export type cleanFontType = {
 	family: string;
 	styles: string[];
 };
@@ -63,7 +63,7 @@ function Widget() {
 
 	const [isFirstLoadFont, setIsFirstLoadFont] = useSyncedState("isFirstLoadFont", true);
 	const [localFonts, setLocalFonts] = useSyncedState<Font[]>("localFonts", []);
-	const [cleanFont, setCleanFont] = useSyncedState<CleanFontType[]>("cleanFont", []);
+	const [cleanFont, setCleanFont] = useSyncedState<cleanFontType[]>("cleanFont", []);
 
 	const [showGroup, setShowGroup] = useSyncedState<string[]>("showGroup", []);
 
@@ -176,13 +176,13 @@ function Widget() {
 
 	const fontsClean = (fonts: Font[]) => {
 		let fontFamily: string = "";
-		let data: CleanFontType[] = [];
+		let data: cleanFontType[] = [];
 		let fontStyles: string[] = [];
 		for (let font of fonts) {
 			if (fontFamily === font.fontName.family) {
 				fontStyles.push(font.fontName.style);
 			} else {
-				if (fontFamily != "" && fontStyles.length != 0) {
+				if ((fontFamily != ""  && !fontFamily.startsWith("??")) && fontStyles.length != 0) {
 					data.push({ family: fontFamily, styles: fontStyles });
 				}
 				fontStyles = [font.fontName.style];
@@ -203,6 +203,7 @@ function Widget() {
 		setCacheStyle(data);
 		setFilterStyles(data);
 		setShowStyle(data);
+		figma.notify("Style loaded successfully")
 	};
 
 	const getDataStyle = (id: string) => {

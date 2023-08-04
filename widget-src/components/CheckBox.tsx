@@ -5,7 +5,7 @@ const checkSvg = `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xl
 
 const CheckBox = ({ isCheck, onClick }: { isCheck: Boolean; onClick?: () => void }) => {
 	return (
-		<AutoLayout verticalAlignItems={"center"} horizontalAlignItems={"center"} padding={8}>
+		<AutoLayout width={"hug-contents"} height={"hug-contents"} verticalAlignItems={"center"} horizontalAlignItems={"center"} padding={8}>
 			<AutoLayout
 				width={24}
 				height={24}

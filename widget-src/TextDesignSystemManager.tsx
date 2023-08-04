@@ -1,7 +1,7 @@
 const { widget } = figma;
 const { AutoLayout, Text, Rectangle, useSyncedState, Input, SVG, Fragment } = widget;
 
-import { CleanFontType, textStyleType } from "./code";
+import { cleanFontType, textStyleType } from "./code";
 import CheckBox from "./components/CheckBox";
 
 import getFontWeightValue from "./hooks/getFontWeightValue";
@@ -34,7 +34,7 @@ type textDesignManagerType = {
 	getLocalTextStyle: () => void;
 	setHasReloadLocalFont: (newValue: boolean | ((currValue: boolean) => boolean)) => void;
 	localFonts: Font[];
-	cleanFont: CleanFontType[];
+	cleanFont: cleanFontType[];
 	isOpenSearchBar: boolean;
 };
 const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
@@ -95,33 +95,41 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
 			try {
 				const cache = cacheStyle.find((i) => i.id === style.id);
 				if (cache) {
-					const textStyle: any = figma.getStyleById(style.id);
-
+					const textStyle: TextStyle = figma.getStyleById(style.id) as TextStyle;
+					let isUpdate = false;
 					// console.log(textStyle);
 					if (cache.name !== style.name) {
 						textStyle.name = cache.name;
+						isUpdate = true;
 					}
 					if (cache.description !== style.description) {
 						textStyle.description = cache.description;
+						isUpdate = true;
 					}
 					if (cache.fontName.family !== style.fontName.family || cache.fontName.style !== style.fontName.style) {
 						await figma.loadFontAsync({ ...cache.fontName }).then((res) => {
 							textStyle.fontName = { ...cache.fontName };
+							isUpdate = true;
 						});
 					}
 					if (cache.fontSize !== style.fontSize) {
 						await figma.loadFontAsync({ ...cache.fontName }).then((res) => {
 							textStyle.fontSize = cache.fontSize;
+							isUpdate = true;
 						});
 					}
 					if (cache.lineHeight !== style.lineHeight) {
 						await figma.loadFontAsync({ ...cache.fontName }).then((res) => {
 							textStyle.lineHeight = cache.lineHeight;
+							isUpdate = true;
 						});
+					}
+					if (isUpdate) {
+						figma.notify("✓ " + textStyle.name + "Style has update", {timeout: 300});
 					}
 				}
 			} catch (err) {
-				console.log(err);
+				figma.notify("✕ " + err, { timeout: 3000, error: true });
 			}
 		}
 		setSearchGroup("");
@@ -604,6 +612,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
 			)}
 
 			<AutoLayout direction={"vertical"} width={"fill-parent"}>
+				{/* table title */}
 				<AutoLayout
 					verticalAlignItems={"center"}
 					spacing={12}
@@ -653,6 +662,8 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
 						Description
 					</Text>
 				</AutoLayout>
+
+				{/* table content */}
 				<AutoLayout direction={"vertical"} spacing={0} width={"fill-parent"}>
 					{filterStyles.length !== 0 && cacheStyle.length !== 0 && cacheStyle.length === filterStyles.length ? (
 						filterStyles.map((style) => {
