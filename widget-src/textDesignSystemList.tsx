@@ -3,7 +3,7 @@ import getFontWeightValue from "./hooks/getFontWeightValue";
 import type { FontWeightNumerical } from "./hooks/getFontWeightValue";
 
 const { widget } = figma;
-const { AutoLayout, Text, Rectangle, } = widget;
+const { AutoLayout, Text, Rectangle } = widget;
 
 type TextDesignSystemListType = {
 	showStyle: textStyleType[];
@@ -17,13 +17,11 @@ const getOnlyName = (name: string) => {
 	} else {
 		return name;
 	}
-}
+};
 
 const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
 	const { showStyle, showGroup } = value;
 	const styleList = showStyle;
-
-	
 
 	return (
 		<AutoLayout direction={"vertical"} width={"fill-parent"}>
@@ -41,7 +39,7 @@ const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
 							>
 								<AutoLayout verticalAlignItems={"center"}>
 									<Text
-										width={200}
+										width={170}
 										fontSize={style.fontSize}
 										fontFamily={style.fontName.family}
 										fontWeight={getFontWeightValue(style.fontName.style).fontWeight as FontWeightNumerical}
@@ -58,10 +56,19 @@ const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
 								>
 									<AutoLayout>
 										<Text fontSize={22} fill={"#777"}>
-											{style.fontName.family + " " + style.fontName.style}{" "}
+											{style.fontName.family + " " + style.fontName.style}
 										</Text>
 									</AutoLayout>
 									<AutoLayout spacing={8} verticalAlignItems={"end"}>
+										<Text fontFamily={"Roboto Slab"} fontWeight={400} fontSize={24} fill={"#555"}>
+											font-size:
+										</Text>
+										<Text fontFamily={"Roboto Slab"} fontWeight={600} fontSize={24}>
+											{style.fontSize + "px"}
+										</Text>
+										<Text fontFamily={"Roboto Slab"} fontWeight={400} fontSize={24} fill={"#555"}>
+											|
+										</Text>
 										<Text fontFamily={"Roboto Slab"} fontWeight={400} fontSize={24} fill={"#555"}>
 											font-weight:
 										</Text>
