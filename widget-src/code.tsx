@@ -196,24 +196,24 @@ function Widget() {
 
 	const getLocalTextStyle = async () => {
 		const styles: TextStyle[] = await figma.getLocalTextStylesAsync();
-		console.log(styles);
+		// console.log(styles);
 		const data: textStyleType[] = [];
 		// styles ? styles.map((style) => getDataStyle(style.id) as textStyleType) : [];
 		for (const style of styles) {
 			const value = (await getDataStyle(style.id)) as textStyleType;
 			await data.push(value);
 		}
-		console.log("a", data);
-		setTextStyles(data);
-		setCacheStyle(data);
-		setFilterStyles(data);
-		setShowStyle(data);
+		// console.log("a", data);
+		await setTextStyles(data);
+		await setCacheStyle(data);
+		await setFilterStyles(data);
+		await setShowStyle(data);
 		figma.notify("Style loaded successfully");
 	};
 
 	const getDataStyle = async (id: string) => {
 		const data = (await figma.getStyleByIdAsync(id)) as TextStyle;
-		console.log(data);
+		// console.log(data);
 		if (data) {
 			return {
 				id: data?.id,
