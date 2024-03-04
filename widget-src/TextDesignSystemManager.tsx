@@ -95,7 +95,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
 			try {
 				const cache = cacheStyle.find((i) => i.id === style.id);
 				if (cache) {
-					const textStyle: TextStyle = figma.getStyleById(style.id) as TextStyle;
+					const textStyle: TextStyle = await figma.getStyleByIdAsync(style.id) as TextStyle;
 					let isUpdate = false;
 					// console.log(textStyle);
 					if (cache.name !== style.name) {
@@ -806,7 +806,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
 											value={cache.description}
 											onTextEditEnd={(e) => {
 												setCacheStyle((prev) =>
-													prev.map((i) => (i.id === style.id ? { ...i, description: e.characters } : i))
+													prev.map((i:textStyleType) => (i.id === style.id ? { ...i, description: e.characters } : i))
 												);
 											}}
 											placeholder="Type description"
