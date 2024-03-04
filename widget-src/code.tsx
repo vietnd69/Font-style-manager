@@ -201,14 +201,14 @@ function Widget() {
 		// styles ? styles.map((style) => getDataStyle(style.id) as textStyleType) : [];
 		for (const style of styles) {
 			const value = (await getDataStyle(style.id)) as textStyleType;
-			await data.push(value);
+			data.push(value);
 		}
 		// console.log("a", data);
-		await setTextStyles(data);
-		await setCacheStyle(data);
-		await setFilterStyles(data);
-		await setShowStyle(data);
-		figma.notify("Style loaded successfully");
+		setTextStyles(data);
+		setCacheStyle(data);
+		setFilterStyles(data);
+		setShowStyle(data);
+		figma.notify("✅ Style loaded successfully, Waiting for import data to widget");
 	};
 
 	const getDataStyle = async (id: string) => {
