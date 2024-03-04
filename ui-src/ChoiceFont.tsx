@@ -7,8 +7,11 @@ import fontWeightSvg from "./styles/assets/font-weight.png";
 import { cleanFontType } from "../widget-src/code";
 
 const ChoiceFont = ({ data }: { data: cleanFontType[] }) => {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const [inputFontName, setInputFontName] = useState<any>("");
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const [listFontWeight, setListFontWeight] = useState<any>("");
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const [inputFontWeight, setInputFontWeight] = useState<any>("");
 	
 	const handleClose = () => parent.postMessage({ pluginMessage: { type: "close" } }, "*");
@@ -78,6 +81,7 @@ const ChoiceFont = ({ data }: { data: cleanFontType[] }) => {
 		return { fontWeight, fontStyle, fontWidth };
 	};
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const sortFontNames = (fontNames: any) => {
 		return fontNames.sort((a: string, b: string) => {
 			const aInfo = getFontWeightStyleAndWidth(a);

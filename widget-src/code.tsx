@@ -9,22 +9,22 @@ import { coffeeSvg, searchActive, searchDisable, listViewActive, listViewDisable
 export type msgType =
 	| {
 			type: "close";
-	  }
+	}
 	| {
 			type: "setFamilyAndWeight";
 			data: {
-				family: any;
-				weight: any;
+				family: string;
+				weight: string;
 			};
-	  }
+	}
 	| {
 			type: "setShowTypoGroup";
 			data: textStyleType[];
-	  }
+	}
 	| {
 			type: "setShowDuplicateTypoGroup";
 			data: textStyleType[];
-	  };
+	};
 
 export type textStyleType = {
 	id: string;
@@ -65,7 +65,7 @@ function Widget() {
 	const [localFonts, setLocalFonts] = useSyncedState<Font[]>("localFonts", []);
 	const [cleanFont, setCleanFont] = useSyncedState<cleanFontType[]>("cleanFont", []);
 
-	const [showGroup, setShowGroup] = useSyncedState<string[]>("showGroup", []);
+	const [showGroup] = useSyncedState<string[]>("showGroup", []);
 
 	const [showStyle, setShowStyle] = useSyncedState<textStyleType[]>("showStyle", []);
 
@@ -75,8 +75,8 @@ function Widget() {
 
 	const widgetId = useWidgetId();
 
-	const handleCloneWidget = (showStyleData: textStyleType[] = showStyle) => {
-		const widgetNode = figma.getNodeById(widgetId) as WidgetNode;
+	const handleCloneWidget = async (showStyleData: textStyleType[] = showStyle) => {
+		const widgetNode = await figma.getNodeByIdAsync(widgetId) as WidgetNode;
 		const clonedWidget = widgetNode.clone();
 
 		clonedWidget.setWidgetSyncedState({
@@ -176,13 +176,13 @@ function Widget() {
 
 	const fontsClean = (fonts: Font[]) => {
 		let fontFamily: string = "";
-		let data: cleanFontType[] = [];
+		const data: cleanFontType[] = [];
 		let fontStyles: string[] = [];
-		for (let font of fonts) {
+		for (const font of fonts) {
 			if (fontFamily === font.fontName.family) {
 				fontStyles.push(font.fontName.style);
 			} else {
-				if ((fontFamily != ""  && !fontFamily.startsWith("??")) && fontStyles.length != 0) {
+				if (fontFamily != "" && !fontFamily.startsWith("??") && fontStyles.length != 0) {
 					data.push({ family: fontFamily, styles: fontStyles });
 				}
 				fontStyles = [font.fontName.style];
@@ -195,26 +195,25 @@ function Widget() {
 	};
 
 	const getLocalTextStyle = async () => {
-		
 		const styles: TextStyle[] = await figma.getLocalTextStylesAsync();
 		console.log(styles);
-		let data :textStyleType[] = []
+		const data: textStyleType[] = [];
 		// styles ? styles.map((style) => getDataStyle(style.id) as textStyleType) : [];
-		for (let style of styles) {
-			const value = await getDataStyle(style.id) as textStyleType
-			await data.push(value)
+		for (const style of styles) {
+			const value = (await getDataStyle(style.id)) as textStyleType;
+			await data.push(value);
 		}
-		console.log("a",data)
+		console.log("a", data);
 		setTextStyles(data);
 		setCacheStyle(data);
 		setFilterStyles(data);
 		setShowStyle(data);
-		figma.notify("Style loaded successfully")
+		figma.notify("Style loaded successfully");
 	};
 
 	const getDataStyle = async (id: string) => {
-		const data = await figma.getStyleByIdAsync(id) as TextStyle;
-		console.log(data)
+		const data = (await figma.getStyleByIdAsync(id)) as TextStyle;
+		console.log(data);
 		if (data) {
 			return {
 				id: data?.id,
@@ -280,8 +279,8 @@ function Widget() {
 	// 	}
 	// };
 
-	const showUi = (moduleName: string, name: string, data?: any, size?: { width: number; height: number }) =>
-		new Promise((resolve) => {
+	const showUi = (moduleName: string, name: string, data?: unknown, size?: { width: number; height: number }) =>
+		new Promise(() => {
 			figma.showUI(__html__, {
 				width: size?.width || 300,
 				height: size?.height || 300,

@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, {  useState } from "react";
 import "./styles/App.css";
 import BuyMeACoffee from "./BuyMeACoffee";
 import ChoiceFont from "./ChoiceFont";
 import EditShowGroup from "./EditShowGroup";
-import { cleanFontType } from "../widget-src/code";
+// import { cleanFontType } from "../widget-src/code";
 
 function App() {
 	const [module, setModule] = useState<string>("");
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const [data, setData] = useState<any>();
 
 	onmessage = (e) => {
