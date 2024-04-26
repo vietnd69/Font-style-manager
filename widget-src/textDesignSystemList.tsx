@@ -20,13 +20,13 @@ const getOnlyName = (name: string) => {
 };
 
 const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
-	const { showStyle, showGroup } = value;
+	const { showStyle } = value;
 	const styleList = showStyle;
 
 	return (
 		<AutoLayout direction={"vertical"} width={"fill-parent"}>
 			{styleList.length !== 0 &&
-				styleList.map((style: any, index: number) => {
+				styleList.map((style: textStyleType, index: number) => {
 					// console.log(style)
 					// console.log(cache.lineHeight.value);
 					return (
@@ -82,7 +82,7 @@ const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
 											line-height:
 										</Text>
 										<Text fontFamily={"Roboto Slab"} fontSize={24} fontWeight={600}>
-											{style.lineHeight.value
+											{style.lineHeight.unit != "AUTO" && style.lineHeight.value
 												? style.lineHeight.unit === "PIXELS"
 													? style.lineHeight.value.toString() + "px"
 													: parseFloat((style.lineHeight.value / 100).toPrecision(3))

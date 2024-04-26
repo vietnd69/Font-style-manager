@@ -4,7 +4,7 @@ import { Tree } from "antd";
 import "./styles/EditShowGroup.css";
 
 import type { textStyleType } from "../widget-src/code";
-import type { DataNode, TreeProps } from "antd/es/tree";
+import type { DataNode } from "antd/es/tree";
 
 type groupsType = textStyleType & {
 	groups: string[];
@@ -46,35 +46,35 @@ const EditShowGroup = ({ data }: { data: textStyleType[] }) => {
 
 	const [levels, setLevels] = useState<levelsType[]>([]);
 
-	const [showStyle, setShowStyle] = useState<(textStyleType & { isShow: Boolean })[]>([]);
+	const [showStyle, setShowStyle] = useState<(textStyleType & { isShow: boolean })[]>([]);
 
-	const [treeData, setTreeData] = useState<DataNode[]>([]);
+	const [treeData] = useState<DataNode[]>([]);
 
 	const [showGroup, setShowGroup] = useState<showGroupType[]>([]);
 	const [isShowAll, setIsShowAll] = useState<boolean>(true);
 
-	const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
-	const [checkedKeys, setCheckedKeys] = useState<React.Key[]>([]);
-	const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
-	const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
+	// const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
+	// const [checkedKeys, setCheckedKeys] = useState<React.Key[]>([]);
+	// const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
+	// const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
 
-	const onExpand = (expandedKeysValue: React.Key[]) => {
-		console.log("onExpand", expandedKeysValue);
-		// if not set autoExpandParent to false, if children expanded, parent can not collapse.
-		// or, you can remove all expanded children keys.
-		setExpandedKeys(expandedKeysValue);
-		setAutoExpandParent(false);
-	};
+	// const onExpand = (expandedKeysValue: React.Key[]) => {
+	// 	console.log("onExpand", expandedKeysValue);
+	// 	// if not set autoExpandParent to false, if children expanded, parent can not collapse.
+	// 	// or, you can remove all expanded children keys.
+	// 	setExpandedKeys(expandedKeysValue);
+	// 	setAutoExpandParent(false);
+	// };
 
-	const onCheck = (checkedKeysValue: React.Key[]) => {
-		console.log("onCheck", checkedKeysValue);
-		setCheckedKeys(checkedKeysValue);
-	};
+	// const onCheck = (checkedKeysValue: React.Key[]) => {
+	// 	console.log("onCheck", checkedKeysValue);
+	// 	setCheckedKeys(checkedKeysValue);
+	// };
 
-	const onSelect = (selectedKeysValue: React.Key[], info: any) => {
-		console.log("onSelect", info);
-		setSelectedKeys(selectedKeysValue);
-	};
+	// const onSelect = (selectedKeysValue: React.Key[], info: any) => {
+	// 	console.log("onSelect", info);
+	// 	setSelectedKeys(selectedKeysValue);
+	// };
 
 	useEffect(() => {
 		const value: groupsType[] = data.map((style) => ({
@@ -91,7 +91,7 @@ const EditShowGroup = ({ data }: { data: textStyleType[] }) => {
 
 	useEffect(() => {
 		// console.log(groups);
-		const maxLevels = groups.reduce((max, style) => (style.groups.length > max ? style.groups.length : max), 0);
+		// const maxLevels = groups.reduce((max, style) => (style.groups.length > max ? style.groups.length : max), 0);
 		const levels: levelsType[] = [];
 
 		let groupName = "";
@@ -108,13 +108,13 @@ const EditShowGroup = ({ data }: { data: textStyleType[] }) => {
 		levels.sort((a, b) => (a.levelNumber - b.levelNumber && b.groupName.startsWith(a.groupName) ? -1 : 1));
 		setLevels(levels);
 		// console.log(levels);
-		convertToTreeData(levels, maxLevels);
+		// convertToTreeData(levels, maxLevels);
 		// console.log(maxLevels, levels);
 	}, [groups]);
 
-	const convertToTreeData = (levels: levelsType[], maxLevel: number) => {
+	// const convertToTreeData = (levels: levelsType[], maxLevel: number) => {
 		
-	};
+	// };
 	const isShowStyle = (id: string) => !!showStyle.find((style) => style.id === id && style.isShow);
 
 	const isShowGroup = (id: number) => !!showGroup.find((group) => group.id === id && group.isShow);

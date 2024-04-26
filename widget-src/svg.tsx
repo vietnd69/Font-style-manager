@@ -1,5 +1,5 @@
 
-const size32 = 32;
+// const size32 = 32;
 const size46 = 46;
 
 export const listViewActive = `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="${size46}" height="${size46}" x="0" y="0" viewBox="0 0 24 24" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><g data-name="Layer 2"><path d="M18.8 4.94A4.64 4.64 0 0 0 17.5 4v1a3 3 0 0 1-3 3h-5a3 3 0 0 1-3-3V4a4.64 4.64 0 0 0-1.3.9C3.46 6.7 2.86 10.74 3 14c.09 1.76.51 4.92 2.25 6.35C6.66 21.45 9.33 22 12 22s5.34-.57 6.72-1.7c1.74-1.41 2.16-4.57 2.28-6.3.14-3.26-.46-7.3-2.2-9.06zM8 18.75a1.25 1.25 0 1 1 1.25-1.25A1.25 1.25 0 0 1 8 18.75zm0-5a1.25 1.25 0 1 1 1.25-1.25A1.25 1.25 0 0 1 8 13.75zm8 4.75h-5a1 1 0 0 1 0-2h5a1 1 0 0 1 0 2zm0-5h-5a1 1 0 0 1 0-2h5a1 1 0 0 1 0 2z" fill="#0B68D6" data-original="#0B68D6" class=""></path><rect width="9" height="5" x="7.5" y="2" rx="2" fill="#444" data-original="#444" class=""></rect></g></g></svg>`;
