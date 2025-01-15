@@ -368,6 +368,16 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     return value as LineHeight | { unit: "" };
   };
 
+  const getLetterSpacing = (data: string) => {
+    const unit = data.endsWith("px") ? "PIXELS" : "PERCENT";
+    const value =
+      unit === "PIXELS"
+        ? { value: Number(data.replace("px", "")), unit: unit }
+        : { value: Number(data.replace("%", "")), unit: unit };
+
+    return value as LetterSpacing | { unit: "" };
+  };
+
   return (
     <Fragment>
       {isOpenSearchBar && (
@@ -741,6 +751,12 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
             </Text>
           </AutoLayout>
           <Rectangle width={1} height={60} fill={"#ccc"} />
+          <AutoLayout width={180}>
+            <Text fontSize={24} fontFamily={"Roboto"} fill={"#ccc"}>
+              Letter spacing
+            </Text>
+          </AutoLayout>
+          <Rectangle width={1} height={60} fill={"#ccc"} />
           <Text
             fontSize={24}
             fontFamily={"Roboto"}
@@ -946,6 +962,47 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                             : ""
                           : ""}
                       </Text>
+                    </AutoLayout>
+                    <Rectangle width={1} height={50} fill={"#ccc"} />
+                    <AutoLayout
+                      width={180}
+                      verticalAlignItems={"center"}
+                      spacing={6}
+                    >
+                      <Input
+                        value={
+                          cache.letterSpacing.unit === "PIXELS"
+                            ? cache.letterSpacing.value.toString() + "px"
+                            : parseFloat(
+                                cache.letterSpacing.value
+                                  .toPrecision(3)
+                                  .toString(),
+                              ) + "%"
+                        }
+                        onTextEditEnd={(e) => {
+                          const data = e.characters
+                            .replaceAll(" ", "")
+                            .toLowerCase();
+                          const value = getLetterSpacing(data);
+
+                          // console.log(value);
+                          if (value.unit !== "") {
+                            setCacheStyle((prev) =>
+                              prev.map((i) =>
+                                i.id === style.id
+                                  ? {
+                                      ...i,
+                                      letterSpacing: { ...value },
+                                    }
+                                  : i,
+                              ),
+                            );
+                          }
+                        }}
+                        fontSize={22}
+                        fontFamily={"Roboto"}
+                        width={"fill-parent"}
+                      />
                     </AutoLayout>
                     <Rectangle width={1} height={50} fill={"#ccc"} />
                     <Input
