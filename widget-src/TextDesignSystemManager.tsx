@@ -19,6 +19,7 @@ import {
   nameSvg,
   listSvg,
   lineHeightSvg,
+  letterSpacingSvg
 } from "./svg";
 
 type textDesignManagerType = {
@@ -68,6 +69,11 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
   >("searchLineHeight", {
     unit: "",
   });
+  const [searchLetterSpacing, setSearchLetterSpacing] = useSyncedState<
+    LetterSpacing | { unit: "" }
+  >("searchLetterSpacing", {
+    unit: "",
+  });
 
   const [checkedGroup, setCheckedGroup] = useSyncedState("checkedGroup", "");
   const [checkedFamily, setCheckedFamily] = useSyncedState("checkedFamily", "");
@@ -80,7 +86,12 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     LineHeight | { unit: "" }
   >("checkedLineHeight", {
     unit: "",
-  });
+  });  
+  const [checkedLetterSpacing, setCheckedLetterSpacing] = useSyncedState<
+  LetterSpacing | { unit: "" }
+>("checkedLetterSpacing", {
+  unit: "",
+});
 
   const [stylesChecked, setStylesChecked] = useSyncedState<string[]>(
     "stylesChecked",
@@ -164,6 +175,12 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
               isUpdate = true;
             });
           }
+          if (cache.letterSpacing !== style.letterSpacing) {
+            await figma.loadFontAsync({ ...cache.fontName }).then(() => {
+              textStyle.letterSpacing = cache.letterSpacing;
+              isUpdate = true;
+            });
+          }
           if (isUpdate) {
             figma.notify("✓ " + textStyle.name + "Style has update", {
               timeout: 300,
@@ -184,6 +201,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     setCheckedStyle("");
     setCheckedFontSize("");
     setCheckedLineHeight({ unit: "" });
+    setCheckedLetterSpacing({ unit: "" });
     setFilterStyles(textStyles);
     setCacheStyle(textStyles);
     setStylesChecked([]);
@@ -240,7 +258,9 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     style: string;
     fontSize: number;
     lineHeight: LineHeight | { readonly unit: "" };
+    letterSpacing: LetterSpacing | { readonly unit: ""}
   }) => {
+    console.log(data)
     let styles = [...textStyles];
     if (data.group !== "") {
       styles = styles.filter((style) => {
@@ -286,6 +306,18 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
           return checkUnit && checkValue;
         }
       });
+      
+    }
+    if (data.letterSpacing.unit !== "") {
+      console.log("run")
+      styles = styles.filter((style) => {
+        const checkUnit = style.letterSpacing.unit === data.letterSpacing.unit;
+        const checkValue =
+          "value" in data.letterSpacing && "value" in style.letterSpacing
+            ? data.letterSpacing.value === style.letterSpacing.value
+            : false;
+        return checkUnit && checkValue;
+      });
     }
 
     setFilterStyles(styles);
@@ -301,6 +333,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     setSearchStyle("");
     setSearchFontSize("");
     setSearchLineHeight({ unit: "" });
+    setSearchLetterSpacing({ unit: "" });
     setFilterStyles(textStyles);
     setCacheStyle(textStyles);
     setStylesChecked([]);
@@ -315,6 +348,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
       style: searchStyle,
       fontSize: Number(searchFontSize),
       lineHeight: searchLineHeight,
+      letterSpacing: searchLetterSpacing
     });
   };
 
@@ -339,6 +373,9 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
           }
           if (checkedLineHeight.unit != "") {
             cache.lineHeight = checkedLineHeight;
+          }
+          if (checkedLetterSpacing.unit != "") {
+            cache.letterSpacing = checkedLetterSpacing;
           }
           setCacheStyle((prev) =>
             prev.map((i) => (i.id === style ? cache : i)),
@@ -395,8 +432,8 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
           >
             <SVG src={closeSvg} />
           </AutoLayout>
-          <AutoLayout spacing={12} width={1458} verticalAlignItems={"end"}>
-            <AutoLayout width={470} spacing={12} direction={"vertical"}>
+          <AutoLayout spacing={12} width={"hug-contents"} verticalAlignItems={"end"}>
+            <AutoLayout width={466} spacing={12} direction={"vertical"}>
               <AutoLayout
                 padding={16}
                 fill={"#eee"}
@@ -445,7 +482,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
               verticalAlignItems={"end"}
               stroke={"#ccc"}
               strokeWidth={1}
-              width={195}
+              width={182}
             >
               <SVG src={fontFamilySvg} />
               <Input
@@ -464,7 +501,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
               verticalAlignItems={"end"}
               stroke={"#ccc"}
               strokeWidth={1}
-              width={373}
+              width={372}
             >
               <SVG src={fontStyleSvg} />
               <Input
@@ -483,7 +520,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
               verticalAlignItems={"end"}
               stroke={"#ccc"}
               strokeWidth={1}
-              width={175}
+              width={172}
             >
               <SVG src={fontSizeSvg} />
               <Input
@@ -502,7 +539,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
               verticalAlignItems={"end"}
               stroke={"#ccc"}
               strokeWidth={1}
-              width={195}
+              width={194}
             >
               <SVG src={lineHeightSvg} />
               <Input
@@ -521,6 +558,33 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                   setSearchLineHeight(getLineHeight(e.characters))
                 }
                 placeholder="Line height"
+              />
+            </AutoLayout>
+            <AutoLayout
+              padding={16}
+              fill={"#eee"}
+              cornerRadius={8}
+              spacing={12}
+              verticalAlignItems={"end"}
+              stroke={"#ccc"}
+              strokeWidth={1}
+              width={194}
+            >
+              <SVG src={letterSpacingSvg} />
+              <Input
+                width={"fill-parent"}
+                fontSize={22}
+                value={
+                    "value" in searchLetterSpacing
+                      ? searchLetterSpacing.unit === "PIXELS"
+                        ? searchLetterSpacing.value.toString() + "px"
+                        : searchLetterSpacing.value.toString() + "%"
+                      : ""
+                }
+                onTextEditEnd={(e) =>
+                  setSearchLetterSpacing(getLetterSpacing(e.characters))
+                }
+                placeholder="Letter spacing"
               />
             </AutoLayout>
           </AutoLayout>
@@ -675,6 +739,34 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                     setCheckedLineHeight(getLineHeight(e.characters))
                   }
                   placeholder="Change line height"
+                />
+              </AutoLayout>
+              <AutoLayout
+                padding={16}
+                fill={"#eee"}
+                cornerRadius={8}
+                width={"fill-parent"}
+                spacing={12}
+                verticalAlignItems={"end"}
+                stroke={"#ccc"}
+                strokeWidth={1}
+              >
+                <SVG src={letterSpacingSvg} />
+                <Input
+                  width={"fill-parent"}
+                  fontSize={22}
+                  value={
+                    checkedLetterSpacing.unit !== ""
+                      ? checkedLetterSpacing.value
+                        && checkedLetterSpacing.unit === "PIXELS"
+                          ? checkedLetterSpacing.value.toString() + "px"
+                          : checkedLetterSpacing.value.toString() + "%"
+                        : ""
+                  }
+                  onTextEditEnd={(e) =>
+                    setCheckedLetterSpacing(getLetterSpacing(e.characters))
+                  }
+                  placeholder="Change letter spacing"
                 />
               </AutoLayout>
               <AutoLayout

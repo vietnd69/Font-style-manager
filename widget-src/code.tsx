@@ -12,7 +12,7 @@ const {
   Input,
 } = widget;
 
-import TextDesignList from "./TextDesignSystemList";
+import TextDesignList from "./textDesignSystemList";
 import TextDesignManager from "./TextDesignSystemManager";
 
 import {

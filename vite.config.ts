@@ -8,13 +8,13 @@ export default defineConfig({
 	plugins: [reactRefresh(), viteSingleFile()],
 	build: {
 		target: "esnext",
-		assetsInlineLimit: 100000000,
-		chunkSizeWarningLimit: 100000000,
-		cssCodeSplit: false,
-		// brotliSize: false,
+		sourcemap: false,
+		assetsInlineLimit: 4096,
+		chunkSizeWarningLimit: 500,
+		cssCodeSplit: true,
 		outDir: "../dist",
 		rollupOptions: {
-			inlineDynamicImports: true,
+			// inlineDynamicImports: true,
 		},
 	},
 });
