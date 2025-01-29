@@ -19,6 +19,7 @@
   "author": "vietnd",
   "license": "",
   "dependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
     "antd": "^5.23.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
