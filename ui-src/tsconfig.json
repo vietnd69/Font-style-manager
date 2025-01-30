@@ -14,11 +14,11 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx",
+    "jsx": "react-jsx"
     // "include": ["custom.d.ts"]
-    "build": {
-      "sourcemap": true,
-      "minify": "esbuild", // or 'terser'
-    }
+  },
+  "build": {
+    "sourcemap": false,
+    "minify": "esbuild" // or 'terser'
   }
 }
