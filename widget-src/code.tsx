@@ -12,8 +12,8 @@ const {
   Input,
 } = widget;
 
-import TextDesignList from './TextDesignSystemList';
-import TextDesignManager from './TextDesignSystemManager';
+import TextDesignList from "./TextDesignSystemList";
+import TextDesignManager from "./TextDesignSystemManager";
 
 import {
   coffeeSvg,
@@ -23,29 +23,29 @@ import {
   listViewDisable,
   listSvg,
   editSvg,
-} from './svg';
+} from "./svg";
 
 export type msgType =
   | {
-      type: 'close';
+      type: "close";
     }
   | {
-      type: 'setFamilyAndWeight';
+      type: "setFamilyAndWeight";
       data: {
         family: string;
         weight: string;
       };
     }
   | {
-      type: 'setShowTypoGroup';
+      type: "setShowTypoGroup";
       data: textStyleType[];
     }
   | {
-      type: 'setShowDuplicateTypoGroup';
+      type: "setShowDuplicateTypoGroup";
       data: textStyleType[];
     }
   | {
-      type: 'setShowEditType';
+      type: "setShowEditType";
       data: ShowType;
     };
 
@@ -57,6 +57,7 @@ export type textStyleType = {
   lineHeight: LineHeight;
   letterSpacing: LetterSpacing;
   description: string;
+  boundVariables?: { [key: string]: VariableAlias };
 };
 
 export type cleanFontType = {
@@ -80,54 +81,54 @@ function Widget() {
     }
   });
 
-  const [mode, setMode] = useSyncedState<'edit' | 'view'>('mode', 'edit');
+  const [mode, setMode] = useSyncedState<"edit" | "view">("mode", "edit");
   const [textStyles, setTextStyles] = useSyncedState<textStyleType[]>(
-    'textStyles',
+    "textStyles",
     []
   );
 
   const [filterStyles, setFilterStyles] = useSyncedState<textStyleType[]>(
-    'filterStyles',
+    "filterStyles",
     []
   );
 
-  const [checkedFamily, setCheckedFamily] = useSyncedState('checkedFamily', '');
-  const [checkedStyle, setCheckedStyle] = useSyncedState('checkedStyle', '');
+  const [checkedFamily, setCheckedFamily] = useSyncedState("checkedFamily", "");
+  const [checkedStyle, setCheckedStyle] = useSyncedState("checkedStyle", "");
 
   const [cacheStyle, setCacheStyle] = useSyncedState<textStyleType[]>(
-    'cacheStyle',
+    "cacheStyle",
     []
   );
 
   const [isFirstLoadFont, setIsFirstLoadFont] = useSyncedState(
-    'isFirstLoadFont',
+    "isFirstLoadFont",
     true
   );
-  const [localFonts, setLocalFonts] = useSyncedState<Font[]>('localFonts', []);
+  const [localFonts, setLocalFonts] = useSyncedState<Font[]>("localFonts", []);
   const [cleanFont, setCleanFont] = useSyncedState<cleanFontType[]>(
-    'cleanFont',
+    "cleanFont",
     []
   );
 
-  const [showGroup] = useSyncedState<string[]>('showGroup', []);
+  const [showGroup] = useSyncedState<string[]>("showGroup", []);
 
   const [showStyle, setShowStyle] = useSyncedState<textStyleType[]>(
-    'showStyle',
+    "showStyle",
     []
   );
 
   const [hasReloadLocalFont, setHasReloadLocalFont] = useSyncedState(
-    'hasReloadLocalFont',
+    "hasReloadLocalFont",
     false
   );
 
   const [isOpenSearchBar, setIsOpenSearchBar] = useSyncedState<boolean>(
-    'isOpenSearchBar',
+    "isOpenSearchBar",
     true
   );
 
   const [showEditType, setShowEditType] = useSyncedState<ShowType>(
-    'showEditType',
+    "showEditType",
     {
       letterSpacing: true,
       description: true,
@@ -135,7 +136,7 @@ function Widget() {
   );
 
   const [localVariableList, setLocalVariableList] = useSyncedState<Variable[]>(
-    'localVariableList',
+    "localVariableList",
     []
   );
 
@@ -148,7 +149,7 @@ function Widget() {
     const clonedWidget = widgetNode.clone();
 
     clonedWidget.setWidgetSyncedState({
-      mode: 'view',
+      mode: "view",
       textStyles,
       filterStyles,
       checkedFamily,
@@ -164,30 +165,30 @@ function Widget() {
   };
 
   const handleSetMode = () =>
-    setMode((prev) => (prev === 'edit' ? 'view' : 'edit'));
+    setMode((prev) => (prev === "edit" ? "view" : "edit"));
   const modeOptions = [
-    { option: 'edit', label: 'Edit mode' },
-    { option: 'view', label: 'List mode' },
+    { option: "edit", label: "Edit mode" },
+    { option: "view", label: "List mode" },
   ];
   usePropertyMenu(
     [
       {
-        itemType: 'action',
-        tooltip: 'Mode view:',
-        propertyName: 'action:',
+        itemType: "action",
+        tooltip: "Mode view:",
+        propertyName: "action:",
       },
 
       {
-        itemType: 'dropdown',
-        propertyName: 'mode',
-        tooltip: 'Mode view',
+        itemType: "dropdown",
+        propertyName: "mode",
+        tooltip: "Mode view",
         selectedOption: mode,
         options: modeOptions,
       },
     ],
     ({ propertyName, propertyValue }) => {
-      if (propertyName === 'mode') {
-        setMode(propertyValue as 'edit' | 'view');
+      if (propertyName === "mode") {
+        setMode(propertyValue as "edit" | "view");
       }
     }
   );
@@ -218,24 +219,24 @@ function Widget() {
   });
 
   const handleGetUiMessage = (msg: msgType) => {
-    if (msg.type === 'setFamilyAndWeight') {
+    if (msg.type === "setFamilyAndWeight") {
       // console.log(msg);
       setCheckedFamily(msg.data.family);
       setCheckedStyle(msg.data.weight);
       figma.closePlugin();
     }
-    if (msg.type === 'setShowTypoGroup') {
+    if (msg.type === "setShowTypoGroup") {
       setShowStyle(msg.data);
     }
-    if (msg.type === 'setShowDuplicateTypoGroup') {
+    if (msg.type === "setShowDuplicateTypoGroup") {
       handleCloneWidget(msg.data);
       figma.closePlugin();
     }
-    if (msg.type === 'close') {
+    if (msg.type === "close") {
       // console.log("ok")
       figma.closePlugin();
     }
-    if (msg.type === 'setShowEditType') {
+    if (msg.type === "setShowEditType") {
       setShowEditType(msg.data);
       figma.closePlugin();
     }
@@ -248,7 +249,7 @@ function Widget() {
   };
 
   const fontsClean = (fonts: Font[]) => {
-    let fontFamily: string = '';
+    let fontFamily: string = "";
     const data: cleanFontType[] = [];
     let fontStyles: string[] = [];
     for (const font of fonts) {
@@ -256,8 +257,8 @@ function Widget() {
         fontStyles.push(font.fontName.style);
       } else {
         if (
-          fontFamily != '' &&
-          !fontFamily.startsWith('??') &&
+          fontFamily != "" &&
+          !fontFamily.startsWith("??") &&
           fontStyles.length != 0
         ) {
           data.push({ family: fontFamily, styles: fontStyles });
@@ -280,21 +281,32 @@ function Widget() {
       const value = (await getDataStyle(style.id)) as textStyleType;
       data.push(value);
     }
-    // console.log("a", data);
+    console.log("style", data);
     setTextStyles(data);
     setCacheStyle(data);
     setFilterStyles(data);
     setShowStyle(data);
     const localVariables = await figma.variables.getLocalVariablesAsync();
 
-    const variablesData: Variable[] = [];
+    const variablesData: Array<{
+      id: string;
+      name: string;
+      key: string;
+      variableCollectionId: string;
+      scopes: VariableScope[];
+      valuesByMode: { [modeId: string]: VariableValue };
+      defaultModeId?: string;
+    }> = [];
 
-    for (const Variable of localVariables) {
-      const value = '';
+    for (const variable of localVariables) {
+      const value = await getDataVariable(variable.id);
+      if (value) {
+        variablesData.push(value);
+      }
     }
-
+    // console.log(variablesData);
     figma.notify(
-      '✅ Style loaded successfully, Waiting for import data to widget'
+      "✅ Style loaded successfully, Waiting for import data to widget"
     );
   };
 
@@ -313,16 +325,37 @@ function Widget() {
         lineHeight: data.lineHeight,
         letterSpacing: data.letterSpacing,
         description: data.description,
+        boundVariables: data.boundVariables,
+        type: data.type,
+        remote: data.remote,
       };
     } else {
       return null;
     }
   };
 
-  const getDataVariable = async (id: string) => {
-    const data = await figma.variables.getVariableByIdAsync(id);
+  const getDataVariable = async (variableId: string) => {
+    const data = await figma.variables.getVariableByIdAsync(variableId);
 
-    return data ? { id: data.id, name: data.name, key: data.key } : null;
+    if (data) {
+      const { id, name, key, variableCollectionId, scopes, valuesByMode } =
+        data;
+      const collection =
+        await figma.variables.getVariableCollectionByIdAsync(
+          variableCollectionId
+        );
+      const defaultModeId = collection?.defaultModeId;
+      return {
+        id,
+        name,
+        key,
+        variableCollectionId,
+        scopes,
+        valuesByMode,
+        defaultModeId,
+      };
+    }
+    return null;
   };
   // const checkFontName = (font: any) => {
   // 	// const regex = new RegExp(font.fontName.family, "i");
@@ -389,9 +422,9 @@ function Widget() {
 
   return (
     <AutoLayout
-      width={mode === 'edit' ? 1980 : 1200}
-      height={'hug-contents'}
-      fill={'#fff'}
+      width={mode === "edit" ? 1980 : 1200}
+      height={"hug-contents"}
+      fill={"#fff"}
       padding={{
         top: 60,
         right: 36,
@@ -399,39 +432,39 @@ function Widget() {
         bottom: 50,
       }}
       spacing={42}
-      direction={'vertical'}
+      direction={"vertical"}
       cornerRadius={24}
-      overflow={'scroll'}
+      overflow={"scroll"}
       // canvasStacking={"first-on-top"}
     >
       {/* <Text onClick={() => showUi("choiceFont", "font", cleanFont)}>aaaa</Text> */}
-      <AutoLayout width={'fill-parent'}>
+      <AutoLayout width={"fill-parent"}>
         <AutoLayout
-          width={'fill-parent'}
-          horizontalAlignItems={mode === 'edit' ? 'center' : 'start'}
-          direction={'vertical'}
+          width={"fill-parent"}
+          horizontalAlignItems={mode === "edit" ? "center" : "start"}
+          direction={"vertical"}
           padding={{ bottom: 6 }}
         >
           <Text fontSize={46} fontWeight={700}>
-            {mode === 'edit' ? 'FONT STYLES MANAGER' : 'FONT STYLES LIST'}
+            {mode === "edit" ? "FONT STYLES MANAGER" : "FONT STYLES LIST"}
           </Text>
-          {mode === 'edit' ? (
+          {mode === "edit" ? (
             <Text fontSize={18}>Choose styles you want to change</Text>
           ) : (
             <Input
               width={600}
               fontSize={18}
-              value={'Change to your subHeadings'}
+              value={"Change to your subHeadings"}
               onTextEditEnd={() => {}}
-              placeholder={'Change subHeadings'}
+              placeholder={"Change subHeadings"}
             />
           )}
         </AutoLayout>
-        {mode === 'view' ? (
+        {mode === "view" ? (
           <SVG
             src={editSvg}
             onClick={() =>
-              showUi('editShowGroup', 'Choice Group of Typo', textStyles, {
+              showUi("editShowGroup", "Choice Group of Typo", textStyles, {
                 width: 500,
                 height: 550,
               })
@@ -440,8 +473,9 @@ function Widget() {
         ) : (
           <SVG
             src={editSvg}
+            tooltip="Edit table table column"
             onClick={() =>
-              showUi('editTypeList', 'Choice edit type showed', showEditType, {
+              showUi("editTypeList", "Choice edit type showed", showEditType, {
                 width: 300,
                 height: 350,
               })
@@ -450,41 +484,41 @@ function Widget() {
         )}
       </AutoLayout>
       <AutoLayout
-        positioning={'absolute'}
-        x={mode === 'edit' ? 1995 : 1215}
+        positioning={"absolute"}
+        x={mode === "edit" ? 1995 : 1215}
         y={120}
         width={82}
       >
         <AutoLayout
-          width={'fill-parent'}
+          width={"fill-parent"}
           cornerRadius={16}
           spacing={24}
           padding={{ top: 24, bottom: 24, right: 16, left: 16 }}
-          fill={'#ffffff'}
-          horizontalAlignItems={'center'}
-          direction={'vertical'}
+          fill={"#ffffff"}
+          horizontalAlignItems={"center"}
+          direction={"vertical"}
         >
           <SVG
-            src={mode === 'edit' ? listViewDisable : listViewActive}
+            src={mode === "edit" ? listViewDisable : listViewActive}
             onClick={() => handleSetMode()}
-            tooltip={mode === 'edit' ? 'Open view mode' : 'Open edit mode'}
+            tooltip={mode === "edit" ? "Open view mode" : "Open edit mode"}
           />
-          <Rectangle width={'fill-parent'} height={1} fill={'#888'} />
-          {mode === 'edit' && (
+          <Rectangle width={"fill-parent"} height={1} fill={"#888"} />
+          {mode === "edit" && (
             <SVG
               src={isOpenSearchBar ? searchActive : searchDisable}
               onClick={toggleSearchBar}
               tooltip={
-                isOpenSearchBar ? 'Hidden search tool' : 'Show search tool'
+                isOpenSearchBar ? "Hidden search tool" : "Show search tool"
               }
             />
           )}
-          {mode === 'view' && (
+          {mode === "view" && (
             <Fragment>
               <SVG
                 src={listSvg}
                 onClick={() =>
-                  showUi('editShowGroup', 'Choice Group of Typo', textStyles, {
+                  showUi("editShowGroup", "Choice Group of Typo", textStyles, {
                     width: 450,
                     height: 550,
                   })
@@ -492,16 +526,16 @@ function Widget() {
               />
             </Fragment>
           )}
-          <Rectangle width={'fill-parent'} height={1} fill={'#888'} />
+          <Rectangle width={"fill-parent"} height={1} fill={"#888"} />
           <SVG
             src={coffeeSvg}
-            tooltip={'Buy me a coffee'}
-            onClick={() => showUi('buyCoffee', 'Buy me a coffee')}
+            tooltip={"Buy me a coffee"}
+            onClick={() => showUi("buyCoffee", "Buy me a coffee")}
           />
         </AutoLayout>
       </AutoLayout>
 
-      {mode === 'edit' && (
+      {mode === "edit" && (
         <TextDesignManager
           value={{
             textStyles,
@@ -515,7 +549,7 @@ function Widget() {
           }}
         />
       )}
-      {mode === 'view' && (
+      {mode === "view" && (
         <TextDesignList
           value={{
             showStyle,

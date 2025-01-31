@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { ShowType } from '../widget-src/code';
-import { Checkbox, Button, List, Typography, Space } from 'antd';
+import { useState } from "react";
+import { ShowType } from "../widget-src/code";
+import { Checkbox, Button, List, Typography, Space } from "antd";
 
 const { Title, Paragraph } = Typography;
 
@@ -18,11 +18,11 @@ const EditShowType = ({ data }: { data: ShowType }) => {
     parent.postMessage(
       {
         pluginMessage: {
-          type: 'setShowEditType',
+          type: "setShowEditType",
           data: showType,
         },
       },
-      '*'
+      "*"
     );
   };
 
@@ -35,21 +35,21 @@ const EditShowType = ({ data }: { data: ShowType }) => {
   return (
     <div
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        padding: '16px 16px 0 16px',
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        padding: "16px 16px 0 16px",
       }}
     >
-      <div style={{ flex: 1, overflow: 'auto' }}>
-        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+      <div style={{ flex: 1, overflow: "auto" }}>
+        <Space direction="vertical" size="middle" style={{ width: "100%" }}>
           <Typography>
             <Title level={5} style={{ margin: 0 }}>
               Edit Show Type Component
             </Title>
             <Paragraph
               type="secondary"
-              style={{ fontSize: '13px', marginBottom: 0 }}
+              style={{ fontSize: "13px", marginBottom: 0 }}
             >
               Select the elements to display in the table if there are too many
               columns. Check the boxes to show elements or uncheck them to hide.
@@ -61,7 +61,7 @@ const EditShowType = ({ data }: { data: ShowType }) => {
             dataSource={checkboxItems}
             style={{ marginTop: 8 }}
             renderItem={(item) => (
-              <List.Item style={{ padding: '8px 0' }}>
+              <List.Item style={{ padding: "8px 0" }}>
                 <Checkbox
                   checked={item.checked}
                   onChange={() => handleChange(item.value as keyof ShowType)}
@@ -76,18 +76,18 @@ const EditShowType = ({ data }: { data: ShowType }) => {
 
       <div
         style={{
-          padding: '16px',
+          padding: "16px",
           marginLeft: -16,
           marginRight: -16,
-          borderTop: '1px solid #f0f0f0',
-          backgroundColor: '#fff',
+          borderTop: "1px solid #f0f0f0",
+          backgroundColor: "#fff",
         }}
       >
         <Button
           type="primary"
           block
           onClick={handleSubmit}
-          style={{ height: '32px' }}
+          style={{ height: "32px" }}
         >
           Save Changes
         </Button>

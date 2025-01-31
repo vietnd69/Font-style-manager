@@ -27,8 +27,6 @@ const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
     <AutoLayout direction={"vertical"} width={"fill-parent"}>
       {styleList.length !== 0 &&
         styleList.map((style: textStyleType, index: number) => {
-          // console.log(style)
-          // console.log(cache.lineHeight.value);
           return (
             <AutoLayout
               key={index}
@@ -130,7 +128,7 @@ const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
                         ? style.lineHeight.unit === "PIXELS"
                           ? style.lineHeight.value.toString() + "px"
                           : parseFloat(
-                              (style.lineHeight.value / 100).toPrecision(3),
+                              (style.lineHeight.value / 100).toPrecision(3)
                             )
                         : "auto"}
                     </Text>
