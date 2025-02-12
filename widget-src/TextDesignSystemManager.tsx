@@ -20,6 +20,7 @@ import {
   listSvg,
   lineHeightSvg,
   letterSpacingSvg,
+  variableSvg,
 } from "./svg";
 
 export type textDesignManagerType = {
@@ -423,6 +424,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
 
   return (
     <Fragment>
+      {/* search bar*/}
       {isOpenSearchBar && (
         <AutoLayout
           spacing={12}
@@ -896,7 +898,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                 (i) => i.id === style.id
               ) as textStyleType;
               const check = checkFontName(cache);
-              // console.log(cache.lineHeight.value);
+              // console.log(cache);
               return (
                 <AutoLayout
                   key={style.id}
@@ -941,8 +943,20 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                     <AutoLayout
                       width={"fill-parent"}
                       verticalAlignItems={"center"}
-                      spacing={6}
+                      spacing={8}
+                      cornerRadius={
+                        cache.boundVariables?.fontFamily !== undefined ? 8 : 0
+                      }
+                      fill={
+                        cache.boundVariables?.fontFamily !== undefined
+                          ? "#eee"
+                          : { r: 1, g: 1, b: 1, a: 0 }
+                      }
+                      padding={{ vertical: 6, horizontal: 10 }}
                     >
+                      {cache.boundVariables?.fontFamily !== undefined && (
+                        <SVG src={variableSvg} />
+                      )}
                       {!check.check && check.status === "family" && (
                         <SVG src={warningSvg} />
                       )}
@@ -972,8 +986,20 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                     <AutoLayout
                       width={360}
                       verticalAlignItems={"center"}
-                      spacing={6}
+                      spacing={8}
+                      cornerRadius={
+                        cache.boundVariables?.fontStyle !== undefined ? 8 : 0
+                      }
+                      fill={
+                        cache.boundVariables?.fontStyle !== undefined
+                          ? "#eee"
+                          : { r: 1, g: 1, b: 1, a: 0 }
+                      }
+                      padding={{ vertical: 6, horizontal: 10 }}
                     >
+                      {cache.boundVariables?.fontStyle !== undefined && (
+                        <SVG src={variableSvg} />
+                      )}
                       {!check.check && <SVG src={warningSvg} />}
                       <Input
                         value={cache.fontName.style}
@@ -1008,6 +1034,8 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                     <Rectangle width={1} height={50} fill={"#ccc"} />
                     <AutoLayout
                       width={160}
+                      verticalAlignItems={"center"}
+                      spacing={8}
                       cornerRadius={
                         cache.boundVariables?.fontSize !== undefined ? 8 : 0
                       }
@@ -1018,6 +1046,9 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                       }
                       padding={{ vertical: 6, horizontal: 10 }}
                     >
+                      {cache.boundVariables?.fontSize !== undefined && (
+                        <SVG src={variableSvg} />
+                      )}
                       <Input
                         value={cache.fontSize.toString()}
                         onTextEditEnd={(e) => {
@@ -1043,8 +1074,20 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                     <AutoLayout
                       width={180}
                       verticalAlignItems={"center"}
-                      spacing={6}
+                      spacing={8}
+                      cornerRadius={
+                        cache.boundVariables?.lineHeight !== undefined ? 8 : 0
+                      }
+                      fill={
+                        cache.boundVariables?.lineHeight !== undefined
+                          ? "#eee"
+                          : { r: 1, g: 1, b: 1, a: 0 }
+                      }
+                      padding={{ vertical: 6, horizontal: 10 }}
                     >
+                      {cache.boundVariables?.lineHeight !== undefined && (
+                        <SVG src={variableSvg} />
+                      )}
                       {/* <Text fontSize={22} fontFamily={"Roboto"} horizontalAlignText={"left"}>
 												{cache.lineHeight.value ? cache.lineHeight.value : "Auto"}
 											</Text> */}
@@ -1109,8 +1152,21 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                         <AutoLayout
                           width={180}
                           verticalAlignItems={"center"}
-                          spacing={6}
+                          spacing={8}
+                          cornerRadius={
+                            cache.boundVariables?.letterSpacing !== undefined
+                              ? 8
+                              : 0
+                          }
+                          fill={
+                            cache.boundVariables?.letterSpacing !== undefined
+                              ? "#eee"
+                              : { r: 1, g: 1, b: 1, a: 0 }
+                          }
+                          padding={{ vertical: 6, horizontal: 10 }}
                         >
+                          {cache.boundVariables?.letterSpacing !==
+                            undefined && <SVG src={variableSvg} />}
                           <Input
                             value={
                               cache.letterSpacing.unit === "PIXELS"
