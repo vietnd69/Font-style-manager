@@ -281,7 +281,7 @@ function Widget() {
       const value = (await getDataStyle(style.id)) as textStyleType;
       data.push(value);
     }
-    console.log("style", data);
+    // console.log("style", data);
     setTextStyles(data);
     setCacheStyle(data);
     setFilterStyles(data);

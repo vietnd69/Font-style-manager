@@ -311,7 +311,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
       });
     }
     if (data.letterSpacing.unit !== "") {
-      console.log("run");
+      // console.log("run");
       styles = styles.filter((style) => {
         const checkUnit = style.letterSpacing.unit === data.letterSpacing.unit;
         const checkValue =
