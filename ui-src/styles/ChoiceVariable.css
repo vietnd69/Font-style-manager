@@ -1,0 +1,53 @@
+.choice-variable {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px;
+}
+
+.search-container {
+  margin-bottom: 16px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.variables-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.variable-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 4px;
+}
+
+.variable-item:hover {
+  background-color: #f0f0f0;
+}
+
+.variable-name {
+  font-size: 14px;
+  color: #333;
+}
+
+.variable-value {
+  font-size: 14px;
+  color: #666;
+}
+
+.no-variables {
+  text-align: center;
+  color: #666;
+  padding: 16px;
+}

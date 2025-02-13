@@ -2,7 +2,13 @@ const { widget } = figma;
 const { AutoLayout, Text, Rectangle, useSyncedState, Input, SVG, Fragment } =
   widget;
 
-import { cleanFontType, textStyleType, ShowType } from "./code";
+import {
+  cleanFontType,
+  textStyleType,
+  ShowType,
+  CustomVariable,
+  textDesignManagerType,
+} from "./code";
 import CheckBox from "./components/CheckBox";
 
 import getFontWeightValue from "./hooks/getFontWeightValue";
@@ -21,28 +27,9 @@ import {
   lineHeightSvg,
   letterSpacingSvg,
   variableSvg,
+  variableOutlineSvg,
 } from "./svg";
 
-export type textDesignManagerType = {
-  textStyles: textStyleType[];
-  showUi: (
-    moduleName: string,
-    name: string,
-    data?: unknown,
-    size?: {
-      width: number;
-      height: number;
-    }
-  ) => Promise<unknown>;
-  getLocalTextStyle: () => void;
-  setHasReloadLocalFont: (
-    newValue: boolean | ((currValue: boolean) => boolean)
-  ) => void;
-  localFonts: Font[];
-  cleanFont: cleanFontType[];
-  isOpenSearchBar: boolean;
-  showEditType: ShowType;
-};
 const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
   const {
     textStyles,
@@ -53,6 +40,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     cleanFont,
     isOpenSearchBar,
     showEditType,
+    localVariableList,
   } = value;
   const [filterStyles, setFilterStyles] = useSyncedState<textStyleType[]>(
     "filterStyles",
@@ -422,6 +410,24 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     return { value, unit } as LetterSpacing;
   };
 
+  const handleShowUi = (type: string, id: string, value: string | number) => {
+    console.log("handleShowUi called with:", {
+      type,
+      id,
+      value,
+      localVariableList,
+    });
+
+    return new Promise((resolve) => {
+      showUi(type, id, {
+        type: type === "choiceVariable" ? "fontStyle" : type,
+        id,
+        value,
+        variables: localVariableList || [],
+      }).then(resolve);
+    });
+  };
+
   return (
     <Fragment>
       {/* search bar*/}
@@ -611,7 +617,6 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
             padding={{ top: 14, bottom: 14, right: 24, left: 24 }}
             verticalAlignItems={"center"}
             horizontalAlignItems={"center"}
-            // height={"fill-parent"}
             cornerRadius={12}
             fill={"#0B68D6"}
           >
@@ -680,10 +685,11 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                   src={listSvg}
                   tooltip="Choice font"
                   onClick={() =>
-                    showUi("choiceFont", "Choice in font list", cleanFont, {
-                      width: 350,
-                      height: 400,
-                    })
+                    handleShowUi(
+                      "choiceFont",
+                      "Choice in font list",
+                      JSON.stringify(cleanFont)
+                    )
                   }
                 />
               </AutoLayout>
@@ -796,7 +802,6 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                 }}
                 verticalAlignItems={"center"}
                 horizontalAlignItems={"center"}
-                // height={"fill-parent"}
                 cornerRadius={12}
                 fill={"#0B68D6"}
               >
@@ -905,6 +910,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                   width={"fill-parent"}
                   direction={"vertical"}
                 >
+                  {/* Checkbox */}
                   <AutoLayout
                     verticalAlignItems={"center"}
                     spacing={12}
@@ -919,6 +925,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                       }
                       onClick={() => handleCheck(style.id)}
                     />
+                    {/* style name */}
                     <Rectangle width={1} height={50} fill={"#ccc"} />
                     <Input
                       value={cache.name}
@@ -939,6 +946,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                       fontFamily={"Roboto"}
                       width={450}
                     />
+                    {/* font family */}
                     <Rectangle width={1} height={50} fill={"#ccc"} />
                     <AutoLayout
                       width={"fill-parent"}
@@ -949,8 +957,8 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                       }
                       fill={
                         cache.boundVariables?.fontFamily !== undefined
-                          ? "#eee"
-                          : { r: 1, g: 1, b: 1, a: 0 }
+                          ? "#eeeeee"
+                          : "#ffffff00"
                       }
                       padding={{ vertical: 6, horizontal: 10 }}
                     >
@@ -982,6 +990,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                         width={"fill-parent"}
                       />
                     </AutoLayout>
+                    {/* Font weight */}
                     <Rectangle width={1} height={50} fill={"#ccc"} />
                     <AutoLayout
                       width={360}
@@ -992,8 +1001,8 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                       }
                       fill={
                         cache.boundVariables?.fontStyle !== undefined
-                          ? "#eee"
-                          : { r: 1, g: 1, b: 1, a: 0 }
+                          ? "#eeeeee"
+                          : "#ffffff00"
                       }
                       padding={{ vertical: 6, horizontal: 10 }}
                     >
@@ -1030,7 +1039,19 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                       >
                         {getFontWeightValue(cache.fontName.style).fontWeight}
                       </Text>
+                      <SVG
+                        src={variableOutlineSvg}
+                        tooltip="Choice variable"
+                        onClick={() =>
+                          handleShowUi(
+                            "choiceVariable",
+                            style.id,
+                            cache.fontName.style
+                          )
+                        }
+                      />
                     </AutoLayout>
+                    {/* Font size */}
                     <Rectangle width={1} height={50} fill={"#ccc"} />
                     <AutoLayout
                       width={160}
@@ -1041,8 +1062,8 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                       }
                       fill={
                         cache.boundVariables?.fontSize !== undefined
-                          ? "#eee"
-                          : { r: 1, g: 1, b: 1, a: 0 }
+                          ? "#eeeeee"
+                          : "#ffffff00"
                       }
                       padding={{ vertical: 6, horizontal: 10 }}
                     >
@@ -1069,7 +1090,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                         width={"fill-parent"}
                       />
                     </AutoLayout>
-
+                    {/* Line height */}
                     <Rectangle width={1} height={50} fill={"#ccc"} />
                     <AutoLayout
                       width={180}
@@ -1080,8 +1101,8 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                       }
                       fill={
                         cache.boundVariables?.lineHeight !== undefined
-                          ? "#eee"
-                          : { r: 1, g: 1, b: 1, a: 0 }
+                          ? "#eeeeee"
+                          : "#ffffff00"
                       }
                       padding={{ vertical: 6, horizontal: 10 }}
                     >
@@ -1146,6 +1167,8 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                           : ""}
                       </Text>
                     </AutoLayout>
+
+                    {/* Letter spacing */}
                     {showEditType.letterSpacing && (
                       <>
                         <Rectangle width={1} height={50} fill={"#ccc"} />
@@ -1160,8 +1183,8 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                           }
                           fill={
                             cache.boundVariables?.letterSpacing !== undefined
-                              ? "#eee"
-                              : { r: 1, g: 1, b: 1, a: 0 }
+                              ? "#eeeeee"
+                              : "#ffffff00"
                           }
                           padding={{ vertical: 6, horizontal: 10 }}
                         >
@@ -1206,7 +1229,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                         </AutoLayout>
                       </>
                     )}
-
+                    {/* Description */}
                     {showEditType.description && (
                       <>
                         <Rectangle width={1} height={50} fill={"#ccc"} />
@@ -1249,7 +1272,9 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
           )}
         </AutoLayout>
       </AutoLayout>
+      {/* bottom button */}
       <AutoLayout spacing={"auto"} width={"fill-parent"}>
+        {/* Left button */}
         <AutoLayout
           padding={24}
           fill={"#333"}
@@ -1265,7 +1290,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
               : "Reload local text styles"}
           </Text>
         </AutoLayout>
-
+        {/* Right button */}
         <AutoLayout
           padding={24}
           fill={"#0B68D6"}

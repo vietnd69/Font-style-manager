@@ -69,6 +69,39 @@ export type ShowType = {
   letterSpacing: boolean;
   description: boolean;
 };
+
+export type CustomVariable = {
+  id: string;
+  name: string;
+  key: string;
+  variableCollectionId: string;
+  scopes: VariableScope[];
+  valuesByMode: { [modeId: string]: VariableValue };
+  defaultModeId?: string;
+};
+
+export type textDesignManagerType = {
+  textStyles: textStyleType[];
+  showUi: (
+    moduleName: string,
+    name: string,
+    data?: unknown,
+    size?: {
+      width: number;
+      height: number;
+    }
+  ) => Promise<unknown>;
+  getLocalTextStyle: () => void;
+  setHasReloadLocalFont: (
+    newValue: boolean | ((currValue: boolean) => boolean)
+  ) => void;
+  localFonts: Font[];
+  cleanFont: cleanFontType[];
+  isOpenSearchBar: boolean;
+  showEditType: ShowType;
+  localVariableList: CustomVariable[];
+};
+
 function Widget() {
   useEffect(() => {
     if (isFirstLoadFont && localFonts.length === 0) {
@@ -135,10 +168,9 @@ function Widget() {
     }
   );
 
-  const [localVariableList, setLocalVariableList] = useSyncedState<Variable[]>(
-    "localVariableList",
-    []
-  );
+  const [localVariableList, setLocalVariableList] = useSyncedState<
+    CustomVariable[]
+  >("localVariableList", []);
 
   const widgetId = useWidgetId();
 
@@ -288,15 +320,7 @@ function Widget() {
     setShowStyle(data);
     const localVariables = await figma.variables.getLocalVariablesAsync();
 
-    const variablesData: Array<{
-      id: string;
-      name: string;
-      key: string;
-      variableCollectionId: string;
-      scopes: VariableScope[];
-      valuesByMode: { [modeId: string]: VariableValue };
-      defaultModeId?: string;
-    }> = [];
+    const variablesData: CustomVariable[] = [];
 
     for (const variable of localVariables) {
       const value = await getDataVariable(variable.id);
@@ -304,6 +328,7 @@ function Widget() {
         variablesData.push(value);
       }
     }
+    setLocalVariableList(variablesData);
     // console.log(variablesData);
     figma.notify(
       "✅ Style loaded successfully, Waiting for import data to widget"
@@ -546,6 +571,7 @@ function Widget() {
             cleanFont,
             isOpenSearchBar,
             showEditType,
+            localVariableList,
           }}
         />
       )}
