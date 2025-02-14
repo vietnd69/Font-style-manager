@@ -25,6 +25,13 @@ import {
   editSvg,
 } from "./svg";
 
+export interface ShowUiParams {
+  moduleName: string;
+  name: string;
+  data?: unknown;
+  size?: { width: number; height: number };
+}
+
 export type msgType =
   | {
       type: "close";
@@ -82,15 +89,7 @@ export type CustomVariable = {
 
 export type textDesignManagerType = {
   textStyles: textStyleType[];
-  showUi: (
-    moduleName: string,
-    name: string,
-    data?: unknown,
-    size?: {
-      width: number;
-      height: number;
-    }
-  ) => Promise<unknown>;
+  showUi: (params: ShowUiParams) => Promise<unknown>;
   getLocalTextStyle: () => void;
   setHasReloadLocalFont: (
     newValue: boolean | ((currValue: boolean) => boolean)
@@ -430,12 +429,7 @@ function Widget() {
   // 	}
   // };
 
-  const showUi = (
-    moduleName: string,
-    name: string,
-    data?: unknown,
-    size?: { width: number; height: number }
-  ) =>
+  const showUi = ({ moduleName, name, data, size }: ShowUiParams) =>
     new Promise(() => {
       figma.showUI(__html__, {
         width: size?.width || 300,
@@ -489,9 +483,11 @@ function Widget() {
           <SVG
             src={editSvg}
             onClick={() =>
-              showUi("editShowGroup", "Choice Group of Typo", textStyles, {
-                width: 500,
-                height: 550,
+              showUi({
+                moduleName: "editShowGroup",
+                name: "Choice Group of Typo",
+                data: textStyles,
+                size: { width: 500, height: 550 },
               })
             }
           />
@@ -500,9 +496,11 @@ function Widget() {
             src={editSvg}
             tooltip="Edit table table column"
             onClick={() =>
-              showUi("editTypeList", "Choice edit type showed", showEditType, {
-                width: 300,
-                height: 350,
+              showUi({
+                moduleName: "editTypeList",
+                name: "Choice edit type showed",
+                data: showEditType,
+                size: { width: 300, height: 350 },
               })
             }
           />
@@ -543,9 +541,11 @@ function Widget() {
               <SVG
                 src={listSvg}
                 onClick={() =>
-                  showUi("editShowGroup", "Choice Group of Typo", textStyles, {
-                    width: 450,
-                    height: 550,
+                  showUi({
+                    moduleName: "editShowGroup",
+                    name: "Choice Group of Typo",
+                    data: textStyles,
+                    size: { width: 450, height: 550 },
                   })
                 }
               />
@@ -555,7 +555,9 @@ function Widget() {
           <SVG
             src={coffeeSvg}
             tooltip={"Buy me a coffee"}
-            onClick={() => showUi("buyCoffee", "Buy me a coffee")}
+            onClick={() =>
+              showUi({ moduleName: "buyCoffee", name: "Buy me a coffee" })
+            }
           />
         </AutoLayout>
       </AutoLayout>

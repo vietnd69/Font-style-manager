@@ -410,24 +410,6 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     return { value, unit } as LetterSpacing;
   };
 
-  const handleShowUi = (type: string, id: string, value: string | number) => {
-    console.log("handleShowUi called with:", {
-      type,
-      id,
-      value,
-      localVariableList,
-    });
-
-    return new Promise((resolve) => {
-      showUi(type, id, {
-        type: type === "choiceVariable" ? "fontStyle" : type,
-        id,
-        value,
-        variables: localVariableList || [],
-      }).then(resolve);
-    });
-  };
-
   return (
     <Fragment>
       {/* search bar*/}
@@ -685,11 +667,11 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                   src={listSvg}
                   tooltip="Choice font"
                   onClick={() =>
-                    handleShowUi(
-                      "choiceFont",
-                      "Choice in font list",
-                      JSON.stringify(cleanFont)
-                    )
+                    showUi({
+                      moduleName: "choiceFont",
+                      name: "Choice in font list",
+                      data: cleanFont,
+                    })
                   }
                 />
               </AutoLayout>
@@ -1043,11 +1025,16 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                         src={variableOutlineSvg}
                         tooltip="Choice variable"
                         onClick={() =>
-                          handleShowUi(
-                            "choiceVariable",
-                            style.id,
-                            cache.fontName.style
-                          )
+                          showUi({
+                            moduleName: "choiceVariable",
+                            name: "Choice variable",
+                            data: {
+                              type: "fontStyle",
+                              id: style.id,
+                              value: cache.fontName.style,
+                              variables: localVariableList || [],
+                            },
+                          })
                         }
                       />
                     </AutoLayout>
