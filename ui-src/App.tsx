@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, Suspense, lazy } from "react";
 import "./styles/App.css";
-import BuyMeACoffee from "./BuyMeACoffee";
-import ChoiceFont from "./ChoiceFont";
-import EditShowGroup from "./EditShowGroup";
-import EditShowType from "./EditShowType";
-import ChoiceVariable from "./ChoiceVariable";
 // import { cleanFontType } from "../widget-src/code";
+
+// Lazy load components
+const BuyMeACoffee = lazy(() => import("./BuyMeACoffee"));
+const ChoiceFont = lazy(() => import("./ChoiceFont"));
+const EditShowGroup = lazy(() => import("./EditShowGroup"));
+const EditShowType = lazy(() => import("./EditShowType"));
+const ChoiceVariable = lazy(() => import("./ChoiceVariable"));
 
 function App() {
   const [module, setModule] = useState<string>("");
@@ -22,11 +24,13 @@ function App() {
 
   return (
     <div className="App">
-      {module === "buyCoffee" && <BuyMeACoffee />}
-      {module === "choiceFont" && <ChoiceFont data={data} />}
-      {module === "editShowGroup" && <EditShowGroup data={data} />}
-      {module === "editTypeList" && <EditShowType data={data} />}
-      {module === "choiceVariable" && <ChoiceVariable data={data} />}
+      <Suspense fallback={<div>Loading...</div>}>
+        {module === "buyCoffee" && <BuyMeACoffee />}
+        {module === "choiceFont" && <ChoiceFont data={data} />}
+        {module === "editShowGroup" && <EditShowGroup data={data} />}
+        {module === "editTypeList" && <EditShowType data={data} />}
+        {module === "choiceVariable" && <ChoiceVariable data={data} />}
+      </Suspense>
     </div>
   );
 }
