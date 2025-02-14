@@ -1,36 +1,107 @@
-Below are the steps to get your widget running. You can also find instructions at:
+# Font Style Manager for Figma
 
-https://www.figma.com/widget-docs/setup-guide/
+A powerful Figma widget to manage and bulk edit text styles with support for variables.
 
-This widget template uses Typescript and NPM, two standard tools in creating JavaScript applications.
+## Features
 
-First, download Node.js which comes with NPM. This will allow you to install TypeScript and other
-libraries. You can find the download link here:
+- 🎨 **Bulk Edit Text Styles**
+  - Edit multiple text styles simultaneously
+  - Update font family, style, size, line height, and letter spacing
+  - Modify style descriptions and grouping
 
-https://nodejs.org/en/download/
+- 📦 **Variable Support**
+  - Bind text properties to Figma variables
+  - Support for font style, weight, size, and other properties
+  - Filter variables by appropriate scopes (FONT_STYLE, FONT_WEIGHT, etc.)
 
-Next, install TypeScript, esbuild and the latest type definitions by running:
+- 🔍 **Advanced Search & Filter**
+  - Search by style name, group, or properties
+  - Filter styles by font family, weight, size
+  - Quick access to frequently used styles
 
+- 📱 **Modern UI**
+  - Clean and intuitive interface
+  - Real-time preview of changes
+  - Responsive design for different screen sizes
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/Font-style-manager.git
+cd Font-style-manager
+```
+
+2. Install dependencies:
+```bash
 npm install
+```
 
-If you are familiar with JavaScript, TypeScript will look very familiar. In fact, valid JavaScript code
-is already valid Typescript code.
+3. Start development:
+```bash
+npm run dev
+```
 
-TypeScript adds type annotations to variables. This allows code editors such as Visual Studio Code
-to provide information about the Figma API while you are writing code, as well as help catch bugs
-you previously didn't notice.
+## Usage
 
-For more information, visit https://www.typescriptlang.org/
+### Edit Mode
 
-Using TypeScript requires a compiler to convert TypeScript (widget-src/code.tsx) into JavaScript (dist/code.js)
-for the browser to run. We use esbuild to do this for us.
+1. Click "Load local text styles" to import your Figma text styles
+2. Use the search bar to filter styles
+3. Select styles you want to edit using checkboxes
+4. Make changes to properties in bulk
+5. Click "Update styles" to apply changes
 
-We recommend writing TypeScript code using Visual Studio code:
+### Variable Binding
 
-1. Download Visual Studio Code if you haven't already: https://code.visualstudio.com/.
-2. Open this directory in Visual Studio Code.
-3. Compile TypeScript to JavaScript: Run the "Terminal > Run Build Task..." menu item,
-   then select "npm: watch". You will have to do this again every time
-   you reopen Visual Studio Code.
+1. Click the variable icon next to any property
+2. Choose a variable from the list
+3. Variables are filtered by appropriate scope (e.g., FONT_STYLE for font styles)
 
-That's it! Visual Studio Code will regenerate the JavaScript file every time you save.
+### View Mode
+
+1. Switch to view mode using the toggle button
+2. Browse styles in a clean, organized list
+3. Group styles for better organization
+4. Quick copy style properties
+
+## Development
+
+- Build production version:
+```bash
+npm run build:production
+```
+
+- Format code:
+```bash
+npm run format
+```
+
+- Type checking:
+```bash
+npm run tsc
+```
+
+## Tech Stack
+
+- React
+- TypeScript
+- Figma Widget API
+- Ant Design
+- Vite
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+Made with ❤️ by vietnd
