@@ -1,3 +1,6 @@
+/**
+ * Font weight identifiers in text
+ */
 type FontWeight =
 	| "thin"
 	| "hairline"
@@ -20,11 +23,39 @@ type FontWeight =
 	| "ultra-bold"
 	| "black"
 	| "heavy";
-type FontStyle = "italic";
-type FontWidth = "condensed";
-export type FontWeightNumerical = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
 
-const getFontWeightValue = (fontWeightName: string): { fontWeight?: FontWeightNumerical; fontStyle?: FontStyle; fontWidth?: FontWidth } => {
+/**
+ * Font style identifier
+ */
+type FontStyle = "italic";
+
+/**
+ * Font width identifier
+ */
+type FontWidth = "condensed";
+
+/**
+ * Numerical values for font weights according to CSS standards
+ */
+export type FontWeightNumerical = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+
+/**
+ * Convert a font weight name (e.g., "Light Italic") to its numerical, style, and width values
+ * 
+ * This function parses a font style name and extracts:
+ * - Font weight (numerical value from 100-900)
+ * - Font style (e.g., italic)
+ * - Font width (e.g., condensed)
+ * 
+ * @param fontWeightName - The font weight/style name to parse
+ * @returns Object with fontWeight, fontStyle, and fontWidth properties
+ */
+const getFontWeightValue = (fontWeightName: string): { 
+	fontWeight?: FontWeightNumerical; 
+	fontStyle?: FontStyle; 
+	fontWidth?: FontWidth 
+} => {
+	// Map of text descriptions to numerical weights
 	const fontWeights: { [key: string]: FontWeightNumerical } = {
 		thin: 100,
 		hairline: 100,
@@ -49,15 +80,17 @@ const getFontWeightValue = (fontWeightName: string): { fontWeight?: FontWeightNu
 		heavy: 900,
 	};
 	const fontStyles: FontStyle[] = ["italic"];
-
 	const fontWidths: FontWidth[] = ["condensed"];
+	
+	// Split the font weight name into words for processing
 	const words = fontWeightName.toLowerCase().split(" ");
 
-	let fontWeight : FontWeightNumerical = 400;
+	// Default to regular weight if no weight is specified
+	let fontWeight: FontWeightNumerical = 400;
 	let fontStyle: FontStyle | undefined;
 	let fontWidth: FontWidth | undefined;
 
-
+	// Process each word to determine weight, style, and width
 	for (const word of words) {
 		if (word in fontWeights) {
 			fontWeight = fontWeights[word as FontWeight];
@@ -70,4 +103,5 @@ const getFontWeightValue = (fontWeightName: string): { fontWeight?: FontWeightNu
 
 	return { fontWeight, fontStyle, fontWidth };
 };
+
 export default getFontWeightValue;

@@ -30,6 +30,18 @@ import {
   variableOutlineSvg,
 } from "./svg";
 
+/**
+ * TextDesignManager Component
+ * 
+ * A component for managing and displaying text design styles in Figma.
+ * Provides functionality for:
+ * - Viewing and filtering text styles
+ * - Applying text styles to selected elements
+ * - Managing text style properties like font family, weight, size, etc.
+ * - Searching and organizing text styles
+ * 
+ * @param value - Configuration and state for the text design manager
+ */
 const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
   const {
     textStyles,
@@ -98,28 +110,42 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     []
   );
 
+  /**
+   * Toggle selection state for a specific text style
+   * @param id - ID of the text style to toggle
+   */
   const handleCheck = (id: string) => {
+    // Check if style is already in the selected list
     const hasStyleInList = stylesChecked.find((idStyle) => idStyle === id)
       ? true
       : false;
+      
     if (hasStyleInList) {
+      // If already selected, remove it
       if (stylesChecked.length === filterStyles.length) {
-        setHasCheckAll(false);
+        setHasCheckAll(false); // Uncheck "Select All" if was previously all selected
       }
       setStylesChecked((prev) => prev.filter((idStyle) => idStyle !== id));
     } else {
+      // If not selected, add it
       if (stylesChecked.length === filterStyles.length - 1) {
-        setHasCheckAll(true);
+        setHasCheckAll(true); // Check "Select All" if this completes the set
       }
       setStylesChecked((prev) => [...prev, id]);
     }
   };
 
+  /**
+   * Toggle selection state for all text styles
+   * Either selects all styles or deselects all styles
+   */
   const handleCheckAll = () => {
     setHasCheckAll((prev) => {
       if (!prev) {
+        // If not all selected, select all styles
         setStylesChecked(filterStyles.map((style) => style.id));
       } else {
+        // If all selected, clear selection
         setStylesChecked([]);
       }
 
@@ -127,11 +153,17 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     });
   };
 
+  /**
+   * Update text styles in Figma based on current state
+   * Compares current styles with cached styles to identify changes
+   */
   const updateStyle = async () => {
     for (const style of filterStyles) {
       try {
+        // Find the original style in cache for comparison
         const cache = cacheStyle.find((i) => i.id === style.id);
         if (cache) {
+          // Get the actual style from Figma
           const textStyle: TextStyle = (await figma.getStyleByIdAsync(
             style.id
           )) as TextStyle;

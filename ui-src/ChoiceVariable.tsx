@@ -14,29 +14,29 @@ type ChoiceVariableProps = {
   };
 };
 
-// Map property types to variable scopes
-const PROPERTY_SCOPE_MAP: { [key: string]: string } = {
-  fontFamily: "FONT_FAMILY",
-  fontStyle: "FONT_STYLE",
-  fontWeight: "FONT_WEIGHT",
-  fontSize: "FONT_SIZE",
-  lineHeight: "LINE_HEIGHT",
-  letterSpacing: "LETTER_SPACING",
-  paragraphSpacing: "PARAGRAPH_SPACING",
-  paragraphIndent: "PARAGRAPH_INDENT",
-  fill: "ALL_FILLS",
-  textFill: "TEXT_FILL",
-  shapeFill: "SHAPE_FILL",
-  frameFill: "FRAME_FILL",
-  stroke: "STROKE_COLOR",
-  strokeWidth: "STROKE_FLOAT",
-  effect: "EFFECT_COLOR",
-  effectFloat: "EFFECT_FLOAT",
-  cornerRadius: "CORNER_RADIUS",
-  widthHeight: "WIDTH_HEIGHT",
-  gap: "GAP",
-  opacity: "OPACITY",
-  all: "ALL_SCOPES",
+// Map property types to variable scopes - adding more compatible scopes
+const PROPERTY_SCOPE_MAP: { [key: string]: string[] } = {
+  fontFamily: ["FONT_FAMILY", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
+  fontStyle: ["FONT_STYLE", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
+  fontWeight: ["FONT_WEIGHT", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
+  fontSize: ["FONT_SIZE", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
+  lineHeight: ["LINE_HEIGHT", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
+  letterSpacing: ["LETTER_SPACING", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
+  paragraphSpacing: ["PARAGRAPH_SPACING", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
+  paragraphIndent: ["PARAGRAPH_INDENT", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
+  fill: ["ALL_FILLS"],
+  textFill: ["TEXT_FILL", "ALL_FILLS"],
+  shapeFill: ["SHAPE_FILL", "ALL_FILLS"],
+  frameFill: ["FRAME_FILL", "ALL_FILLS"],
+  stroke: ["STROKE_COLOR"],
+  strokeWidth: ["STROKE_FLOAT"],
+  effect: ["EFFECT_COLOR"],
+  effectFloat: ["EFFECT_FLOAT"],
+  cornerRadius: ["CORNER_RADIUS"],
+  widthHeight: ["WIDTH_HEIGHT"],
+  gap: ["GAP"],
+  opacity: ["OPACITY"],
+  all: ["ALL_SCOPES"],
 };
 
 // Update the PROPERTY_VALUE_TYPE_MAP to support multiple types
@@ -80,10 +80,20 @@ const formatValue = (value: any, defaultModeId: string | undefined) => {
 };
 
 const getValueType = (value: any): string => {
+  console.log("Examining value:", value);
+  if (value === undefined || value === null) return "unknown";
   if (typeof value === "string") return "string";
   if (typeof value === "number") return "number";
   if (typeof value === "boolean") return "boolean";
-  if (value && typeof value === "object" && "r" in value) return "color";
+  if (value && typeof value === "object") {
+    // Check for color object
+    if ("r" in value) return "color";
+    // Check for variable reference object
+    if ("type" in value && value.type === "VARIABLE_ALIAS") return "variable_reference";
+    // Check if it's an array
+    if (Array.isArray(value)) return "array";
+    console.log("Unknown object type:", value);
+  }
   return "unknown";
 };
 
@@ -98,38 +108,51 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
 
   useEffect(() => {
     console.log("Variables from data:", data.variables);
-    console.log("Required scope for type:", PROPERTY_SCOPE_MAP[data.type]);
+    console.log("Required scopes for type:", PROPERTY_SCOPE_MAP[data.type]);
     console.log("Required value types:", PROPERTY_VALUE_TYPE_MAP[data.type]);
 
     if (data.variables) {
-      const requiredScope = PROPERTY_SCOPE_MAP[data.type];
-      const allowedValueTypes = PROPERTY_VALUE_TYPE_MAP[data.type];
-      console.log("Filtering variables with scope:", requiredScope);
+      const compatibleScopes = PROPERTY_SCOPE_MAP[data.type] || ["ALL_SCOPES"];
+      const allowedValueTypes = PROPERTY_VALUE_TYPE_MAP[data.type] || ["any"];
+      console.log("Filtering variables with compatible scopes:", compatibleScopes);
 
       const filtered = data.variables.filter((variable) => {
-        // Check scope compatibility
-        const hasRequiredScope =
-          variable.scopes.includes(requiredScope) ||
-          variable.scopes.includes("ALL_SCOPES");
+        // Check if the variable has any of the compatible scopes
+        const hasCompatibleScope = variable.scopes.some(scope => 
+          compatibleScopes.includes(scope) || scope === "ALL_SCOPES"
+        );
 
-        // Check value type compatibility
-        const defaultValue =
-          variable.valuesByMode[variable.defaultModeId || ""];
+        // Get default value, handle case where defaultModeId might be missing
+        let defaultValue;
+        if (variable.defaultModeId && variable.valuesByMode[variable.defaultModeId]) {
+          defaultValue = variable.valuesByMode[variable.defaultModeId];
+        } else {
+          // If defaultModeId is not available, try to get the first value
+          const firstModeId = Object.keys(variable.valuesByMode)[0];
+          defaultValue = firstModeId ? variable.valuesByMode[firstModeId] : undefined;
+        }
+        
+        console.log(`Variable ${variable.name} default value:`, defaultValue);
+        
         const valueType = getValueType(defaultValue);
-        const hasCompatibleType =
-          allowedValueTypes.includes("any") ||
-          allowedValueTypes.includes(valueType);
+        
+        // For fontStyle and fontWeight, we accept any variable regardless of type
+        // since we can't reliably determine the actual type from the API
+        const hasCompatibleType = 
+          allowedValueTypes.includes("any") || 
+          allowedValueTypes.includes(valueType) ||
+          (data.type === 'fontStyle' || data.type === 'fontWeight');
 
         console.log(
           `Variable ${variable.name}:`,
           `scopes: ${variable.scopes.join(", ")},`,
           `value type: ${valueType},`,
-          `matches scope: ${hasRequiredScope},`,
+          `matches scope: ${hasCompatibleScope},`,
           `matches type: ${hasCompatibleType},`,
           `allowed types: ${allowedValueTypes.join(", ")}`
         );
 
-        return hasRequiredScope && hasCompatibleType;
+        return hasCompatibleScope && hasCompatibleType;
       });
 
       console.log("Filtered variables:", filtered);
@@ -137,6 +160,18 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
       setFilteredVariables(filtered);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (searchTerm && variables.length > 0) {
+      const lowercaseSearch = searchTerm.toLowerCase();
+      const filtered = variables.filter(variable => 
+        variable.name.toLowerCase().includes(lowercaseSearch)
+      );
+      setFilteredVariables(filtered);
+    } else {
+      setFilteredVariables(variables);
+    }
+  }, [searchTerm, variables]);
 
   const handleVariableSelect = (variable: CustomVariable) => {
     console.log("Selected variable:", variable);
@@ -171,7 +206,7 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
         <Typography>
           <Title level={5} style={{ margin: 0 }}>
             Choose {data.type === "all" ? "" : data.type} Variable (
-            {variables.length} available)
+            {filteredVariables.length} available)
           </Title>
           <Paragraph
             type="secondary"
@@ -232,6 +267,7 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
                 style={{
                   color: variable.id === selectedId ? "#1890ff" : "#666666",
                   opacity: variable.id === selectedId ? 1 : 0.8,
+                  marginLeft: "8px",
                 }}
               >
                 {formatValue(
@@ -242,9 +278,11 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
             </List.Item>
           )}
           locale={{
-            emptyText: `No ${data.type === "all" ? "" : data.type} variables found`,
+            emptyText: searchTerm 
+              ? `No variables found matching "${searchTerm}"` 
+              : `No ${data.type === "all" ? "" : data.type} variables found`,
           }}
-          style={{ backgroundColor: "#ffffff" }}
+          style={{ backgroundColor: "#ffffff", maxHeight: "300px", overflowY: "auto" }}
         />
       </div>
 

@@ -5,11 +5,21 @@ import type { FontWeightNumerical } from "./hooks/getFontWeightValue";
 const { widget } = figma;
 const { AutoLayout, Text, Rectangle } = widget;
 
+/**
+ * Props for the TextDesignList component
+ */
 type TextDesignSystemListType = {
-  showStyle: textStyleType[];
-  showGroup: string[];
+  showStyle: textStyleType[];  // Text styles to display
+  showGroup: string[];         // Groups to display
 };
 
+/**
+ * Extract only the name part from a style path
+ * For example: "Heading/H1" returns "H1"
+ * 
+ * @param name - Style name or path
+ * @returns The extracted name without the path
+ */
 const getOnlyName = (name: string) => {
   if (name.includes("/")) {
     const onlyName: string | undefined = name.split("/").pop();
@@ -19,6 +29,14 @@ const getOnlyName = (name: string) => {
   }
 };
 
+/**
+ * TextDesignList Component
+ * 
+ * Renders a list of text styles with their visual representation
+ * and properties such as font family, style, size, etc.
+ * 
+ * @param value - Configuration with styles and groups to show
+ */
 const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
   const { showStyle } = value;
   const styleList = showStyle;
@@ -33,6 +51,7 @@ const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
               width={"fill-parent"}
               direction={"vertical"}
             >
+              {/* Style preview with actual font rendering */}
               <AutoLayout
                 width={"fill-parent"}
                 height={"hug-contents"}

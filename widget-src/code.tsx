@@ -25,58 +25,82 @@ import {
   editSvg,
 } from "./svg";
 
+/**
+ * Interface for parameters passed when showing UI
+ */
 export interface ShowUiParams {
-  moduleName: string;
-  name: string;
-  data?: unknown;
-  size?: { width: number; height: number };
+  moduleName: string;  // Module name to identify which UI to show
+  name: string;        // Name for the UI instance
+  data?: unknown;      // Optional data to pass to the UI
+  size?: { width: number; height: number };  // Optional size for the UI
 }
 
+/**
+ * Message types for communication between UI and widget
+ */
 export type msgType =
   | {
-      type: "close";
+      type: "close";  // Close UI message
     }
   | {
-      type: "setFamilyAndWeight";
+      type: "setFamilyAndWeight";  // Set font family and weight
       data: {
         family: string;
         weight: string;
       };
     }
   | {
-      type: "setShowTypoGroup";
+      type: "setShowTypoGroup";  // Set typography group to display
       data: textStyleType[];
     }
   | {
-      type: "setShowDuplicateTypoGroup";
+      type: "setShowDuplicateTypoGroup";  // Set duplicate typography group
       data: textStyleType[];
     }
   | {
-      type: "setShowEditType";
+      type: "setShowEditType";  // Set display options for typography
       data: ShowType;
+    }
+  | {
+      type: "setVariable";  // Set variable for a style property
+      variableId: string;   // ID of the selected variable
+      styleId: string;      // ID of the style to bind variable to
+      propertyType: string; // Type of property (e.g., "fontStyle", "fontFamily")
     };
 
+/**
+ * Text style definition with font properties and metadata
+ */
 export type textStyleType = {
-  id: string;
-  name: string;
-  fontName: FontName;
-  fontSize: number;
-  lineHeight: LineHeight;
-  letterSpacing: LetterSpacing;
-  description: string;
-  boundVariables?: { [key: string]: VariableAlias };
+  id: string;           // Unique identifier
+  name: string;         // Display name
+  fontName: FontName;   // Font name information
+  fontSize: number;     // Font size in pixels
+  lineHeight: LineHeight;  // Line height settings
+  letterSpacing: LetterSpacing;  // Letter spacing settings
+  description: string;  // Description of the text style
+  boundVariables?: { [key: string]: VariableAlias };  // Bound variables
 };
 
+/**
+ * Simplified font type for easier manipulation
+ */
 export type cleanFontType = {
-  family: string;
-  styles: string[];
+  family: string;     // Font family name
+  styles: string[];   // Available font styles
 };
 
+/**
+ * Display options for typography details
+ */
 export type ShowType = {
-  letterSpacing: boolean;
-  description: boolean;
+  letterSpacing: boolean;  // Whether to show letter spacing
+  description: boolean;    // Whether to show descriptions
 };
 
+/**
+ * Custom variable definition for typography
+ */
 export type CustomVariable = {
   id: string;
   name: string;
@@ -87,21 +111,29 @@ export type CustomVariable = {
   defaultModeId?: string;
 };
 
+/**
+ * Text design manager configuration and state
+ */
 export type textDesignManagerType = {
-  textStyles: textStyleType[];
-  showUi: (params: ShowUiParams) => Promise<unknown>;
-  getLocalTextStyle: () => void;
+  textStyles: textStyleType[];  // Available text styles
+  showUi: (params: ShowUiParams) => Promise<unknown>;  // Function to show UI
+  getLocalTextStyle: () => void;  // Function to fetch local text styles
   setHasReloadLocalFont: (
     newValue: boolean | ((currValue: boolean) => boolean)
-  ) => void;
-  localFonts: Font[];
-  cleanFont: cleanFontType[];
-  isOpenSearchBar: boolean;
-  showEditType: ShowType;
-  localVariableList: CustomVariable[];
+  ) => void;  // Function to update font reload status
+  localFonts: Font[];  // Available local fonts
+  cleanFont: cleanFontType[];  // Simplified font information
+  isOpenSearchBar: boolean;  // Search bar visibility state
+  showEditType: ShowType;  // Typography display options
+  localVariableList: CustomVariable[];  // Available variables
 };
 
+/**
+ * Main Widget component for the Font Style Manager
+ * Manages state, UI modes, and handles communication with Figma API
+ */
 function Widget() {
+  // Load fonts on first initialization and refresh text styles when needed
   useEffect(() => {
     if (isFirstLoadFont && localFonts.length === 0) {
       loadLocalFont();
@@ -113,17 +145,18 @@ function Widget() {
     }
   });
 
+  // Core state management
   const [mode, setMode] = useSyncedState<"edit" | "view">("mode", "edit");
   const [textStyles, setTextStyles] = useSyncedState<textStyleType[]>(
     "textStyles",
     []
   );
-
   const [filterStyles, setFilterStyles] = useSyncedState<textStyleType[]>(
     "filterStyles",
     []
   );
 
+  // Font selection state
   const [checkedFamily, setCheckedFamily] = useSyncedState("checkedFamily", "");
   const [checkedStyle, setCheckedStyle] = useSyncedState("checkedStyle", "");
 
@@ -173,12 +206,17 @@ function Widget() {
 
   const widgetId = useWidgetId();
 
+  /**
+   * Creates a clone of the current widget with specified text styles
+   * @param showStyleData - Text styles to display in the cloned widget (defaults to current showStyle)
+   */
   const handleCloneWidget = async (
     showStyleData: textStyleType[] = showStyle
   ) => {
     const widgetNode = (await figma.getNodeByIdAsync(widgetId)) as WidgetNode;
     const clonedWidget = widgetNode.clone();
 
+    // Transfer the current state to the cloned widget
     clonedWidget.setWidgetSyncedState({
       mode: "view",
       textStyles,
@@ -189,18 +227,26 @@ function Widget() {
       isFirstLoadFont,
       showStyle: showStyleData,
     });
+    
     // Position the cloned widget beside this widget
     widgetNode.parent!.appendChild(clonedWidget);
     clonedWidget.x = widgetNode.x + widgetNode.width + 250;
     clonedWidget.y = widgetNode.y;
   };
 
+  /**
+   * Toggle between edit and view modes
+   */
   const handleSetMode = () =>
     setMode((prev) => (prev === "edit" ? "view" : "edit"));
+    
+  // Property menu configuration for mode selection
   const modeOptions = [
     { option: "edit", label: "Edit mode" },
     { option: "view", label: "List mode" },
   ];
+  
+  // Configure the widget's property menu
   usePropertyMenu(
     [
       {
@@ -208,7 +254,6 @@ function Widget() {
         tooltip: "Mode view:",
         propertyName: "action:",
       },
-
       {
         itemType: "dropdown",
         propertyName: "mode",
@@ -224,11 +269,13 @@ function Widget() {
     }
   );
 
+  /**
+   * Load available fonts from Figma and process them
+   */
   const loadLocalFont = () => {
     figma.listAvailableFontsAsync().then((fonts) => {
       setLocalFonts(fonts);
       fontsClean(fonts);
-      // console.log(fonts)
     });
   };
 
@@ -242,16 +289,19 @@ function Widget() {
   // 	description: "",
   // });
 
+  // Handle messages from UI
   useEffect(() => {
     figma.ui.onmessage = (msg) => {
-      // console.log(msg.type)
       handleGetUiMessage(msg);
     };
   });
 
+  /**
+   * Process messages received from the UI
+   * @param msg - Message object from UI
+   */
   const handleGetUiMessage = (msg: msgType) => {
     if (msg.type === "setFamilyAndWeight") {
-      // console.log(msg);
       setCheckedFamily(msg.data.family);
       setCheckedStyle(msg.data.weight);
       figma.closePlugin();
@@ -264,29 +314,95 @@ function Widget() {
       figma.closePlugin();
     }
     if (msg.type === "close") {
-      // console.log("ok")
       figma.closePlugin();
     }
     if (msg.type === "setShowEditType") {
       setShowEditType(msg.data);
       figma.closePlugin();
     }
+    if (msg.type === "setVariable") {
+      // Handle binding variable to text style property
+      console.log("Setting variable:", msg.variableId, "for style:", msg.styleId, "property:", msg.propertyType);
+      
+      try {
+        // Find the text style to update
+        const styleToUpdate = figma.getStyleById(msg.styleId) as TextStyle;
+        if (!styleToUpdate) {
+          console.error("Style not found:", msg.styleId);
+          figma.closePlugin();
+          return;
+        }
+        
+        // Get the variable reference
+        const variableToApply = figma.variables.getVariableById(msg.variableId);
+        if (!variableToApply) {
+          console.error("Variable not found:", msg.variableId);
+          figma.closePlugin();
+          return;
+        }
+        
+        // Map property type to the correct field for a TextStyle
+        let field: string;
+        switch (msg.propertyType) {
+          case "fontFamily":
+            field = "fontFamily";
+            break;
+          case "fontStyle":
+          case "fontWeight":
+            field = "fontStyle";
+            break;
+          case "fontSize":
+            field = "fontSize";
+            break;
+          case "lineHeight":
+            field = "lineHeight";
+            break;
+          case "letterSpacing":
+            field = "letterSpacing";
+            break;
+          default:
+            console.warn(`Property type "${msg.propertyType}" not supported for variable binding`);
+            figma.closePlugin();
+            return;
+        }
+        
+        // Use setBoundVariable to bind the variable to the style
+        // @ts-ignore - Bypassing type checking because Figma API typings might be outdated
+        styleToUpdate.setBoundVariable(field, variableToApply);
+        
+        console.log(`Successfully bound variable to ${field} of style ${styleToUpdate.name}`);
+      } catch (error) {
+        console.error("Failed to bind variable:", error);
+      }
+      
+      figma.closePlugin();
+    }
   };
 
   // const [findKeys, setFindKeys] = useSyncedState("findKeys", { family: "", style: "" });
 
+  /**
+   * Toggle the search bar visibility
+   */
   const toggleSearchBar = () => {
     setIsOpenSearchBar((prev) => !prev);
   };
 
+  /**
+   * Process font list to create a clean, organized structure by family and style
+   * @param fonts - List of available fonts
+   */
   const fontsClean = (fonts: Font[]) => {
     let fontFamily: string = "";
     const data: cleanFontType[] = [];
     let fontStyles: string[] = [];
+    
+    // Group fonts by family and collect available styles
     for (const font of fonts) {
       if (fontFamily === font.fontName.family) {
         fontStyles.push(font.fontName.style);
       } else {
+        // Add the previous font family and its styles to the result
         if (
           fontFamily != "" &&
           !fontFamily.startsWith("??") &&
@@ -294,33 +410,38 @@ function Widget() {
         ) {
           data.push({ family: fontFamily, styles: fontStyles });
         }
+        // Start collecting styles for the new family
         fontStyles = [font.fontName.style];
         fontFamily = font.fontName.family;
       }
     }
 
     setCleanFont(data);
-    // console.log(data);
   };
 
+  /**
+   * Load and process all local text styles from Figma
+   */
   const getLocalTextStyle = async () => {
     const styles: TextStyle[] = await figma.getLocalTextStylesAsync();
-    // console.log(styles);
     const data: textStyleType[] = [];
-    // styles ? styles.map((style) => getDataStyle(style.id) as textStyleType) : [];
+    
+    // Process each style to extract required information
     for (const style of styles) {
       const value = (await getDataStyle(style.id)) as textStyleType;
       data.push(value);
     }
-    // console.log("style", data);
+    
+    // Update state with the processed styles
     setTextStyles(data);
     setCacheStyle(data);
     setFilterStyles(data);
     setShowStyle(data);
+    
+    // Load local variables
     const localVariables = await figma.variables.getLocalVariablesAsync();
-
     const variablesData: CustomVariable[] = [];
-
+    
     for (const variable of localVariables) {
       const value = await getDataVariable(variable.id);
       if (value) {
@@ -328,15 +449,18 @@ function Widget() {
       }
     }
     setLocalVariableList(variablesData);
-    // console.log(variablesData);
     figma.notify(
       "✅ Style loaded successfully, Waiting for import data to widget"
     );
   };
 
+  /**
+   * Retrieve and format text style data from a style ID
+   * @param id - The ID of the style to retrieve
+   * @returns Formatted text style object or undefined if not found
+   */
   const getDataStyle = async (id: string) => {
     const data = (await figma.getStyleByIdAsync(id)) as TextStyle;
-    // console.log(data);
     if (data) {
       return {
         id: data?.id,
@@ -345,41 +469,45 @@ function Widget() {
           family: data?.fontName?.family,
           style: data?.fontName?.style,
         },
-        fontSize: data.fontSize,
-        lineHeight: data.lineHeight,
-        letterSpacing: data.letterSpacing,
-        description: data.description,
-        boundVariables: data.boundVariables,
-        type: data.type,
-        remote: data.remote,
+        fontSize: data?.fontSize,
+        lineHeight: data?.lineHeight,
+        letterSpacing: data?.letterSpacing,
+        description: data?.description || "",
+        boundVariables: data?.boundVariables,
       };
-    } else {
-      return null;
     }
+    return undefined;
   };
 
+  /**
+   * Retrieve and format variable data from a variable ID
+   * @param variableId - The ID of the variable to retrieve
+   * @returns Formatted variable object or undefined if not found
+   */
   const getDataVariable = async (variableId: string) => {
     const data = await figma.variables.getVariableByIdAsync(variableId);
-
     if (data) {
-      const { id, name, key, variableCollectionId, scopes, valuesByMode } =
-        data;
-      const collection =
-        await figma.variables.getVariableCollectionByIdAsync(
-          variableCollectionId
-        );
-      const defaultModeId = collection?.defaultModeId;
-      return {
-        id,
-        name,
-        key,
-        variableCollectionId,
-        scopes,
-        valuesByMode,
-        defaultModeId,
-      };
+      // Extract modes and values
+      const modes = await figma.variables.getVariableCollectionByIdAsync(
+        data.variableCollectionId
+      );
+      
+      if (modes) {
+        // Get default mode ID
+        const defaultMode = modes.modes.find((mode) => mode.name === "Default");
+        
+        return {
+          id: data.id,
+          name: data.name,
+          key: data.key,
+          variableCollectionId: data.variableCollectionId,
+          scopes: data.scopes,
+          valuesByMode: data.valuesByMode,
+          defaultModeId: defaultMode?.modeId || "",
+        };
+      }
     }
-    return null;
+    return undefined;
   };
   // const checkFontName = (font: any) => {
   // 	// const regex = new RegExp(font.fontName.family, "i");
