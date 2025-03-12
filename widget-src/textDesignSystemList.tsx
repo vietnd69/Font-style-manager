@@ -19,6 +19,17 @@ const getOnlyName = (name: string) => {
   }
 };
 
+const splitNameAndGroup = (name: string): { name: string; group: string } => {
+  if (name.includes("/")) {
+    const parts = name.split("/");
+    const onlyName = parts.pop() || "";
+    const group = parts.join("/");
+    return { name: onlyName, group };
+  } else {
+    return { name, group: "" };
+  }
+};
+
 const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
   const { showStyle } = value;
   const styleList = showStyle;
@@ -51,7 +62,16 @@ const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
                   >
                     Ag
                   </Text>
-                  <Text fontSize={22}>{getOnlyName(style.name)}</Text>
+                  <AutoLayout
+                    width={"hug-contents"}
+                    height={"hug-contents"}
+                    direction="vertical"
+                  >
+                    <Text fontSize={18} fill={"#777"}>
+                      {splitNameAndGroup(style.name).group}
+                    </Text>
+                    <Text fontSize={22}>{getOnlyName(style.name)}</Text>
+                  </AutoLayout>
                 </AutoLayout>
                 <AutoLayout
                   width={"fill-parent"}
