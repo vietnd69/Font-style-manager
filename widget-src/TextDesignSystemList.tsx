@@ -9,14 +9,14 @@ const { AutoLayout, Text, Rectangle } = widget;
  * Props for the TextDesignList component
  */
 type TextDesignSystemListType = {
-  showStyle: textStyleType[];  // Text styles to display
-  showGroup: string[];         // Groups to display
+  showStyle: textStyleType[]; // Text styles to display
+  showGroup: string[]; // Groups to display
 };
 
 /**
  * Extract only the name part from a style path
  * For example: "Heading/H1" returns "H1"
- * 
+ *
  * @param name - Style name or path
  * @returns The extracted name without the path
  */
@@ -29,16 +29,15 @@ const getOnlyName = (name: string) => {
   }
 };
 
-<<<<<<< HEAD:widget-src/TextDesignSystemList.tsx
 /**
  * TextDesignList Component
- * 
+ *
  * Renders a list of text styles with their visual representation
  * and properties such as font family, style, size, etc.
- * 
+ *
  * @param value - Configuration with styles and groups to show
  */
-=======
+
 const splitNameAndGroup = (name: string): { name: string; group: string } => {
   if (name.includes("/")) {
     const parts = name.split("/");
@@ -50,7 +49,6 @@ const splitNameAndGroup = (name: string): { name: string; group: string } => {
   }
 };
 
->>>>>>> list-mode:widget-src/textDesignSystemList.tsx
 const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
   const { showStyle } = value;
   const styleList = showStyle;
