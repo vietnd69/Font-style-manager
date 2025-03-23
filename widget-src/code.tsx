@@ -117,6 +117,7 @@ export type CustomVariable = {
 export type textDesignManagerType = {
   textStyles: textStyleType[];  // Available text styles
   showUi: (params: ShowUiParams) => Promise<unknown>;  // Function to show UI
+  updateProgressUi: (params: Omit<ShowUiParams, 'name' | 'size'>) => void;  // Function to update UI without reopening it
   getLocalTextStyle: () => void;  // Function to fetch local text styles
   setHasReloadLocalFont: (
     newValue: boolean | ((currValue: boolean) => boolean)
@@ -561,11 +562,19 @@ function Widget() {
     new Promise(() => {
       figma.showUI(__html__, {
         width: size?.width || 300,
-        height: size?.height || 300,
+        height: size?.height || 400,
         title: name,
       });
       figma.ui.postMessage({ moduleName, data });
     });
+    
+  /**
+   * Cập nhật thông tin tiến trình trong UI mà không gọi lại figma.showUI
+   * Chỉ gửi message tới UI đã hiển thị
+   */
+  const updateProgressUi = ({ moduleName, data }: Omit<ShowUiParams, 'name' | 'size'>) => {
+    figma.ui.postMessage({ moduleName, data });
+  };
 
   return (
     <AutoLayout
@@ -695,6 +704,7 @@ function Widget() {
           value={{
             textStyles,
             showUi,
+            updateProgressUi,
             getLocalTextStyle,
             setHasReloadLocalFont,
             localFonts,

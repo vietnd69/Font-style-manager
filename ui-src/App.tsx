@@ -8,6 +8,7 @@ const ChoiceFont = lazy(() => import("./ChoiceFont"));
 const EditShowGroup = lazy(() => import("./EditShowGroup"));
 const EditShowType = lazy(() => import("./EditShowType"));
 const ChoiceVariable = lazy(() => import("./ChoiceVariable"));
+const Processing = lazy(() => import("./Processing"));
 
 function App() {
   const [module, setModule] = useState<string>("");
@@ -30,6 +31,7 @@ function App() {
         {module === "editShowGroup" && <EditShowGroup data={data} />}
         {module === "editTypeList" && <EditShowType data={data} />}
         {module === "choiceVariable" && <ChoiceVariable data={data} />}
+        {module === "processing" && <Processing data={data} />}
       </Suspense>
     </div>
   );

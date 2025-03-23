@@ -1,0 +1,59 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Font Style Manager for Figma
+
+## Project Structure
+
+### ui-src
+- React-based UI components for interactive interfaces
+- Core modules: ChoiceFont, EditShowGroup, EditShowType, ChoiceVariable, BuyMeACoffee,...
+- Built with React, TypeScript and CSS modules
+- Uses Vite for bundling and development
+
+### widget-src
+- Implements Figma Widget API and Plugin API
+- Core files: code.tsx, TextDesignSystemManager.tsx, TextDesignSystemList.tsx
+- Uses custom JSX factory (`figma.widget.h` and `figma.widget.Fragment`)
+- Manages widget state through `useSyncedState` hooks
+
+## Communication Pattern
+- Widget displays UI via `figma.showUI(__html__)`
+- Widget sends data to UI using `figma.ui.postMessage({ moduleName, data })`
+- UI sends messages to widget with `parent.postMessage({ pluginMessage: msg }, "*")`
+- Message types and structure defined in `msgType` interface
+- Widget listens for UI messages with `figma.ui.onmessage`
+
+## Figma Types Integration
+- Utilizes native Figma API types: Font, FontName, LineHeight, LetterSpacing, TextStyle
+- Extends with custom types:
+  - `textStyleType`: Text style definition with font properties and metadata
+  - `cleanFontType`: Simplified font type for easier manipulation
+  - `ShowType`: Display options for typography details
+  - `CustomVariable`: Custom variable definition for typography
+
+## Features
+- View and manage text styles in Figma documents
+- Search and filter text styles by various properties
+- Apply text styles to selected elements
+- Clone widgets with different style configurations
+- Link Figma Variables to text properties (fontFamily, fontSize, lineHeight, etc.)
+- Toggle between edit and view modes
+
+## Data Flow
+1. Widget loads fonts via `figma.listAvailableFontsAsync()` and text styles via `figma.getLocalTextStylesAsync()`
+2. User interacts with widget to open specific UI modules
+3. UI displays relevant data and controls for manipulation
+4. User makes changes and sends data back to widget
+5. Widget applies changes to Figma document using appropriate API calls
+
+## Build Configuration
+- `manifest.json` defines plugin parameters, API versions, and permissions
+- `networkAccess` allows Google Fonts integration
+- Configured for both Plugin API 1.0.0 and Widget API 1.0.0
+- Uses `documentAccess: "dynamic-page"` for document access
+- Build process uses separate TypeScript configurations for widget and UI 
+
+

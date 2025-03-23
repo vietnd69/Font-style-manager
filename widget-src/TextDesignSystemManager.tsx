@@ -8,6 +8,7 @@ import {
   ShowType,
   CustomVariable,
   textDesignManagerType,
+  ShowUiParams,
 } from "./code";
 import CheckBox from "./components/CheckBox";
 
@@ -46,6 +47,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
   const {
     textStyles,
     showUi,
+    updateProgressUi,
     getLocalTextStyle,
     setHasReloadLocalFont,
     localFonts,
@@ -158,6 +160,20 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
    * Compares current styles with cached styles to identify changes
    */
   const updateStyle = async () => {
+    const totalStyles = filterStyles.length;
+    let updatedCount = 0;
+    
+    // Hiển thị popup iframe để theo dõi tiến trình - chỉ gọi một lần
+    showUi({
+      moduleName: "processing",
+      name: "Updating Styles",
+      data: {
+        message: "Processing...",
+        current: 0,
+        total: totalStyles
+      }
+    });
+
     for (const style of filterStyles) {
       try {
         // Find the original style in cache for comparison
@@ -204,16 +220,42 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
               isUpdate = true;
             });
           }
-          if (isUpdate) {
-            figma.notify("✓ " + textStyle.name + "Style has update", {
-              timeout: 300,
-            });
-          }
+          // if (isUpdate) {
+          //   figma.notify("✓ " + textStyle.name + "Style has update", {
+          //     timeout: 300,
+          //   });
+          // }
         }
       } catch (err) {
         figma.notify("✕ " + err, { timeout: 3000, error: true });
       }
+      
+      // Cập nhật tiến trình - sử dụng updateProgressUi thay vì showUi
+      updatedCount++;
+      updateProgressUi({
+        moduleName: "processing",
+        data: {
+          message: "Processing...",
+          current: updatedCount,
+          total: totalStyles
+        }
+      });
     }
+    
+    // Hiển thị thông báo hoàn thành - sử dụng updateProgressUi
+    updateProgressUi({
+      moduleName: "processing",
+      data: {
+        message: "Styles updated",
+        current: updatedCount,
+        total: totalStyles,
+        completed: true
+      }
+    });
+    
+    // Thông báo thành công nhưng không đóng popup
+    // figma.notify("✓ Styles updated successfully", { timeout: 2000 });
+    
     setSearchGroup("");
     setSearchName("");
     setSearchFamily("");
