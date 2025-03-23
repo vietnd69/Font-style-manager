@@ -1011,16 +1011,19 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                       verticalAlignItems={"center"}
                       spacing={8}
                       cornerRadius={
-                        cache.boundVariables?.fontStyle !== undefined ? 8 : 0
+                        (cache.boundVariables?.fontStyle !== undefined || 
+                         cache.boundVariables?.fontWeight !== undefined) ? 8 : 0
                       }
                       fill={
-                        cache.boundVariables?.fontStyle !== undefined
+                        (cache.boundVariables?.fontStyle !== undefined || 
+                         cache.boundVariables?.fontWeight !== undefined)
                           ? "#eeeeee"
                           : "#ffffff00"
                       }
                       padding={{ vertical: 6, horizontal: 10 }}
                     >
-                      {cache.boundVariables?.fontStyle !== undefined && (
+                      {(cache.boundVariables?.fontStyle !== undefined || 
+                        cache.boundVariables?.fontWeight !== undefined) && (
                         <SVG src={variableSvg} />
                       )}
                       {!check.check && <SVG src={warningSvg} />}
