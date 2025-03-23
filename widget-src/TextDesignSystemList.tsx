@@ -9,14 +9,14 @@ const { AutoLayout, Text, Rectangle } = widget;
  * Props for the TextDesignList component
  */
 type TextDesignSystemListType = {
-  showStyle: textStyleType[];  // Text styles to display
-  showGroup: string[];         // Groups to display
+  showStyle: textStyleType[]; // Text styles to display
+  showGroup: string[]; // Groups to display
 };
 
 /**
  * Extract only the name part from a style path
  * For example: "Heading/H1" returns "H1"
- * 
+ *
  * @param name - Style name or path
  * @returns The extracted name without the path
  */
@@ -31,12 +31,24 @@ const getOnlyName = (name: string) => {
 
 /**
  * TextDesignList Component
- * 
+ *
  * Renders a list of text styles with their visual representation
  * and properties such as font family, style, size, etc.
- * 
+ *
  * @param value - Configuration with styles and groups to show
  */
+
+const splitNameAndGroup = (name: string): { name: string; group: string } => {
+  if (name.includes("/")) {
+    const parts = name.split("/");
+    const onlyName = parts.pop() || "";
+    const group = parts.join("/");
+    return { name: onlyName, group };
+  } else {
+    return { name, group: "" };
+  }
+};
+
 const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
   const { showStyle } = value;
   const styleList = showStyle;
@@ -70,7 +82,16 @@ const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
                   >
                     Ag
                   </Text>
-                  <Text fontSize={22}>{getOnlyName(style.name)}</Text>
+                  <AutoLayout
+                    width={"hug-contents"}
+                    height={"hug-contents"}
+                    direction="vertical"
+                  >
+                    <Text fontSize={18} fill={"#777"}>
+                      {splitNameAndGroup(style.name).group}
+                    </Text>
+                    <Text fontSize={22}>{getOnlyName(style.name)}</Text>
+                  </AutoLayout>
                 </AutoLayout>
                 <AutoLayout
                   width={"fill-parent"}
