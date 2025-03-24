@@ -29,10 +29,10 @@ import {
  * Interface for parameters passed when showing UI
  */
 export interface ShowUiParams {
-  moduleName: string;  // Module name to identify which UI to show
-  name: string;        // Name for the UI instance
-  data?: unknown;      // Optional data to pass to the UI
-  size?: { width: number; height: number };  // Optional size for the UI
+  moduleName: string; // Module name to identify which UI to show
+  name: string; // Name for the UI instance
+  data?: unknown; // Optional data to pass to the UI
+  size?: { width: number; height: number }; // Optional size for the UI
 }
 
 /**
@@ -40,31 +40,31 @@ export interface ShowUiParams {
  */
 export type msgType =
   | {
-      type: "close";  // Close UI message
+      type: "close"; // Close UI message
     }
   | {
-      type: "setFamilyAndWeight";  // Set font family and weight
+      type: "setFamilyAndWeight"; // Set font family and weight
       data: {
         family: string;
         weight: string;
       };
     }
   | {
-      type: "setShowTypoGroup";  // Set typography group to display
+      type: "setShowTypoGroup"; // Set typography group to display
       data: textStyleType[];
     }
   | {
-      type: "setShowDuplicateTypoGroup";  // Set duplicate typography group
+      type: "setShowDuplicateTypoGroup"; // Set duplicate typography group
       data: textStyleType[];
     }
   | {
-      type: "setShowEditType";  // Set display options for typography
+      type: "setShowEditType"; // Set display options for typography
       data: ShowType;
     }
   | {
-      type: "setVariable";  // Set variable for a style property
-      variableId: string;   // ID of the selected variable
-      styleId: string;      // ID of the style to bind variable to
+      type: "setVariable"; // Set variable for a style property
+      variableId: string; // ID of the selected variable
+      styleId: string; // ID of the style to bind variable to
       propertyType: string; // Type of property (e.g., "fontStyle", "fontFamily")
     };
 
@@ -72,30 +72,30 @@ export type msgType =
  * Text style definition with font properties and metadata
  */
 export type textStyleType = {
-  id: string;           // Unique identifier
-  name: string;         // Display name
-  fontName: FontName;   // Font name information
-  fontSize: number;     // Font size in pixels
-  lineHeight: LineHeight;  // Line height settings
-  letterSpacing: LetterSpacing;  // Letter spacing settings
-  description: string;  // Description of the text style
-  boundVariables?: { [key: string]: VariableAlias };  // Bound variables
+  id: string; // Unique identifier
+  name: string; // Display name
+  fontName: FontName; // Font name information
+  fontSize: number; // Font size in pixels
+  lineHeight: LineHeight; // Line height settings
+  letterSpacing: LetterSpacing; // Letter spacing settings
+  description: string; // Description of the text style
+  boundVariables?: { [key: string]: VariableAlias }; // Bound variables
 };
 
 /**
  * Simplified font type for easier manipulation
  */
 export type cleanFontType = {
-  family: string;     // Font family name
-  styles: string[];   // Available font styles
+  family: string; // Font family name
+  styles: string[]; // Available font styles
 };
 
 /**
  * Display options for typography details
  */
 export type ShowType = {
-  letterSpacing: boolean;  // Whether to show letter spacing
-  description: boolean;    // Whether to show descriptions
+  letterSpacing: boolean; // Whether to show letter spacing
+  description: boolean; // Whether to show descriptions
 };
 
 /**
@@ -115,18 +115,18 @@ export type CustomVariable = {
  * Text design manager configuration and state
  */
 export type textDesignManagerType = {
-  textStyles: textStyleType[];  // Available text styles
-  showUi: (params: ShowUiParams) => Promise<unknown>;  // Function to show UI
-  updateProgressUi: (params: Omit<ShowUiParams, 'name' | 'size'>) => void;  // Function to update UI without reopening it
-  getLocalTextStyle: () => void;  // Function to fetch local text styles
+  textStyles: textStyleType[]; // Available text styles
+  showUi: (params: ShowUiParams) => Promise<unknown>; // Function to show UI
+  updateProgressUi: (params: Omit<ShowUiParams, "name" | "size">) => void; // Function to update UI without reopening it
+  getLocalTextStyle: () => void; // Function to fetch local text styles
   setHasReloadLocalFont: (
     newValue: boolean | ((currValue: boolean) => boolean)
-  ) => void;  // Function to update font reload status
-  localFonts: Font[];  // Available local fonts
-  cleanFont: cleanFontType[];  // Simplified font information
-  isOpenSearchBar: boolean;  // Search bar visibility state
-  showEditType: ShowType;  // Typography display options
-  localVariableList: CustomVariable[];  // Available variables
+  ) => void; // Function to update font reload status
+  localFonts: Font[]; // Available local fonts
+  cleanFont: cleanFontType[]; // Simplified font information
+  isOpenSearchBar: boolean; // Search bar visibility state
+  showEditType: ShowType; // Typography display options
+  localVariableList: CustomVariable[]; // Available variables
 };
 
 /**
@@ -214,7 +214,9 @@ function Widget() {
   const handleCloneWidget = async (
     showStyleData: textStyleType[] = showStyle
   ) => {
-    const widgetNode = (await figma.getNodeByIdAsync(widgetId)) as WidgetNode;
+    const widgetNode = (await figma.getNodeByIdAsync(
+      String(widgetId)
+    )) as WidgetNode;
     const clonedWidget = widgetNode.clone();
 
     // Transfer the current state to the cloned widget
@@ -228,7 +230,7 @@ function Widget() {
       isFirstLoadFont,
       showStyle: showStyleData,
     });
-    
+
     // Position the cloned widget beside this widget
     widgetNode.parent!.appendChild(clonedWidget);
     clonedWidget.x = widgetNode.x + widgetNode.width + 250;
@@ -240,13 +242,13 @@ function Widget() {
    */
   const handleSetMode = () =>
     setMode((prev) => (prev === "edit" ? "view" : "edit"));
-    
+
   // Property menu configuration for mode selection
   const modeOptions = [
     { option: "edit", label: "Edit mode" },
     { option: "view", label: "List mode" },
   ];
-  
+
   // Configure the widget's property menu
   usePropertyMenu(
     [
@@ -323,8 +325,15 @@ function Widget() {
     }
     if (msg.type === "setVariable") {
       // Handle binding variable to text style property
-      console.log("Setting variable:", msg.variableId, "for style:", msg.styleId, "property:", msg.propertyType);
-      
+      console.log(
+        "Setting variable:",
+        msg.variableId,
+        "for style:",
+        msg.styleId,
+        "property:",
+        msg.propertyType
+      );
+
       try {
         // Find the text style to update
         const styleToUpdate = figma.getStyleById(msg.styleId) as TextStyle;
@@ -333,7 +342,7 @@ function Widget() {
           figma.closePlugin();
           return;
         }
-        
+
         // Get the variable reference
         const variableToApply = figma.variables.getVariableById(msg.variableId);
         if (!variableToApply) {
@@ -341,7 +350,7 @@ function Widget() {
           figma.closePlugin();
           return;
         }
-        
+
         // Map property type to the correct field for a TextStyle
         let field: string;
         switch (msg.propertyType) {
@@ -362,20 +371,24 @@ function Widget() {
             field = "letterSpacing";
             break;
           default:
-            console.warn(`Property type "${msg.propertyType}" not supported for variable binding`);
+            console.warn(
+              `Property type "${msg.propertyType}" not supported for variable binding`
+            );
             figma.closePlugin();
             return;
         }
-        
+
         // Use setBoundVariable to bind the variable to the style
         // @ts-ignore - Bypassing type checking because Figma API typings might be outdated
         styleToUpdate.setBoundVariable(field, variableToApply);
-        
-        console.log(`Successfully bound variable to ${field} of style ${styleToUpdate.name}`);
+
+        console.log(
+          `Successfully bound variable to ${field} of style ${styleToUpdate.name}`
+        );
       } catch (error) {
         console.error("Failed to bind variable:", error);
       }
-      
+
       figma.closePlugin();
     }
   };
@@ -397,7 +410,7 @@ function Widget() {
     let fontFamily: string = "";
     const data: cleanFontType[] = [];
     let fontStyles: string[] = [];
-    
+
     // Group fonts by family and collect available styles
     for (const font of fonts) {
       if (fontFamily === font.fontName.family) {
@@ -426,23 +439,23 @@ function Widget() {
   const getLocalTextStyle = async () => {
     const styles: TextStyle[] = await figma.getLocalTextStylesAsync();
     const data: textStyleType[] = [];
-    
+
     // Process each style to extract required information
     for (const style of styles) {
       const value = (await getDataStyle(style.id)) as textStyleType;
       data.push(value);
     }
-    
+
     // Update state with the processed styles
     setTextStyles(data);
     setCacheStyle(data);
     setFilterStyles(data);
     setShowStyle(data);
-    
+
     // Load local variables
     const localVariables = await figma.variables.getLocalVariablesAsync();
     const variablesData: CustomVariable[] = [];
-    
+
     for (const variable of localVariables) {
       const value = await getDataVariable(variable.id);
       if (value) {
@@ -492,11 +505,11 @@ function Widget() {
       const modes = await figma.variables.getVariableCollectionByIdAsync(
         data.variableCollectionId
       );
-      
+
       if (modes) {
         // Get default mode ID
         const defaultMode = modes.modes.find((mode) => mode.name === "Default");
-        
+
         return {
           id: data.id,
           name: data.name,
@@ -562,17 +575,20 @@ function Widget() {
     new Promise(() => {
       figma.showUI(__html__, {
         width: size?.width || 300,
-        height: size?.height || 400,
+        height: size?.height || 350,
         title: name,
       });
       figma.ui.postMessage({ moduleName, data });
     });
-    
+
   /**
    * Cập nhật thông tin tiến trình trong UI mà không gọi lại figma.showUI
    * Chỉ gửi message tới UI đã hiển thị
    */
-  const updateProgressUi = ({ moduleName, data }: Omit<ShowUiParams, 'name' | 'size'>) => {
+  const updateProgressUi = ({
+    moduleName,
+    data,
+  }: Omit<ShowUiParams, "name" | "size">) => {
     figma.ui.postMessage({ moduleName, data });
   };
 
