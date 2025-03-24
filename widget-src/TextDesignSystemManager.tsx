@@ -33,14 +33,14 @@ import {
 
 /**
  * TextDesignManager Component
- * 
+ *
  * A component for managing and displaying text design styles in Figma.
  * Provides functionality for:
  * - Viewing and filtering text styles
  * - Applying text styles to selected elements
  * - Managing text style properties like font family, weight, size, etc.
  * - Searching and organizing text styles
- * 
+ *
  * @param value - Configuration and state for the text design manager
  */
 const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
@@ -121,7 +121,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     const hasStyleInList = stylesChecked.find((idStyle) => idStyle === id)
       ? true
       : false;
-      
+
     if (hasStyleInList) {
       // If already selected, remove it
       if (stylesChecked.length === filterStyles.length) {
@@ -162,7 +162,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
   const updateStyle = async () => {
     const totalStyles = filterStyles.length;
     let updatedCount = 0;
-    
+
     // Hiển thị popup iframe để theo dõi tiến trình - chỉ gọi một lần
     showUi({
       moduleName: "processing",
@@ -170,8 +170,8 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
       data: {
         message: "Processing...",
         current: 0,
-        total: totalStyles
-      }
+        total: totalStyles,
+      },
     });
 
     for (const style of filterStyles) {
@@ -229,7 +229,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
       } catch (err) {
         figma.notify("✕ " + err, { timeout: 3000, error: true });
       }
-      
+
       // Cập nhật tiến trình - sử dụng updateProgressUi thay vì showUi
       updatedCount++;
       updateProgressUi({
@@ -237,11 +237,11 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
         data: {
           message: "Processing...",
           current: updatedCount,
-          total: totalStyles
-        }
+          total: totalStyles,
+        },
       });
     }
-    
+
     // Hiển thị thông báo hoàn thành - sử dụng updateProgressUi
     updateProgressUi({
       moduleName: "processing",
@@ -249,13 +249,13 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
         message: "Styles updated",
         current: updatedCount,
         total: totalStyles,
-        completed: true
-      }
+        completed: true,
+      },
     });
-    
+
     // Thông báo thành công nhưng không đóng popup
     // figma.notify("✓ Styles updated successfully", { timeout: 2000 });
-    
+
     setSearchGroup("");
     setSearchName("");
     setSearchFamily("");
@@ -275,6 +275,12 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
   };
 
   const checkFontName = (font: textStyleType) => {
+    // Kiểm tra xem fontName.style có phải là số hay không
+    // Chỉ áp dụng kiểm tra cho style, không kiểm tra cho family
+    if (!isNaN(Number(font.fontName.style))) {
+      return { check: false, status: "number" };
+    }
+
     // const regex = new RegExp(font.fontName.family, "i");
     const res = localFonts.filter(
       (fontLocal) => font.fontName.family === fontLocal.fontName.family
@@ -1022,23 +1028,41 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                         <SVG src={variableSvg} />
                       )}
                       {!check.check && check.status === "family" && (
-                        <SVG src={warningSvg} />
+                        <SVG
+                          src={warningSvg}
+                          tooltip="Font family does not exist in the system"
+                        />
                       )}
                       <Input
                         value={cache.fontName.family}
                         onTextEditEnd={(e) => {
                           setCacheStyle((prev) =>
-                            prev.map((i) =>
-                              i.id === style.id
-                                ? {
-                                    ...i,
-                                    fontName: {
-                                      ...i.fontName,
-                                      family: e.characters,
-                                    },
-                                  }
-                                : i
-                            )
+                            prev.map((i) => {
+                              if (i.id === style.id) {
+                                // Tạo phiên bản mới của boundVariables (nếu có) với fontFamily đã được loại bỏ
+                                const newBoundVariables = i.boundVariables
+                                  ? { ...i.boundVariables }
+                                  : undefined;
+
+                                // Nếu có boundVariables và có thuộc tính fontFamily, xóa nó
+                                if (
+                                  newBoundVariables &&
+                                  "fontFamily" in newBoundVariables
+                                ) {
+                                  delete newBoundVariables.fontFamily;
+                                }
+
+                                return {
+                                  ...i,
+                                  fontName: {
+                                    ...i.fontName,
+                                    family: e.characters,
+                                  },
+                                  boundVariables: newBoundVariables,
+                                };
+                              }
+                              return i;
+                            })
                           );
                         }}
                         fontSize={22}
@@ -1053,37 +1077,67 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                       verticalAlignItems={"center"}
                       spacing={8}
                       cornerRadius={
-                        (cache.boundVariables?.fontStyle !== undefined || 
-                         cache.boundVariables?.fontWeight !== undefined) ? 8 : 0
+                        cache.boundVariables?.fontStyle !== undefined ||
+                        cache.boundVariables?.fontWeight !== undefined
+                          ? 8
+                          : 0
                       }
                       fill={
-                        (cache.boundVariables?.fontStyle !== undefined || 
-                         cache.boundVariables?.fontWeight !== undefined)
+                        cache.boundVariables?.fontStyle !== undefined ||
+                        cache.boundVariables?.fontWeight !== undefined
                           ? "#eeeeee"
                           : "#ffffff00"
                       }
                       padding={{ vertical: 6, horizontal: 10 }}
                     >
-                      {(cache.boundVariables?.fontStyle !== undefined || 
+                      {(cache.boundVariables?.fontStyle !== undefined ||
                         cache.boundVariables?.fontWeight !== undefined) && (
                         <SVG src={variableSvg} />
                       )}
-                      {!check.check && <SVG src={warningSvg} />}
+                      {!check.check &&
+                        (check.status === "style" ||
+                          check.status === "number") && (
+                          <SVG
+                            src={warningSvg}
+                            tooltip={
+                              check.status === "style"
+                                ? "Font style does not exist for this font family"
+                                : "Numerical font weight is not supported, please use font style names (Regular, Bold, Medium,...)"
+                            }
+                          />
+                        )}
                       <Input
                         value={cache.fontName.style}
                         onTextEditEnd={(e) => {
                           setCacheStyle((prev) =>
-                            prev.map((i) =>
-                              i.id === style.id
-                                ? {
-                                    ...i,
-                                    fontName: {
-                                      ...i.fontName,
-                                      style: e.characters,
-                                    },
+                            prev.map((i) => {
+                              if (i.id === style.id) {
+                                // Tạo phiên bản mới của boundVariables (nếu có) với fontStyle và fontWeight đã được loại bỏ
+                                const newBoundVariables = i.boundVariables
+                                  ? { ...i.boundVariables }
+                                  : undefined;
+
+                                // Nếu có boundVariables và có thuộc tính fontStyle hoặc fontWeight, xóa chúng
+                                if (newBoundVariables) {
+                                  if ("fontStyle" in newBoundVariables) {
+                                    delete newBoundVariables.fontStyle;
                                   }
-                                : i
-                            )
+                                  if ("fontWeight" in newBoundVariables) {
+                                    delete newBoundVariables.fontWeight;
+                                  }
+                                }
+
+                                return {
+                                  ...i,
+                                  fontName: {
+                                    ...i.fontName,
+                                    style: e.characters,
+                                  },
+                                  boundVariables: newBoundVariables,
+                                };
+                              }
+                              return i;
+                            })
                           );
                         }}
                         fontSize={22}
@@ -1138,14 +1192,29 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                         value={cache.fontSize.toString()}
                         onTextEditEnd={(e) => {
                           setCacheStyle((prev) =>
-                            prev.map((i) =>
-                              i.id === style.id
-                                ? {
-                                    ...i,
-                                    fontSize: Number(e.characters),
-                                  }
-                                : i
-                            )
+                            prev.map((i) => {
+                              if (i.id === style.id) {
+                                // Tạo phiên bản mới của boundVariables (nếu có) với fontSize đã được loại bỏ
+                                const newBoundVariables = i.boundVariables
+                                  ? { ...i.boundVariables }
+                                  : undefined;
+
+                                // Nếu có boundVariables và có thuộc tính fontSize, xóa nó
+                                if (
+                                  newBoundVariables &&
+                                  "fontSize" in newBoundVariables
+                                ) {
+                                  delete newBoundVariables.fontSize;
+                                }
+
+                                return {
+                                  ...i,
+                                  fontSize: Number(e.characters),
+                                  boundVariables: newBoundVariables,
+                                };
+                              }
+                              return i;
+                            })
                           );
                         }}
                         placeholder="Type size"
