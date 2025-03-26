@@ -89,6 +89,48 @@ const getFontWeightValue = (
     "ultra-bold": 800,
     black: 900,
     heavy: 900,
+    "thin italic": 100,
+    "hairline italic": 100,
+    "extralight italic": 200,
+    "extra-light italic": 200,
+    "ultralight italic": 200,
+    "ultra-light italic": 200,
+    "light italic": 300,
+    "normal italic": 400,
+    "regular italic": 400,
+    "medium italic": 500,
+    "semibold italic": 600,
+    "semi-bold italic": 600,
+    "demibold italic": 600,
+    "demi-bold italic": 600,
+    "bold italic": 700,
+    "extrabold italic": 800,
+    "extra-bold italic": 800,
+    "ultrabold italic": 800,
+    "ultra-bold italic": 800,
+    "black italic": 900,
+    "heavy italic": 900,
+    "thin condensed": 100,
+    "hairline condensed": 100,
+    "extralight condensed": 200,
+    "extra-light condensed": 200,
+    "ultralight condensed": 200,
+    "ultra-light condensed": 200,
+    "light condensed": 300,
+    "normal condensed": 400,
+    "regular condensed": 400,
+    "medium condensed": 500,
+    "semibold condensed": 600,
+    "semi-bold condensed": 600,
+    "demibold condensed": 600,
+    "demi-bold condensed": 600,
+    "bold condensed": 700,
+    "extrabold condensed": 800,
+    "extra-bold condensed": 800,
+    "ultrabold condensed": 800,
+    "ultra-bold condensed": 800,
+    "black condensed": 900,
+    "heavy condensed": 900,
   };
   const fontStyles: FontStyle[] = ["italic"];
   const fontWidths: FontWidth[] = ["condensed"];
@@ -109,6 +151,17 @@ const getFontWeightValue = (
       fontStyle = word as FontStyle;
     } else if (fontWidths.includes(word as FontWidth)) {
       fontWidth = word as FontWidth;
+    }
+  }
+
+  // Nếu không tìm thấy weight từng từ, thử tìm trong toàn bộ tên style
+  if (fontWeight === 400) {
+    const fullStyleName = fontWeightName.toLowerCase();
+    for (const [key, value] of Object.entries(fontWeights)) {
+      if (fullStyleName.includes(key)) {
+        fontWeight = value;
+        break;
+      }
     }
   }
 

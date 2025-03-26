@@ -25,6 +25,8 @@ import {
   editSvg,
 } from "./svg";
 
+import getFontWeightValue from "./hooks/getFontWeightValue";
+
 /**
  * Interface for parameters passed when showing UI
  */
@@ -275,11 +277,38 @@ function Widget() {
   /**
    * Load available fonts from Figma and process them
    */
-  const loadLocalFont = () => {
-    figma.listAvailableFontsAsync().then((fonts) => {
-      setLocalFonts(fonts);
-      fontsClean(fonts);
-    });
+  const loadLocalFont = async () => {
+    try {
+      // Load fonts
+      const fonts = await figma.listAvailableFontsAsync();
+
+      // Lọc và xử lý fonts
+      const processedFonts = fonts.filter((font) => {
+        // Loại bỏ các font không hợp lệ
+        if (!font.fontName.family || font.fontName.family.startsWith("??")) {
+          return false;
+        }
+        return true;
+      });
+
+      // Cập nhật state
+      setLocalFonts(processedFonts);
+
+      // Xử lý và tổ chức lại fonts
+      fontsClean(processedFonts);
+
+      // Log thông tin về fonts đã load
+      console.log(`Đã load ${processedFonts.length} fonts`);
+
+      // Log các font family duy nhất
+      const uniqueFamilies = [
+        ...new Set(processedFonts.map((font) => font.fontName.family)),
+      ];
+      console.log(`Có ${uniqueFamilies.length} font families:`, uniqueFamilies);
+    } catch (error) {
+      console.error("Lỗi khi load fonts:", error);
+      figma.notify("❌ Có lỗi xảy ra khi load fonts", { error: true });
+    }
   };
 
   // const [newStyle, setNewStyle] = useSyncedState("newStyle", {
@@ -326,6 +355,7 @@ function Widget() {
       figma.closePlugin();
       return;
     }
+    console.log("Found style to update:", styleToUpdate);
 
     // Kiểm tra variable trong localVariableList
     const variableToApply = localVariableList.find(
@@ -336,9 +366,10 @@ function Widget() {
       figma.closePlugin();
       return;
     }
+    console.log("Found variable to apply:", variableToApply);
 
     // Map property type to the correct field for a TextStyle
-    let field: string;
+    let field: string = ""; // Khởi tạo giá trị mặc định
     switch (propertyType) {
       case "fontFamily":
         field = "fontFamily";
@@ -358,26 +389,116 @@ function Widget() {
         break;
       default:
         console.warn(
-          `Property type "${propertyType}" not supported for variable binding`
+          `Property type "${propertyType}" không được hỗ trợ để bind variable`
         );
         figma.closePlugin();
         return;
     }
+    console.log("Mapped field:", field);
 
-    // Update cache.boundVariables
-    setCacheStyle((prev) =>
-      prev.map((style) => {
+    // Update cache.boundVariables và giá trị tương ứng
+    setCacheStyle((prev: textStyleType[]) =>
+      prev.map((style: textStyleType) => {
         if (style.id === styleId) {
-          return {
-            ...style,
-            boundVariables: {
-              ...style.boundVariables,
-              [field]: {
-                type: "VARIABLE_ALIAS",
-                id: variableId,
-              },
+          // Lấy giá trị từ variable dựa trên defaultModeId
+          const defaultModeId = variableToApply.defaultModeId;
+
+          // Kiểm tra defaultModeId và valuesByMode
+          if (!defaultModeId || !variableToApply.valuesByMode[defaultModeId]) {
+            console.error(
+              `Variable ${variableId} không có giá trị cho defaultModeId ${defaultModeId}`
+            );
+            return style;
+          }
+
+          const variableValue = variableToApply.valuesByMode[defaultModeId];
+          console.log("Variable value:", variableValue);
+          console.log("Default mode ID:", defaultModeId);
+
+          // Cập nhật giá trị tương ứng với field
+          let updatedStyle = { ...style };
+          console.log("Current style before update:", updatedStyle);
+
+          switch (field) {
+            case "fontFamily":
+              updatedStyle.fontName = {
+                ...style.fontName,
+                family: variableValue as string,
+              };
+              console.log("Updated fontName:", updatedStyle.fontName);
+              break;
+            case "fontStyle":
+              // Kiểm tra kiểu dữ liệu của variableValue
+              if (typeof variableValue === "number") {
+                // Kiểm tra xem font có hỗ trợ weight không
+                const fontSupportsWeight = checkFontWeightSupport(
+                  style.fontName.family
+                );
+
+                if (fontSupportsWeight) {
+                  // Nếu hỗ trợ weight, chuyển đổi thành tên style tương ứng
+                  const weightToStyle: { [key: number]: string } = {
+                    100: "Thin",
+                    200: "ExtraLight",
+                    300: "Light",
+                    400: "Regular",
+                    500: "Medium",
+                    600: "SemiBold",
+                    700: "Bold",
+                    800: "ExtraBold",
+                    900: "Black",
+                  };
+                  updatedStyle.fontName = {
+                    ...style.fontName,
+                    style: weightToStyle[variableValue] || "Regular",
+                  };
+                } else {
+                  // Nếu không hỗ trợ weight, giữ nguyên style hiện tại
+                  console.warn(
+                    `Font ${style.fontName.family} không hỗ trợ weight ${variableValue}`
+                  );
+                  return style;
+                }
+              } else {
+                // Nếu là string, sử dụng trực tiếp
+                updatedStyle.fontName = {
+                  ...style.fontName,
+                  style: variableValue as string,
+                };
+              }
+              console.log("Updated fontName:", updatedStyle.fontName);
+              break;
+            case "fontSize":
+              updatedStyle.fontSize = variableValue as number;
+              console.log("Updated fontSize:", updatedStyle.fontSize);
+              break;
+            case "lineHeight":
+              console.log("Current lineHeight:", updatedStyle.lineHeight);
+              // Giữ nguyên giá trị lineHeight hiện tại vì nó là object phức tạp
+              break;
+            case "letterSpacing":
+              console.log("Current letterSpacing:", updatedStyle.letterSpacing);
+              // Giữ nguyên giá trị letterSpacing hiện tại vì nó là object phức tạp
+              break;
+            default:
+              console.warn(
+                `Field "${field}" không được hỗ trợ để bind variable`
+              );
+              figma.closePlugin();
+              return style; // Return style hiện tại thay vì undefined
+          }
+
+          // Cập nhật boundVariables
+          updatedStyle.boundVariables = {
+            ...style.boundVariables,
+            [field]: {
+              type: "VARIABLE_ALIAS",
+              id: variableId,
             },
           };
+          console.log("Updated boundVariables:", updatedStyle.boundVariables);
+
+          return updatedStyle;
         }
         return style;
       })
@@ -527,14 +648,19 @@ function Widget() {
   const getDataVariable = async (variableId: string) => {
     const data = await figma.variables.getVariableByIdAsync(variableId);
     if (data) {
-      // Extract modes and values
       const modes = await figma.variables.getVariableCollectionByIdAsync(
         data.variableCollectionId
       );
 
       if (modes) {
-        // Get default mode ID
-        const defaultMode = modes.modes.find((mode) => mode.name === "Default");
+        // Lấy defaultModeId từ collection hoặc mode đầu tiên
+        const defaultModeId = modes.defaultModeId || modes.modes[0]?.modeId;
+
+        // Kiểm tra xem defaultModeId có hợp lệ không
+        if (!defaultModeId) {
+          console.warn(`Variable ${variableId} không có defaultModeId hợp lệ`);
+          return undefined;
+        }
 
         return {
           id: data.id,
@@ -543,7 +669,7 @@ function Widget() {
           variableCollectionId: data.variableCollectionId,
           scopes: data.scopes,
           valuesByMode: data.valuesByMode,
-          defaultModeId: defaultMode?.modeId || "",
+          defaultModeId,
         };
       }
     }
@@ -616,6 +742,26 @@ function Widget() {
     data,
   }: Omit<ShowUiParams, "name" | "size">) => {
     figma.ui.postMessage({ moduleName, data });
+  };
+
+  /**
+   * Kiểm tra xem font có hỗ trợ weight hay không
+   * @param fontFamily - Tên font family cần kiểm tra
+   * @returns boolean - true nếu font hỗ trợ weight, false nếu không
+   */
+  const checkFontWeightSupport = (fontFamily: string): boolean => {
+    // Lấy danh sách font từ localFonts
+    const fontStyles = localFonts
+      .filter((font) => font.fontName.family === fontFamily)
+      .map((font) => font.fontName.style);
+
+    // Kiểm tra xem có style nào có weight hợp lệ không
+    const hasWeightStyle = fontStyles.some((style) => {
+      const weightInfo = getFontWeightValue(style);
+      return weightInfo.fontWeight !== undefined;
+    });
+
+    return hasWeightStyle;
   };
 
   return (
