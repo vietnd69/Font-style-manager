@@ -132,6 +132,44 @@ export type textDesignManagerType = {
 };
 
 /**
+ * Kiểm tra xem style trong cache có khác với local style không
+ * @param cacheStyle - Style từ cache
+ * @param localStyle - Style từ local
+ * @returns object - Object chứa thông tin về các thuộc tính đã thay đổi
+ */
+export const checkStyleChanged = (
+  cacheStyle: textStyleType,
+  localStyle: textStyleType
+): {
+  fontFamily: boolean;
+  fontStyle: boolean;
+  fontSize: boolean;
+  lineHeight: boolean;
+  letterSpacing: boolean;
+  description: boolean;
+} => {
+  return {
+    fontFamily: cacheStyle.fontName.family !== localStyle.fontName.family,
+    fontStyle: cacheStyle.fontName.style !== localStyle.fontName.style,
+    fontSize: cacheStyle.fontSize !== localStyle.fontSize,
+    lineHeight:
+      cacheStyle.lineHeight.unit !== localStyle.lineHeight.unit ||
+      (cacheStyle.lineHeight.unit !== "AUTO" &&
+        localStyle.lineHeight.unit !== "AUTO" &&
+        cacheStyle.lineHeight.value !== localStyle.lineHeight.value),
+    letterSpacing:
+      cacheStyle.letterSpacing.unit !== localStyle.letterSpacing.unit ||
+      (cacheStyle.letterSpacing.unit === "PIXELS" &&
+        localStyle.letterSpacing.unit === "PIXELS" &&
+        cacheStyle.letterSpacing.value !== localStyle.letterSpacing.value) ||
+      (cacheStyle.letterSpacing.unit === "PERCENT" &&
+        localStyle.letterSpacing.unit === "PERCENT" &&
+        cacheStyle.letterSpacing.value !== localStyle.letterSpacing.value),
+    description: cacheStyle.description !== localStyle.description,
+  };
+};
+
+/**
  * Main Widget component for the Font Style Manager
  * Manages state, UI modes, and handles communication with Figma API
  */
@@ -762,6 +800,126 @@ function Widget() {
     });
 
     return hasWeightStyle;
+  };
+
+  const updateStyle = async (
+    setSearchGroup: (value: string) => void,
+    setSearchName: (value: string) => void,
+    setSearchFamily: (value: string) => void,
+    setSearchStyle: (value: string) => void,
+    setSearchFontSize: (value: string) => void,
+    setCheckedFamily: (value: string) => void,
+    setCheckedGroup: (value: string) => void,
+    setCheckedStyle: (value: string) => void,
+    setCheckedFontSize: (value: string) => void,
+    setCheckedLineHeight: (value: LineHeight | { unit: "" }) => void,
+    setCheckedLetterSpacing: (value: LetterSpacing | { unit: "" }) => void,
+    setFilterStyles: (value: textStyleType[]) => void,
+    setCacheStyle: (value: textStyleType[]) => void,
+    setStylesChecked: (value: string[]) => void,
+    setHasCheckAll: (value: boolean) => void,
+    setHasReloadLocalFont: (value: boolean) => void
+  ) => {
+    const totalStyles = filterStyles.length;
+    let updatedCount = 0;
+
+    // Hiển thị popup iframe để theo dõi tiến trình - chỉ gọi một lần
+    showUi({
+      moduleName: "processing",
+      name: "Updating Styles",
+      data: {
+        message: "Processing...",
+        current: 0,
+        total: totalStyles,
+      },
+    });
+
+    for (const style of filterStyles) {
+      try {
+        // Find the original style in cache for comparison
+        const cache = cacheStyle.find((i) => i.id === style.id);
+        if (cache) {
+          // Get the actual style from Figma
+          const textStyle: TextStyle = (await figma.getStyleByIdAsync(
+            style.id
+          )) as TextStyle;
+          let isUpdate = false;
+
+          if (cache.description !== style.description) {
+            textStyle.description = cache.description;
+            isUpdate = true;
+          }
+          if (
+            cache.fontName.family !== style.fontName.family ||
+            cache.fontName.style !== style.fontName.style
+          ) {
+            await figma.loadFontAsync({ ...cache.fontName }).then(() => {
+              textStyle.fontName = { ...cache.fontName };
+              isUpdate = true;
+            });
+          }
+          if (cache.fontSize !== style.fontSize) {
+            await figma.loadFontAsync({ ...cache.fontName }).then(() => {
+              textStyle.fontSize = cache.fontSize;
+              isUpdate = true;
+            });
+          }
+          if (cache.lineHeight !== style.lineHeight) {
+            await figma.loadFontAsync({ ...cache.fontName }).then(() => {
+              textStyle.lineHeight = cache.lineHeight;
+              isUpdate = true;
+            });
+          }
+          if (cache.letterSpacing !== style.letterSpacing) {
+            await figma.loadFontAsync({ ...cache.fontName }).then(() => {
+              textStyle.letterSpacing = cache.letterSpacing;
+              isUpdate = true;
+            });
+          }
+        }
+      } catch (err) {
+        figma.notify("✕ " + err, { timeout: 3000, error: true });
+      }
+
+      // Cập nhật tiến trình - sử dụng updateProgressUi thay vì showUi
+      updatedCount++;
+      updateProgressUi({
+        moduleName: "processing",
+        data: {
+          message: "Processing...",
+          current: updatedCount,
+          total: totalStyles,
+        },
+      });
+    }
+
+    // Hiển thị thông báo hoàn thành - sử dụng updateProgressUi
+    updateProgressUi({
+      moduleName: "processing",
+      data: {
+        message: "Styles updated",
+        current: updatedCount,
+        total: totalStyles,
+        completed: true,
+      },
+    });
+
+    setSearchGroup("");
+    setSearchName("");
+    setSearchFamily("");
+    setSearchStyle("");
+    setSearchFontSize("");
+    setCheckedFamily("");
+    setCheckedGroup("");
+    setCheckedStyle("");
+    setCheckedFontSize("");
+    setCheckedLineHeight({ unit: "" });
+    setCheckedLetterSpacing({ unit: "" });
+    setFilterStyles(textStyles);
+    setCacheStyle(textStyles);
+    setStylesChecked([]);
+    setHasCheckAll(false);
+    setHasReloadLocalFont(true);
   };
 
   return (

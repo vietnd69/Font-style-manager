@@ -9,6 +9,7 @@ import {
   CustomVariable,
   textDesignManagerType,
   ShowUiParams,
+  checkStyleChanged,
 } from "./code";
 import CheckBox from "./components/CheckBox";
 
@@ -159,7 +160,24 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
    * Update text styles in Figma based on current state
    * Compares current styles with cached styles to identify changes
    */
-  const updateStyle = async () => {
+  const updateStyle = async (
+    setSearchGroup: (value: string) => void,
+    setSearchName: (value: string) => void,
+    setSearchFamily: (value: string) => void,
+    setSearchStyle: (value: string) => void,
+    setSearchFontSize: (value: string) => void,
+    setCheckedFamily: (value: string) => void,
+    setCheckedGroup: (value: string) => void,
+    setCheckedStyle: (value: string) => void,
+    setCheckedFontSize: (value: string) => void,
+    setCheckedLineHeight: (value: LineHeight | { unit: "" }) => void,
+    setCheckedLetterSpacing: (value: LetterSpacing | { unit: "" }) => void,
+    setFilterStyles: (value: textStyleType[]) => void,
+    setCacheStyle: (value: textStyleType[]) => void,
+    setStylesChecked: (value: string[]) => void,
+    setHasCheckAll: (value: boolean) => void,
+    setHasReloadLocalFont: (value: boolean) => void
+  ) => {
     const totalStyles = filterStyles.length;
     let updatedCount = 0;
 
@@ -989,25 +1007,14 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                     />
                     {/* style name */}
                     <Rectangle width={1} height={50} fill={"#ccc"} />
-                    <Input
-                      value={cache.name}
-                      onTextEditEnd={(e) => {
-                        setCacheStyle((prev) =>
-                          prev.map((i) =>
-                            i.id === style.id
-                              ? {
-                                  ...i,
-                                  name: e.characters,
-                                }
-                              : i
-                          )
-                        );
-                      }}
-                      placeholder="Type name"
+                    <Text
                       fontSize={22}
                       fontFamily={"Roboto"}
                       width={450}
-                    />
+                      fill={"#000000"}
+                    >
+                      {cache.name}
+                    </Text>
                     {/* font family */}
                     <Rectangle width={1} height={50} fill={"#ccc"} />
                     <AutoLayout
@@ -1039,12 +1046,10 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                           setCacheStyle((prev) =>
                             prev.map((i) => {
                               if (i.id === style.id) {
-                                // Tạo phiên bản mới của boundVariables (nếu có) với fontFamily đã được loại bỏ
                                 const newBoundVariables = i.boundVariables
                                   ? { ...i.boundVariables }
                                   : undefined;
 
-                                // Nếu có boundVariables và có thuộc tính fontFamily, xóa nó
                                 if (
                                   newBoundVariables &&
                                   "fontFamily" in newBoundVariables
@@ -1068,6 +1073,11 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                         fontSize={22}
                         fontFamily={"Roboto"}
                         width={"fill-parent"}
+                        fill={
+                          checkStyleChanged(cache, style).fontFamily
+                            ? "#0B68D6"
+                            : "#000000"
+                        }
                       />
                     </AutoLayout>
                     {/* Font weight */}
@@ -1112,12 +1122,10 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                           setCacheStyle((prev) =>
                             prev.map((i) => {
                               if (i.id === style.id) {
-                                // Tạo phiên bản mới của boundVariables (nếu có) với fontStyle và fontWeight đã được loại bỏ
                                 const newBoundVariables = i.boundVariables
                                   ? { ...i.boundVariables }
                                   : undefined;
 
-                                // Nếu có boundVariables và có thuộc tính fontStyle hoặc fontWeight, xóa chúng
                                 if (newBoundVariables) {
                                   if ("fontStyle" in newBoundVariables) {
                                     delete newBoundVariables.fontStyle;
@@ -1143,6 +1151,11 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                         fontSize={22}
                         fontFamily={"Roboto"}
                         width={"fill-parent"}
+                        fill={
+                          checkStyleChanged(cache, style).fontStyle
+                            ? "#0B68D6"
+                            : "#000000"
+                        }
                       />
                       <Text
                         fontSize={20}
@@ -1194,12 +1207,10 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                           setCacheStyle((prev) =>
                             prev.map((i) => {
                               if (i.id === style.id) {
-                                // Tạo phiên bản mới của boundVariables (nếu có) với fontSize đã được loại bỏ
                                 const newBoundVariables = i.boundVariables
                                   ? { ...i.boundVariables }
                                   : undefined;
 
-                                // Nếu có boundVariables và có thuộc tính fontSize, xóa nó
                                 if (
                                   newBoundVariables &&
                                   "fontSize" in newBoundVariables
@@ -1221,6 +1232,11 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                         fontSize={22}
                         fontFamily={"Roboto"}
                         width={"fill-parent"}
+                        fill={
+                          checkStyleChanged(cache, style).fontSize
+                            ? "#0B68D6"
+                            : "#000000"
+                        }
                       />
                     </AutoLayout>
                     {/* Line height */}
@@ -1242,9 +1258,6 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                       {cache.boundVariables?.lineHeight !== undefined && (
                         <SVG src={variableSvg} />
                       )}
-                      {/* <Text fontSize={22} fontFamily={"Roboto"} horizontalAlignText={"left"}>
-												{cache.lineHeight.value ? cache.lineHeight.value : "Auto"}
-											</Text> */}
                       <Input
                         value={
                           cache.lineHeight.unit !== "AUTO" &&
@@ -1264,7 +1277,6 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                             .toLowerCase();
                           const value = getLineHeight(data);
 
-                          // console.log(value);
                           if (value.unit !== "") {
                             setCacheStyle((prev) =>
                               prev.map((i) =>
@@ -1283,6 +1295,11 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                         fontSize={22}
                         fontFamily={"Roboto"}
                         width={"fill-parent"}
+                        fill={
+                          checkStyleChanged(cache, style).lineHeight
+                            ? "#0B68D6"
+                            : "#000000"
+                        }
                       />
                       <Text
                         fontSize={20}
@@ -1339,7 +1356,6 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                                 .toLowerCase();
                               const value = getLetterSpacing(data);
 
-                              // console.log(value);
                               if (value.unit !== "") {
                                 setCacheStyle((prev) =>
                                   prev.map((i) =>
@@ -1358,6 +1374,11 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                             fontSize={22}
                             fontFamily={"Roboto"}
                             width={"fill-parent"}
+                            fill={
+                              checkStyleChanged(cache, style).letterSpacing
+                                ? "#0B68D6"
+                                : "#000000"
+                            }
                           />
                         </AutoLayout>
                       </>
@@ -1384,6 +1405,11 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                           fontSize={22}
                           fontFamily={"Roboto"}
                           width={"fill-parent"}
+                          fill={
+                            checkStyleChanged(cache, style).description
+                              ? "#0B68D6"
+                              : "#000000"
+                          }
                         />
                       </>
                     )}
@@ -1428,7 +1454,26 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
           padding={24}
           fill={"#0B68D6"}
           cornerRadius={12}
-          onClick={() => updateStyle()}
+          onClick={() =>
+            updateStyle(
+              setSearchGroup,
+              setSearchName,
+              setSearchFamily,
+              setSearchStyle,
+              setSearchFontSize,
+              setCheckedFamily,
+              setCheckedGroup,
+              setCheckedStyle,
+              setCheckedFontSize,
+              setCheckedLineHeight,
+              setCheckedLetterSpacing,
+              setFilterStyles,
+              setCacheStyle,
+              setStylesChecked,
+              setHasCheckAll,
+              setHasReloadLocalFont
+            )
+          }
           spacing={16}
           hoverStyle={{ fill: "#1A7CF0" }}
         >
