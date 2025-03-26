@@ -181,7 +181,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     const totalStyles = filterStyles.length;
     let updatedCount = 0;
 
-    // Hiển thị popup iframe để theo dõi tiến trình - chỉ gọi một lần
+    // Show popup iframe to track progress - only call once
     showUi({
       moduleName: "processing",
       name: "Updating Styles",
@@ -248,7 +248,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
         figma.notify("✕ " + err, { timeout: 3000, error: true });
       }
 
-      // Cập nhật tiến trình - sử dụng updateProgressUi thay vì showUi
+      // Update progress - use updateProgressUi instead of showUi
       updatedCount++;
       updateProgressUi({
         moduleName: "processing",
@@ -260,7 +260,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
       });
     }
 
-    // Hiển thị thông báo hoàn thành - sử dụng updateProgressUi
+    // Show completion message - use updateProgressUi
     updateProgressUi({
       moduleName: "processing",
       data: {
@@ -271,7 +271,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
       },
     });
 
-    // Thông báo thành công nhưng không đóng popup
+    // Success notification but don't close popup
     // figma.notify("✓ Styles updated successfully", { timeout: 2000 });
 
     setSearchGroup("");
@@ -292,20 +292,112 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     setHasReloadLocalFont(true);
   };
 
+  const handleChangeSelectedStyle = () => {
+    console.log(
+      "[handleChangeSelectedStyle] Starting to update selected styles"
+    );
+    console.log(
+      `[handleChangeSelectedStyle] Number of selected styles: ${stylesChecked.length}`
+    );
+
+    if (stylesChecked.length !== 0) {
+      for (const style of stylesChecked) {
+        console.log(
+          `[handleChangeSelectedStyle] Processing style ID: ${style}`
+        );
+        const cache = cacheStyle.find((i) => i.id === style) as textStyleType;
+        if (cache) {
+          console.log(
+            `[handleChangeSelectedStyle] Found cache for style: ${cache.name}`
+          );
+          let hasChanges = false;
+
+          if (checkedGroup != "") {
+            console.log(
+              `[handleChangeSelectedStyle] Updating group for ${cache.name}: ${checkedGroup}`
+            );
+            cache.name = checkedGroup + "/" + getNameStyle(cache.name);
+            hasChanges = true;
+          }
+          if (checkedFamily != "") {
+            console.log(
+              `[handleChangeSelectedStyle] Updating font family for ${cache.name}: ${checkedFamily}`
+            );
+            cache.fontName = {
+              ...cache.fontName,
+              family: checkedFamily,
+            };
+            hasChanges = true;
+          }
+          if (checkedStyle != "") {
+            console.log(
+              `[handleChangeSelectedStyle] Updating font style for ${cache.name}: ${checkedStyle}`
+            );
+            cache.fontName = {
+              ...cache.fontName,
+              style: checkedStyle,
+            };
+            hasChanges = true;
+          }
+          if (checkedFontSize != "" || isNaN(Number(checkedFontSize))) {
+            console.log(
+              `[handleChangeSelectedStyle] Updating font size for ${cache.name}: ${checkedFontSize}`
+            );
+            cache.fontSize = Number(checkedFontSize);
+            hasChanges = true;
+          }
+          if (checkedLineHeight.unit != "") {
+            console.log(
+              `[handleChangeSelectedStyle] Updating line height for ${cache.name}: ${JSON.stringify(checkedLineHeight)}`
+            );
+            cache.lineHeight = checkedLineHeight;
+            hasChanges = true;
+          }
+          if (checkedLetterSpacing.unit != "") {
+            console.log(
+              `[handleChangeSelectedStyle] Updating letter spacing for ${cache.name}: ${JSON.stringify(checkedLetterSpacing)}`
+            );
+            cache.letterSpacing = checkedLetterSpacing;
+            hasChanges = true;
+          }
+
+          if (hasChanges) {
+            console.log(
+              `[handleChangeSelectedStyle] Updating cache for style: ${cache.name}`
+            );
+            setCacheStyle((prev) =>
+              prev.map((i) => (i.id === style ? cache : i))
+            );
+          } else {
+            console.log(
+              `[handleChangeSelectedStyle] No changes needed for style: ${cache.name}`
+            );
+          }
+        } else {
+          console.warn(
+            `[handleChangeSelectedStyle] No cache found for style ID: ${style}`
+          );
+        }
+      }
+      console.log(
+        "[handleChangeSelectedStyle] Finished updating selected styles"
+      );
+    } else {
+      console.log("[handleChangeSelectedStyle] No styles selected");
+    }
+  };
+
   const checkFontName = (font: textStyleType) => {
-    // Kiểm tra xem fontName.style có phải là số hay không
-    // Chỉ áp dụng kiểm tra cho style, không kiểm tra cho family
+    // Check if fontName.style is a number
+    // Only apply check for style, not for family
     if (!isNaN(Number(font.fontName.style))) {
       return { check: false, status: "number" };
     }
 
-    // const regex = new RegExp(font.fontName.family, "i");
     const res = localFonts.filter(
       (fontLocal) => font.fontName.family === fontLocal.fontName.family
     );
-    // console.log(res)
     if (res.length !== 0) {
-      // const regex = new RegExp(font.fontName.style, "i");
       const style = res.filter(
         (fontLocal) => font.fontName.style === fontLocal.fontName.style
       );
@@ -440,45 +532,6 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     });
   };
 
-  const handleChangeSelectedStyle = () => {
-    // console.log(stylesChecked)
-    if (stylesChecked.length !== 0) {
-      for (const style of stylesChecked) {
-        const cache = cacheStyle.find((i) => i.id === style) as textStyleType;
-        // console.log(cache);
-        if (cache) {
-          if (checkedGroup != "") {
-            cache.name = checkedGroup + "/" + getNameStyle(cache.name);
-          }
-          if (checkedFamily != "") {
-            cache.fontName = {
-              ...cache.fontName,
-              family: checkedFamily,
-            };
-          }
-          if (checkedStyle != "") {
-            cache.fontName = {
-              ...cache.fontName,
-              style: checkedStyle,
-            };
-          }
-          if (checkedFontSize != "" || isNaN(Number(checkedFontSize))) {
-            cache.fontSize = Number(checkedFontSize);
-          }
-          if (checkedLineHeight.unit != "") {
-            cache.lineHeight = checkedLineHeight;
-          }
-          if (checkedLetterSpacing.unit != "") {
-            cache.letterSpacing = checkedLetterSpacing;
-          }
-          setCacheStyle((prev) =>
-            prev.map((i) => (i.id === style ? cache : i))
-          );
-        }
-      }
-    }
-  };
-
   const getLineHeight = (data: string) => {
     const unit =
       data === "auto"
@@ -506,6 +559,37 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     const unit = data.endsWith("px") ? "PIXELS" : "PERCENT";
     const value = Number(data.replace(/[px%]/g, ""));
     return { value, unit } as LetterSpacing;
+  };
+
+  const getDataVariable = async (variableId: string) => {
+    const data = await figma.variables.getVariableByIdAsync(variableId);
+    if (data) {
+      const modes = await figma.variables.getVariableCollectionByIdAsync(
+        data.variableCollectionId
+      );
+
+      if (modes) {
+        // Get defaultModeId from collection or first mode
+        const defaultModeId = modes.defaultModeId || modes.modes[0]?.modeId;
+
+        // Check if defaultModeId is valid
+        if (!defaultModeId) {
+          console.warn(`Variable ${variableId} has no valid defaultModeId`);
+          return undefined;
+        }
+
+        return {
+          id: data.id,
+          name: data.name,
+          key: data.key,
+          variableCollectionId: data.variableCollectionId,
+          scopes: data.scopes,
+          valuesByMode: data.valuesByMode,
+          defaultModeId,
+        };
+      }
+    }
+    return undefined;
   };
 
   return (

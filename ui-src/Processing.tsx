@@ -20,8 +20,6 @@ const Processing = ({ data }: ProcessingProps) => {
     }
   }, [data.current, data.total]);
 
-
-
   // Nếu đã hoàn thành, hiển thị thông báo hoàn thành
   if (data.completed) {
     return (
@@ -29,18 +27,19 @@ const Processing = ({ data }: ProcessingProps) => {
         <div className="processing-content">
           <h2>Styles updated successfully</h2>
           <div className="progress-info">
-            <span>{data.current} / {data.total} styles</span>
+            <span>
+              {data.current} / {data.total} styles
+            </span>
           </div>
           <div className="progress-bar-container">
-            <div 
-              className="progress-bar" 
+            <div
+              className="progress-bar"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
           <div className="processing-message success">
             <span>{data.message}</span>
           </div>
-
         </div>
       </div>
     );
@@ -52,13 +51,12 @@ const Processing = ({ data }: ProcessingProps) => {
       <div className="processing-content">
         <h2>Updating Styles</h2>
         <div className="progress-info">
-          <span>{data.current} / {data.total} styles</span>
+          <span>
+            {data.current} / {data.total} styles
+          </span>
         </div>
         <div className="progress-bar-container">
-          <div 
-            className="progress-bar" 
-            style={{ width: `${progress}%` }}
-          ></div>
+          <div className="progress-bar" style={{ width: `${progress}%` }}></div>
         </div>
         <div className="processing-message">
           <span>{data.message}</span>
@@ -68,4 +66,4 @@ const Processing = ({ data }: ProcessingProps) => {
   );
 };
 
-export default Processing; 
+export default Processing;

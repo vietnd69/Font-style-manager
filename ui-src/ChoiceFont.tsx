@@ -7,161 +7,169 @@ import fontWeightSvg from "./styles/assets/font-weight.png";
 import { cleanFontType } from "../widget-src/code";
 
 const ChoiceFont = ({ data }: { data: cleanFontType[] }) => {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const [inputFontName, setInputFontName] = useState<any>("");
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const [listFontWeight, setListFontWeight] = useState<any>("");
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const [inputFontWeight, setInputFontWeight] = useState<any>("");
-	
-	const handleClose = () => parent.postMessage({ pluginMessage: { type: "close" } }, "*");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [inputFontName, setInputFontName] = useState<any>("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [listFontWeight, setListFontWeight] = useState<any>("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [inputFontWeight, setInputFontWeight] = useState<any>("");
 
-	const handleSave = () =>
-		parent.postMessage(
-			{
-				pluginMessage: {
-					type: "setFamilyAndWeight",
-					data: { family: inputFontName.value, weight: inputFontWeight.value },
-				},
-			},
-			"*"
-		);
+  const handleClose = () =>
+    parent.postMessage({ pluginMessage: { type: "close" } }, "*");
 
-	// console.log(data)
+  const handleSave = () =>
+    parent.postMessage(
+      {
+        pluginMessage: {
+          type: "setFamilyAndWeight",
+          data: { family: inputFontName.value, weight: inputFontWeight.value },
+        },
+      },
+      "*"
+    );
 
-	const getFontWeightList = (fontName: string) => {
-		const font = data.find((fontList: cleanFontType) => fontList.family === fontName);
-		return font ? font.styles : [];
-	};
-	const getFontWeightStyleAndWidth = (input: string) => {
-		const fontWeights = {
-			thin: 100,
-			hairline: 100,
-			extralight: 200,
-			"extra-light": 200,
-			ultralight: 200,
-			"ultra-light": 200,
-			light: 300,
-			normal: 400,
-			regular: 400,
-			medium: 500,
-			semibold: 600,
-			"semi-bold": 600,
-			demibold: 600,
-			"demi-bold": 600,
-			bold: 700,
-			extrabold: 800,
-			"extra-bold": 800,
-			ultrabold: 800,
-			"ultra-bold": 800,
-			black: 900,
-			heavy: 900,
-		};
+  // console.log(data)
 
-		const fontStyles = ["italic"];
+  const getFontWeightList = (fontName: string) => {
+    const font = data.find(
+      (fontList: cleanFontType) => fontList.family === fontName
+    );
+    return font ? font.styles : [];
+  };
+  const getFontWeightStyleAndWidth = (input: string) => {
+    const fontWeights = {
+      thin: 100,
+      hairline: 100,
+      extralight: 200,
+      "extra-light": 200,
+      ultralight: 200,
+      "ultra-light": 200,
+      light: 300,
+      normal: 400,
+      regular: 400,
+      medium: 500,
+      semibold: 600,
+      "semi-bold": 600,
+      demibold: 600,
+      "demi-bold": 600,
+      bold: 700,
+      extrabold: 800,
+      "extra-bold": 800,
+      ultrabold: 800,
+      "ultra-bold": 800,
+      black: 900,
+      heavy: 900,
+    };
 
-		const fontWidths = ["condensed"];
+    const fontStyles = ["italic"];
 
-		const words = input.toLowerCase().split(" ");
+    const fontWidths = ["condensed"];
 
-		let fontWeight = 400;
-		let fontStyle;
-		let fontWidth;
+    const words = input.toLowerCase().split(" ");
 
-		for (const word of words) {
-			if (word in fontWeights) {
-				fontWeight = fontWeights[word as keyof typeof fontWeights];
-			} else if (fontStyles.includes(word)) {
-				fontStyle = word;
-			} else if (fontWidths.includes(word)) {
-				fontWidth = word;
-			}
-		}
+    let fontWeight = 400;
+    let fontStyle;
+    let fontWidth;
 
-		return { fontWeight, fontStyle, fontWidth };
-	};
+    for (const word of words) {
+      if (word in fontWeights) {
+        fontWeight = fontWeights[word as keyof typeof fontWeights];
+      } else if (fontStyles.includes(word)) {
+        fontStyle = word;
+      } else if (fontWidths.includes(word)) {
+        fontWidth = word;
+      }
+    }
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const sortFontNames = (fontNames: any) => {
-		return fontNames.sort((a: string, b: string) => {
-			const aInfo = getFontWeightStyleAndWidth(a);
-			const bInfo = getFontWeightStyleAndWidth(b);
-			if (aInfo.fontStyle !== bInfo.fontStyle) {
-				return aInfo.fontStyle === undefined ? -1 : 1;
-			}
-			if (aInfo.fontWidth !== bInfo.fontWidth) {
-				return aInfo.fontWidth === undefined ? -1 : 1;
-			}
+    return { fontWeight, fontStyle, fontWidth };
+  };
 
-			if (aInfo.fontWeight !== bInfo.fontWeight) {
-				return aInfo.fontWeight - bInfo.fontWeight;
-			}
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sortFontNames = (fontNames: any) => {
+    return fontNames.sort((a: string, b: string) => {
+      const aInfo = getFontWeightStyleAndWidth(a);
+      const bInfo = getFontWeightStyleAndWidth(b);
+      if (aInfo.fontStyle !== bInfo.fontStyle) {
+        return aInfo.fontStyle === undefined ? -1 : 1;
+      }
+      if (aInfo.fontWidth !== bInfo.fontWidth) {
+        return aInfo.fontWidth === undefined ? -1 : 1;
+      }
 
-			return a.localeCompare(b);
-		});
-	};
+      if (aInfo.fontWeight !== bInfo.fontWeight) {
+        return aInfo.fontWeight - bInfo.fontWeight;
+      }
 
-	const mapFontWeights = (data: cleanFontType[]) => data.map((weight) => ({ value: weight, label: weight }));
+      return a.localeCompare(b);
+    });
+  };
 
-	useEffect(() => {
-		if (inputFontName !== "") {
-			setListFontWeight(mapFontWeights(sortFontNames(getFontWeightList(inputFontName?.value))));
-		}
-		// console.log(inputFontName);
-	}, [inputFontName]);
-	useEffect(() => {
-		setInputFontWeight(listFontWeight[0]);
-	}, [listFontWeight]);
+  const mapFontWeights = (data: cleanFontType[]) =>
+    data.map((weight) => ({ value: weight, label: weight }));
 
-	const fontList = data.map((font: cleanFontType) => ({ value: font.family, label: font.family }));
+  useEffect(() => {
+    if (inputFontName !== "") {
+      setListFontWeight(
+        mapFontWeights(sortFontNames(getFontWeightList(inputFontName?.value)))
+      );
+    }
+    // console.log(inputFontName);
+  }, [inputFontName]);
+  useEffect(() => {
+    setInputFontWeight(listFontWeight[0]);
+  }, [listFontWeight]);
 
-	const handleSelectFont = (data: cleanFontType) => {
-		setInputFontName(data);
-	};
-	const handleSelectWeight = (data: cleanFontType) => setInputFontWeight(data);
+  const fontList = data.map((font: cleanFontType) => ({
+    value: font.family,
+    label: font.family,
+  }));
 
-	
-	return (
-		<div id="choiceFont">
-			<div className="font-name input">
-				<img className="icon" src={fontFamilySvg} alt="font-family" />
-				{/* <FontFamilySvg className="icon"/> */}
-				<Select
-					classNamePrefix="react-select"
-					options={fontList}
-					placeholder="Select font"
-					value={inputFontName}
-					onChange={handleSelectFont}
-					isSearchable={true}
-				/>
-			</div>
-			{listFontWeight && (
-				<div className="font-weight input">
-					<img className="icon" src={fontWeightSvg} alt="font-weight" />
-					<Select
-						classNamePrefix="react-select"
-						options={listFontWeight}
-						placeholder="Choice style"
-						value={inputFontWeight}
-						onChange={handleSelectWeight}
-						// defaultValue={}
-						// isSearchable={true}
-					/>
+  const handleSelectFont = (data: cleanFontType) => {
+    setInputFontName(data);
+  };
+  const handleSelectWeight = (data: cleanFontType) => setInputFontWeight(data);
 
-					{/* <select className="weight-select" placeholder="Choice style" /> */}
-				</div>
-			)}
-			
-			<div className="action">
-				<button className="close" onClick={() => handleClose()}>
-					Cancel
-				</button>
-				<button className="ok" onClick={() => handleSave()}>
-					OK
-				</button>
-			</div>
-		</div>
-	);
+  return (
+    <div id="choiceFont">
+      <div className="font-name input">
+        <img className="icon" src={fontFamilySvg} alt="font-family" />
+        {/* <FontFamilySvg className="icon"/> */}
+        <Select
+          classNamePrefix="react-select"
+          options={fontList}
+          placeholder="Select font"
+          value={inputFontName}
+          onChange={handleSelectFont}
+          isSearchable={true}
+        />
+      </div>
+      {listFontWeight && (
+        <div className="font-weight input">
+          <img className="icon" src={fontWeightSvg} alt="font-weight" />
+          <Select
+            classNamePrefix="react-select"
+            options={listFontWeight}
+            placeholder="Choice style"
+            value={inputFontWeight}
+            onChange={handleSelectWeight}
+            // defaultValue={}
+            // isSearchable={true}
+          />
+
+          {/* <select className="weight-select" placeholder="Choice style" /> */}
+        </div>
+      )}
+
+      <div className="action">
+        <button className="close" onClick={() => handleClose()}>
+          Cancel
+        </button>
+        <button className="ok" onClick={() => handleSave()}>
+          OK
+        </button>
+      </div>
+    </div>
+  );
 };
 
 export default ChoiceFont;

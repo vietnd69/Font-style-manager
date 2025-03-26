@@ -320,32 +320,35 @@ function Widget() {
       // Load fonts
       const fonts = await figma.listAvailableFontsAsync();
 
-      // Lọc và xử lý fonts
+      // Process fonts
       const processedFonts = fonts.filter((font) => {
-        // Loại bỏ các font không hợp lệ
+        // Remove invalid fonts
         if (!font.fontName.family || font.fontName.family.startsWith("??")) {
           return false;
         }
         return true;
       });
 
-      // Cập nhật state
+      // Update state
       setLocalFonts(processedFonts);
 
-      // Xử lý và tổ chức lại fonts
+      // Process and organize fonts
       fontsClean(processedFonts);
 
-      // Log thông tin về fonts đã load
-      console.log(`Đã load ${processedFonts.length} fonts`);
+      // Log font loading information
+      console.log(`Loaded ${processedFonts.length} fonts`);
 
-      // Log các font family duy nhất
+      // Log unique font families
       const uniqueFamilies = [
         ...new Set(processedFonts.map((font) => font.fontName.family)),
       ];
-      console.log(`Có ${uniqueFamilies.length} font families:`, uniqueFamilies);
+      console.log(
+        `Found ${uniqueFamilies.length} font families:`,
+        uniqueFamilies
+      );
     } catch (error) {
-      console.error("Lỗi khi load fonts:", error);
-      figma.notify("❌ Có lỗi xảy ra khi load fonts", { error: true });
+      console.error("Error loading fonts:", error);
+      figma.notify("❌ Error occurred while loading fonts", { error: true });
     }
   };
 
@@ -386,7 +389,7 @@ function Widget() {
       propertyType
     );
 
-    // Kiểm tra style trong cache
+    // Check style in cache
     const styleToUpdate = cacheStyle.find((style) => style.id === styleId);
     if (!styleToUpdate) {
       console.error("Style not found in cache:", styleId);
@@ -395,7 +398,7 @@ function Widget() {
     }
     console.log("Found style to update:", styleToUpdate);
 
-    // Kiểm tra variable trong localVariableList
+    // Check variable in localVariableList
     const variableToApply = localVariableList.find(
       (variable) => variable.id === variableId
     );
@@ -407,7 +410,7 @@ function Widget() {
     console.log("Found variable to apply:", variableToApply);
 
     // Map property type to the correct field for a TextStyle
-    let field: string = ""; // Khởi tạo giá trị mặc định
+    let field: string = ""; // Initialize default value
     switch (propertyType) {
       case "fontFamily":
         field = "fontFamily";
@@ -427,24 +430,24 @@ function Widget() {
         break;
       default:
         console.warn(
-          `Property type "${propertyType}" không được hỗ trợ để bind variable`
+          `Property type "${propertyType}" is not supported for variable binding`
         );
         figma.closePlugin();
         return;
     }
     console.log("Mapped field:", field);
 
-    // Update cache.boundVariables và giá trị tương ứng
+    // Update cache.boundVariables and corresponding value
     setCacheStyle((prev: textStyleType[]) =>
       prev.map((style: textStyleType) => {
         if (style.id === styleId) {
-          // Lấy giá trị từ variable dựa trên defaultModeId
+          // Get value from variable based on defaultModeId
           const defaultModeId = variableToApply.defaultModeId;
 
-          // Kiểm tra defaultModeId và valuesByMode
+          // Check defaultModeId and valuesByMode
           if (!defaultModeId || !variableToApply.valuesByMode[defaultModeId]) {
             console.error(
-              `Variable ${variableId} không có giá trị cho defaultModeId ${defaultModeId}`
+              `Variable ${variableId} has no value for defaultModeId ${defaultModeId}`
             );
             return style;
           }
@@ -453,7 +456,7 @@ function Widget() {
           console.log("Variable value:", variableValue);
           console.log("Default mode ID:", defaultModeId);
 
-          // Cập nhật giá trị tương ứng với field
+          // Update corresponding value with field
           let updatedStyle = { ...style };
           console.log("Current style before update:", updatedStyle);
 
@@ -466,15 +469,15 @@ function Widget() {
               console.log("Updated fontName:", updatedStyle.fontName);
               break;
             case "fontStyle":
-              // Kiểm tra kiểu dữ liệu của variableValue
+              // Check variableValue data type
               if (typeof variableValue === "number") {
-                // Kiểm tra xem font có hỗ trợ weight không
+                // Check if font supports weight
                 const fontSupportsWeight = checkFontWeightSupport(
                   style.fontName.family
                 );
 
                 if (fontSupportsWeight) {
-                  // Nếu hỗ trợ weight, chuyển đổi thành tên style tương ứng
+                  // If weight is supported, convert to corresponding style name
                   const weightToStyle: { [key: number]: string } = {
                     100: "Thin",
                     200: "ExtraLight",
@@ -491,14 +494,14 @@ function Widget() {
                     style: weightToStyle[variableValue] || "Regular",
                   };
                 } else {
-                  // Nếu không hỗ trợ weight, giữ nguyên style hiện tại
+                  // If weight is not supported, keep current style
                   console.warn(
-                    `Font ${style.fontName.family} không hỗ trợ weight ${variableValue}`
+                    `Font ${style.fontName.family} does not support weight ${variableValue}`
                   );
                   return style;
                 }
               } else {
-                // Nếu là string, sử dụng trực tiếp
+                // If string, use directly
                 updatedStyle.fontName = {
                   ...style.fontName,
                   style: variableValue as string,
@@ -512,21 +515,21 @@ function Widget() {
               break;
             case "lineHeight":
               console.log("Current lineHeight:", updatedStyle.lineHeight);
-              // Giữ nguyên giá trị lineHeight hiện tại vì nó là object phức tạp
+              // Keep current lineHeight value as it's a complex object
               break;
             case "letterSpacing":
               console.log("Current letterSpacing:", updatedStyle.letterSpacing);
-              // Giữ nguyên giá trị letterSpacing hiện tại vì nó là object phức tạp
+              // Keep current letterSpacing value as it's a complex object
               break;
             default:
               console.warn(
-                `Field "${field}" không được hỗ trợ để bind variable`
+                `Field "${field}" is not supported for variable binding`
               );
               figma.closePlugin();
-              return style; // Return style hiện tại thay vì undefined
+              return style; // Return current style instead of undefined
           }
 
-          // Cập nhật boundVariables
+          // Update boundVariables
           updatedStyle.boundVariables = {
             ...style.boundVariables,
             [field]: {
@@ -820,6 +823,7 @@ function Widget() {
     setHasCheckAll: (value: boolean) => void,
     setHasReloadLocalFont: (value: boolean) => void
   ) => {
+    console.log("[updateStyle] Starting style update process");
     const totalStyles = filterStyles.length;
     let updatedCount = 0;
 
@@ -834,11 +838,17 @@ function Widget() {
       },
     });
 
+    console.log(`[updateStyle] Total styles to update: ${totalStyles}`);
+
     for (const style of filterStyles) {
       try {
+        console.log(
+          `[updateStyle] Processing style: ${style.name} (ID: ${style.id})`
+        );
         // Find the original style in cache for comparison
         const cache = cacheStyle.find((i) => i.id === style.id);
         if (cache) {
+          console.log(`[updateStyle] Found cache for style: ${style.name}`);
           // Get the actual style from Figma
           const textStyle: TextStyle = (await figma.getStyleByIdAsync(
             style.id
@@ -846,6 +856,7 @@ function Widget() {
           let isUpdate = false;
 
           if (cache.description !== style.description) {
+            console.log(`[updateStyle] Updating description for ${style.name}`);
             textStyle.description = cache.description;
             isUpdate = true;
           }
@@ -853,31 +864,55 @@ function Widget() {
             cache.fontName.family !== style.fontName.family ||
             cache.fontName.style !== style.fontName.style
           ) {
+            console.log(
+              `[updateStyle] Updating font for ${style.name}: ${cache.fontName.family} ${cache.fontName.style}`
+            );
             await figma.loadFontAsync({ ...cache.fontName }).then(() => {
               textStyle.fontName = { ...cache.fontName };
               isUpdate = true;
             });
           }
           if (cache.fontSize !== style.fontSize) {
+            console.log(
+              `[updateStyle] Updating font size for ${style.name}: ${cache.fontSize}`
+            );
             await figma.loadFontAsync({ ...cache.fontName }).then(() => {
               textStyle.fontSize = cache.fontSize;
               isUpdate = true;
             });
           }
           if (cache.lineHeight !== style.lineHeight) {
+            console.log(
+              `[updateStyle] Updating line height for ${style.name}: ${JSON.stringify(cache.lineHeight)}`
+            );
             await figma.loadFontAsync({ ...cache.fontName }).then(() => {
               textStyle.lineHeight = cache.lineHeight;
               isUpdate = true;
             });
           }
           if (cache.letterSpacing !== style.letterSpacing) {
+            console.log(
+              `[updateStyle] Updating letter spacing for ${style.name}: ${JSON.stringify(cache.letterSpacing)}`
+            );
             await figma.loadFontAsync({ ...cache.fontName }).then(() => {
               textStyle.letterSpacing = cache.letterSpacing;
               isUpdate = true;
             });
           }
+          if (isUpdate) {
+            console.log(
+              `[updateStyle] Style ${style.name} was updated successfully`
+            );
+          } else {
+            console.log(
+              `[updateStyle] No changes needed for style ${style.name}`
+            );
+          }
+        } else {
+          console.warn(`[updateStyle] No cache found for style: ${style.name}`);
         }
       } catch (err) {
+        console.error(`[updateStyle] Error updating style ${style.name}:`, err);
         figma.notify("✕ " + err, { timeout: 3000, error: true });
       }
 
@@ -892,6 +927,10 @@ function Widget() {
         },
       });
     }
+
+    console.log(
+      `[updateStyle] Update process completed. Updated ${updatedCount} styles`
+    );
 
     // Hiển thị thông báo hoàn thành - sử dụng updateProgressUi
     updateProgressUi({
