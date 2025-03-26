@@ -3,12 +3,8 @@ const { AutoLayout, Text, Rectangle, useSyncedState, Input, SVG, Fragment } =
   widget;
 
 import {
-  cleanFontType,
   textStyleType,
-  ShowType,
-  CustomVariable,
   textDesignManagerType,
-  ShowUiParams,
   checkStyleChanged,
 } from "./code";
 import CheckBox from "./components/CheckBox";

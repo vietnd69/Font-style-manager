@@ -148,23 +148,70 @@ export const checkStyleChanged = (
   letterSpacing: boolean;
   description: boolean;
 } => {
+  // Hàm helper để kiểm tra xem một thuộc tính có bound variable không
+  const hasBoundVariable = (style: textStyleType, property: string): boolean => {
+    return !!style.boundVariables?.[property];
+  };
+
+  // Hàm helper để so sánh giá trị có tính đến bound variable
+  const compareWithVariable = (
+    cacheValue: any,
+    localValue: any,
+    cacheStyle: textStyleType,
+    localStyle: textStyleType,
+    property: string
+  ): boolean => {
+    const cacheHasVariable = hasBoundVariable(cacheStyle, property);
+    const localHasVariable = hasBoundVariable(localStyle, property);
+
+    // Nếu một trong hai có variable và giá trị khác nhau, return true
+    if (cacheHasVariable !== localHasVariable) return true;
+    
+    // Nếu cả hai đều có variable, so sánh ID của variable
+    if (cacheHasVariable && localHasVariable) {
+      return cacheStyle.boundVariables![property].id !== localStyle.boundVariables![property].id;
+    }
+
+    // Nếu cả hai đều không có variable, so sánh giá trị
+    return cacheValue !== localValue;
+  };
+
   return {
-    fontFamily: cacheStyle.fontName.family !== localStyle.fontName.family,
-    fontStyle: cacheStyle.fontName.style !== localStyle.fontName.style,
-    fontSize: cacheStyle.fontSize !== localStyle.fontSize,
-    lineHeight:
-      cacheStyle.lineHeight.unit !== localStyle.lineHeight.unit ||
-      (cacheStyle.lineHeight.unit !== "AUTO" &&
-        localStyle.lineHeight.unit !== "AUTO" &&
-        cacheStyle.lineHeight.value !== localStyle.lineHeight.value),
-    letterSpacing:
-      cacheStyle.letterSpacing.unit !== localStyle.letterSpacing.unit ||
-      (cacheStyle.letterSpacing.unit === "PIXELS" &&
-        localStyle.letterSpacing.unit === "PIXELS" &&
-        cacheStyle.letterSpacing.value !== localStyle.letterSpacing.value) ||
-      (cacheStyle.letterSpacing.unit === "PERCENT" &&
-        localStyle.letterSpacing.unit === "PERCENT" &&
-        cacheStyle.letterSpacing.value !== localStyle.letterSpacing.value),
+    fontFamily: compareWithVariable(
+      cacheStyle.fontName.family,
+      localStyle.fontName.family,
+      cacheStyle,
+      localStyle,
+      "fontFamily"
+    ),
+    fontStyle: compareWithVariable(
+      cacheStyle.fontName.style,
+      localStyle.fontName.style,
+      cacheStyle,
+      localStyle,
+      "fontStyle"
+    ),
+    fontSize: compareWithVariable(
+      cacheStyle.fontSize,
+      localStyle.fontSize,
+      cacheStyle,
+      localStyle,
+      "fontSize"
+    ),
+    lineHeight: compareWithVariable(
+      cacheStyle.lineHeight,
+      localStyle.lineHeight,
+      cacheStyle,
+      localStyle,
+      "lineHeight"
+    ),
+    letterSpacing: compareWithVariable(
+      cacheStyle.letterSpacing,
+      localStyle.letterSpacing,
+      cacheStyle,
+      localStyle,
+      "letterSpacing"
+    ),
     description: cacheStyle.description !== localStyle.description,
   };
 };
@@ -805,161 +852,6 @@ function Widget() {
     return hasWeightStyle;
   };
 
-  const updateStyle = async (
-    setSearchGroup: (value: string) => void,
-    setSearchName: (value: string) => void,
-    setSearchFamily: (value: string) => void,
-    setSearchStyle: (value: string) => void,
-    setSearchFontSize: (value: string) => void,
-    setCheckedFamily: (value: string) => void,
-    setCheckedGroup: (value: string) => void,
-    setCheckedStyle: (value: string) => void,
-    setCheckedFontSize: (value: string) => void,
-    setCheckedLineHeight: (value: LineHeight | { unit: "" }) => void,
-    setCheckedLetterSpacing: (value: LetterSpacing | { unit: "" }) => void,
-    setFilterStyles: (value: textStyleType[]) => void,
-    setCacheStyle: (value: textStyleType[]) => void,
-    setStylesChecked: (value: string[]) => void,
-    setHasCheckAll: (value: boolean) => void,
-    setHasReloadLocalFont: (value: boolean) => void
-  ) => {
-    console.log("[updateStyle] Starting style update process");
-    const totalStyles = filterStyles.length;
-    let updatedCount = 0;
-
-    // Hiển thị popup iframe để theo dõi tiến trình - chỉ gọi một lần
-    showUi({
-      moduleName: "processing",
-      name: "Updating Styles",
-      data: {
-        message: "Processing...",
-        current: 0,
-        total: totalStyles,
-      },
-    });
-
-    console.log(`[updateStyle] Total styles to update: ${totalStyles}`);
-
-    for (const style of filterStyles) {
-      try {
-        console.log(
-          `[updateStyle] Processing style: ${style.name} (ID: ${style.id})`
-        );
-        // Find the original style in cache for comparison
-        const cache = cacheStyle.find((i) => i.id === style.id);
-        if (cache) {
-          console.log(`[updateStyle] Found cache for style: ${style.name}`);
-          // Get the actual style from Figma
-          const textStyle: TextStyle = (await figma.getStyleByIdAsync(
-            style.id
-          )) as TextStyle;
-          let isUpdate = false;
-
-          if (cache.description !== style.description) {
-            console.log(`[updateStyle] Updating description for ${style.name}`);
-            textStyle.description = cache.description;
-            isUpdate = true;
-          }
-          if (
-            cache.fontName.family !== style.fontName.family ||
-            cache.fontName.style !== style.fontName.style
-          ) {
-            console.log(
-              `[updateStyle] Updating font for ${style.name}: ${cache.fontName.family} ${cache.fontName.style}`
-            );
-            await figma.loadFontAsync({ ...cache.fontName }).then(() => {
-              textStyle.fontName = { ...cache.fontName };
-              isUpdate = true;
-            });
-          }
-          if (cache.fontSize !== style.fontSize) {
-            console.log(
-              `[updateStyle] Updating font size for ${style.name}: ${cache.fontSize}`
-            );
-            await figma.loadFontAsync({ ...cache.fontName }).then(() => {
-              textStyle.fontSize = cache.fontSize;
-              isUpdate = true;
-            });
-          }
-          if (cache.lineHeight !== style.lineHeight) {
-            console.log(
-              `[updateStyle] Updating line height for ${style.name}: ${JSON.stringify(cache.lineHeight)}`
-            );
-            await figma.loadFontAsync({ ...cache.fontName }).then(() => {
-              textStyle.lineHeight = cache.lineHeight;
-              isUpdate = true;
-            });
-          }
-          if (cache.letterSpacing !== style.letterSpacing) {
-            console.log(
-              `[updateStyle] Updating letter spacing for ${style.name}: ${JSON.stringify(cache.letterSpacing)}`
-            );
-            await figma.loadFontAsync({ ...cache.fontName }).then(() => {
-              textStyle.letterSpacing = cache.letterSpacing;
-              isUpdate = true;
-            });
-          }
-          if (isUpdate) {
-            console.log(
-              `[updateStyle] Style ${style.name} was updated successfully`
-            );
-          } else {
-            console.log(
-              `[updateStyle] No changes needed for style ${style.name}`
-            );
-          }
-        } else {
-          console.warn(`[updateStyle] No cache found for style: ${style.name}`);
-        }
-      } catch (err) {
-        console.error(`[updateStyle] Error updating style ${style.name}:`, err);
-        figma.notify("✕ " + err, { timeout: 3000, error: true });
-      }
-
-      // Cập nhật tiến trình - sử dụng updateProgressUi thay vì showUi
-      updatedCount++;
-      updateProgressUi({
-        moduleName: "processing",
-        data: {
-          message: "Processing...",
-          current: updatedCount,
-          total: totalStyles,
-        },
-      });
-    }
-
-    console.log(
-      `[updateStyle] Update process completed. Updated ${updatedCount} styles`
-    );
-
-    // Hiển thị thông báo hoàn thành - sử dụng updateProgressUi
-    updateProgressUi({
-      moduleName: "processing",
-      data: {
-        message: "Styles updated",
-        current: updatedCount,
-        total: totalStyles,
-        completed: true,
-      },
-    });
-
-    setSearchGroup("");
-    setSearchName("");
-    setSearchFamily("");
-    setSearchStyle("");
-    setSearchFontSize("");
-    setCheckedFamily("");
-    setCheckedGroup("");
-    setCheckedStyle("");
-    setCheckedFontSize("");
-    setCheckedLineHeight({ unit: "" });
-    setCheckedLetterSpacing({ unit: "" });
-    setFilterStyles(textStyles);
-    setCacheStyle(textStyles);
-    setStylesChecked([]);
-    setHasCheckAll(false);
-    setHasReloadLocalFont(true);
-  };
 
   return (
     <AutoLayout
