@@ -300,6 +300,97 @@ function Widget() {
   });
 
   /**
+   * Bind a variable to a text style property
+   * @param variableId - ID of the variable to bind
+   * @param styleId - ID of the text style to update
+   * @param propertyType - Type of property to bind (fontFamily, fontSize, etc.)
+   */
+  const handleSetVariable = async (
+    variableId: string,
+    styleId: string,
+    propertyType: string
+  ) => {
+    console.log(
+      "Setting variable:",
+      variableId,
+      "for style:",
+      styleId,
+      "property:",
+      propertyType
+    );
+
+    // Kiểm tra style trong cache
+    const styleToUpdate = cacheStyle.find((style) => style.id === styleId);
+    if (!styleToUpdate) {
+      console.error("Style not found in cache:", styleId);
+      figma.closePlugin();
+      return;
+    }
+
+    // Kiểm tra variable trong localVariableList
+    const variableToApply = localVariableList.find(
+      (variable) => variable.id === variableId
+    );
+    if (!variableToApply) {
+      console.error("Variable not found in localVariableList:", variableId);
+      figma.closePlugin();
+      return;
+    }
+
+    // Map property type to the correct field for a TextStyle
+    let field: string;
+    switch (propertyType) {
+      case "fontFamily":
+        field = "fontFamily";
+        break;
+      case "fontStyle":
+      case "fontWeight":
+        field = "fontStyle";
+        break;
+      case "fontSize":
+        field = "fontSize";
+        break;
+      case "lineHeight":
+        field = "lineHeight";
+        break;
+      case "letterSpacing":
+        field = "letterSpacing";
+        break;
+      default:
+        console.warn(
+          `Property type "${propertyType}" not supported for variable binding`
+        );
+        figma.closePlugin();
+        return;
+    }
+
+    // Update cache.boundVariables
+    setCacheStyle((prev) =>
+      prev.map((style) => {
+        if (style.id === styleId) {
+          return {
+            ...style,
+            boundVariables: {
+              ...style.boundVariables,
+              [field]: {
+                type: "VARIABLE_ALIAS",
+                id: variableId,
+              },
+            },
+          };
+        }
+        return style;
+      })
+    );
+
+    console.log(
+      `Successfully bound variable to ${field} of style ${styleToUpdate.name}`
+    );
+
+    figma.closePlugin();
+  };
+
+  /**
    * Process messages received from the UI
    * @param msg - Message object from UI
    */
@@ -324,72 +415,7 @@ function Widget() {
       figma.closePlugin();
     }
     if (msg.type === "setVariable") {
-      // Handle binding variable to text style property
-      console.log(
-        "Setting variable:",
-        msg.variableId,
-        "for style:",
-        msg.styleId,
-        "property:",
-        msg.propertyType
-      );
-
-      try {
-        // Find the text style to update
-        const styleToUpdate = figma.getStyleById(msg.styleId) as TextStyle;
-        if (!styleToUpdate) {
-          console.error("Style not found:", msg.styleId);
-          figma.closePlugin();
-          return;
-        }
-
-        // Get the variable reference
-        const variableToApply = figma.variables.getVariableById(msg.variableId);
-        if (!variableToApply) {
-          console.error("Variable not found:", msg.variableId);
-          figma.closePlugin();
-          return;
-        }
-
-        // Map property type to the correct field for a TextStyle
-        let field: string;
-        switch (msg.propertyType) {
-          case "fontFamily":
-            field = "fontFamily";
-            break;
-          case "fontStyle":
-          case "fontWeight":
-            field = "fontStyle";
-            break;
-          case "fontSize":
-            field = "fontSize";
-            break;
-          case "lineHeight":
-            field = "lineHeight";
-            break;
-          case "letterSpacing":
-            field = "letterSpacing";
-            break;
-          default:
-            console.warn(
-              `Property type "${msg.propertyType}" not supported for variable binding`
-            );
-            figma.closePlugin();
-            return;
-        }
-
-        // Use setBoundVariable to bind the variable to the style
-        // @ts-ignore - Bypassing type checking because Figma API typings might be outdated
-        styleToUpdate.setBoundVariable(field, variableToApply);
-
-        console.log(
-          `Successfully bound variable to ${field} of style ${styleToUpdate.name}`
-        );
-      } catch (error) {
-        console.error("Failed to bind variable:", error);
-      }
-
-      figma.closePlugin();
+      handleSetVariable(msg.variableId, msg.styleId, msg.propertyType);
     }
   };
 

@@ -14,91 +14,139 @@ type ChoiceVariableProps = {
   };
 };
 
-// Map property types to variable scopes - adding more compatible scopes
-const PROPERTY_SCOPE_MAP: { [key: string]: string[] } = {
-  fontFamily: ["FONT_FAMILY", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
-  fontStyle: ["FONT_STYLE", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
-  fontWeight: ["FONT_WEIGHT", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
-  fontSize: ["FONT_SIZE", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
-  lineHeight: ["LINE_HEIGHT", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
-  letterSpacing: ["LETTER_SPACING", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
-  paragraphSpacing: ["PARAGRAPH_SPACING", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
-  paragraphIndent: ["PARAGRAPH_INDENT", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
-  fill: ["ALL_FILLS"],
-  textFill: ["TEXT_FILL", "ALL_FILLS"],
-  shapeFill: ["SHAPE_FILL", "ALL_FILLS"],
-  frameFill: ["FRAME_FILL", "ALL_FILLS"],
-  stroke: ["STROKE_COLOR"],
-  strokeWidth: ["STROKE_FLOAT"],
-  effect: ["EFFECT_COLOR"],
-  effectFloat: ["EFFECT_FLOAT"],
-  cornerRadius: ["CORNER_RADIUS"],
-  widthHeight: ["WIDTH_HEIGHT"],
-  gap: ["GAP"],
-  opacity: ["OPACITY"],
-  all: ["ALL_SCOPES"],
-};
-
-// Update the PROPERTY_VALUE_TYPE_MAP to support multiple types
-const PROPERTY_VALUE_TYPE_MAP: { [key: string]: string[] } = {
-  fontFamily: ["string"],
-  fontStyle: ["string", "number"], // Accept both string and number for font style
-  fontWeight: ["string", "number"], // Accept both string and number for font weight
-  fontSize: ["number"],
-  lineHeight: ["number"],
-  letterSpacing: ["number"],
-  paragraphSpacing: ["number"],
-  paragraphIndent: ["number"],
-  fill: ["color"],
-  textFill: ["color"],
-  shapeFill: ["color"],
-  frameFill: ["color"],
-  stroke: ["color"],
-  strokeWidth: ["number"],
-  effect: ["color"],
-  effectFloat: ["number"],
-  cornerRadius: ["number"],
-  widthHeight: ["number"],
-  gap: ["number"],
-  opacity: ["number"],
-  all: ["any"],
-};
-
-console.log("PROPERTY_SCOPE_MAP initialized:", PROPERTY_SCOPE_MAP);
-
-const formatValue = (value: any, defaultModeId: string | undefined) => {
-  if (!value) return "";
+const formatValue = (value: any, modeId: string | undefined) => {
+  if (value === undefined || value === null) return "";
   if (typeof value === "string") return value;
   if (typeof value === "number") return value.toString();
   if (typeof value === "boolean") return value.toString();
-  // Handle color object
-  if (value && typeof value === "object" && "r" in value) {
-    const { r, g, b, a = 1 } = value;
-    return `rgba(${r * 255}, ${g * 255}, ${b * 255}, ${a})`;
+  if (
+    value &&
+    typeof value === "object" &&
+    "r" in value &&
+    "g" in value &&
+    "b" in value &&
+    "a" in value
+  ) {
+    const r = Math.round(value.r * 255);
+    const g = Math.round(value.g * 255);
+    const b = Math.round(value.b * 255);
+    const hex = `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+    return value.a !== 1 ? `${hex} | ${Math.round(value.a * 100)}%` : hex;
   }
   return "";
 };
 
 const getValueType = (value: any): string => {
-  console.log("Examining value:", value);
   if (value === undefined || value === null) return "unknown";
   if (typeof value === "string") return "string";
   if (typeof value === "number") return "number";
   if (typeof value === "boolean") return "boolean";
   if (value && typeof value === "object") {
-    // Check for color object
-    if ("r" in value) return "color";
-    // Check for variable reference object
-    if ("type" in value && value.type === "VARIABLE_ALIAS") return "variable_reference";
-    // Check if it's an array
+    if ("r" in value && "g" in value && "b" in value && "a" in value)
+      return "color";
+    if (value.type === "VARIABLE_ALIAS") return "variable_reference";
     if (Array.isArray(value)) return "array";
-    console.log("Unknown object type:", value);
   }
   return "unknown";
 };
 
+interface FilterRule {
+  type: string;
+  scopes: string[];
+  valueTypes: string[];
+  validate: (value: any) => boolean;
+}
+
+const FILTER_RULES: FilterRule[] = [
+  {
+    type: "fontFamily",
+    scopes: ["FONT_FAMILY", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
+    valueTypes: ["string"],
+    validate: (value) => getValueType(value) === "string",
+  },
+  {
+    type: "fontSize",
+    scopes: ["FONT_SIZE", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
+    valueTypes: ["number"],
+    validate: (value) => getValueType(value) === "number",
+  },
+  {
+    type: "fontWeight",
+    scopes: ["FONT_WEIGHT", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
+    valueTypes: ["string", "number"],
+    validate: (value) => {
+      const type = getValueType(value);
+      return type === "string" || type === "number";
+    },
+  },
+  {
+    type: "fontStyle",
+    scopes: ["FONT_STYLE", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
+    valueTypes: ["string", "number"],
+    validate: (value) => {
+      const type = getValueType(value);
+      return type === "string" || type === "number";
+    },
+  },
+  {
+    type: "lineHeight",
+    scopes: ["LINE_HEIGHT", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
+    valueTypes: ["number"],
+    validate: (value) => getValueType(value) === "number",
+  },
+  {
+    type: "letterSpacing",
+    scopes: ["LETTER_SPACING", "TEXT", "TYPOGRAPHY", "ALL_SCOPES"],
+    valueTypes: ["number"],
+    validate: (value) => getValueType(value) === "number",
+  },
+  {
+    type: "fill",
+    scopes: ["ALL_FILLS"],
+    valueTypes: ["color"],
+    validate: (value) => getValueType(value) === "color",
+  },
+  {
+    type: "textFill",
+    scopes: ["TEXT_FILL", "ALL_FILLS"],
+    valueTypes: ["color"],
+    validate: (value) => getValueType(value) === "color",
+  },
+  {
+    type: "stroke",
+    scopes: ["STROKE_COLOR"],
+    valueTypes: ["color"],
+    validate: (value) => getValueType(value) === "color",
+  },
+  {
+    type: "strokeWidth",
+    scopes: ["STROKE_FLOAT"],
+    valueTypes: ["number"],
+    validate: (value) => getValueType(value) === "number",
+  },
+  {
+    type: "all",
+    scopes: ["ALL_SCOPES"],
+    valueTypes: ["any"],
+    validate: () => true,
+  },
+];
+
+const getDefaultValue = (variable: CustomVariable) => {
+  if (variable.defaultModeId && variable.valuesByMode[variable.defaultModeId]) {
+    return variable.valuesByMode[variable.defaultModeId];
+  }
+  const firstModeId = Object.keys(variable.valuesByMode)[0];
+  return firstModeId ? variable.valuesByMode[firstModeId] : undefined;
+};
+
+const hasCompatibleScope = (variable: CustomVariable, scopes: string[]) => {
+  return variable.scopes.some(
+    (scope) => scopes.includes(scope) || scope === "ALL_SCOPES"
+  );
+};
+
 const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
-  console.log("ChoiceVariable received data:", data);
   const [variables, setVariables] = useState<CustomVariable[]>([]);
   const [filteredVariables, setFilteredVariables] = useState<CustomVariable[]>(
     []
@@ -107,55 +155,25 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log("Variables from data:", data.variables);
-    console.log("Required scopes for type:", PROPERTY_SCOPE_MAP[data.type]);
-    console.log("Required value types:", PROPERTY_VALUE_TYPE_MAP[data.type]);
-
     if (data.variables) {
-      const compatibleScopes = PROPERTY_SCOPE_MAP[data.type] || ["ALL_SCOPES"];
-      const allowedValueTypes = PROPERTY_VALUE_TYPE_MAP[data.type] || ["any"];
-      console.log("Filtering variables with compatible scopes:", compatibleScopes);
+      const rule =
+        FILTER_RULES.find((r) => r.type === data.type) ||
+        FILTER_RULES.find((r) => r.type === "all");
+
+      if (!rule) {
+        setVariables([]);
+        setFilteredVariables([]);
+        return;
+      }
 
       const filtered = data.variables.filter((variable) => {
-        // Check if the variable has any of the compatible scopes
-        const hasCompatibleScope = variable.scopes.some(scope => 
-          compatibleScopes.includes(scope) || scope === "ALL_SCOPES"
+        const defaultValue = getDefaultValue(variable);
+        return (
+          hasCompatibleScope(variable, rule.scopes) &&
+          rule.validate(defaultValue)
         );
-
-        // Get default value, handle case where defaultModeId might be missing
-        let defaultValue;
-        if (variable.defaultModeId && variable.valuesByMode[variable.defaultModeId]) {
-          defaultValue = variable.valuesByMode[variable.defaultModeId];
-        } else {
-          // If defaultModeId is not available, try to get the first value
-          const firstModeId = Object.keys(variable.valuesByMode)[0];
-          defaultValue = firstModeId ? variable.valuesByMode[firstModeId] : undefined;
-        }
-        
-        console.log(`Variable ${variable.name} default value:`, defaultValue);
-        
-        const valueType = getValueType(defaultValue);
-        
-        // For fontStyle and fontWeight, we accept any variable regardless of type
-        // since we can't reliably determine the actual type from the API
-        const hasCompatibleType = 
-          allowedValueTypes.includes("any") || 
-          allowedValueTypes.includes(valueType) ||
-          (data.type === 'fontStyle' || data.type === 'fontWeight');
-
-        console.log(
-          `Variable ${variable.name}:`,
-          `scopes: ${variable.scopes.join(", ")},`,
-          `value type: ${valueType},`,
-          `matches scope: ${hasCompatibleScope},`,
-          `matches type: ${hasCompatibleType},`,
-          `allowed types: ${allowedValueTypes.join(", ")}`
-        );
-
-        return hasCompatibleScope && hasCompatibleType;
       });
 
-      console.log("Filtered variables:", filtered);
       setVariables(filtered);
       setFilteredVariables(filtered);
     }
@@ -164,7 +182,7 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
   useEffect(() => {
     if (searchTerm && variables.length > 0) {
       const lowercaseSearch = searchTerm.toLowerCase();
-      const filtered = variables.filter(variable => 
+      const filtered = variables.filter((variable) =>
         variable.name.toLowerCase().includes(lowercaseSearch)
       );
       setFilteredVariables(filtered);
@@ -174,7 +192,6 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
   }, [searchTerm, variables]);
 
   const handleVariableSelect = (variable: CustomVariable) => {
-    console.log("Selected variable:", variable);
     setSelectedId(variable.id);
     parent.postMessage(
       {
@@ -190,7 +207,6 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
   };
 
   if (!data || !Array.isArray(data.variables)) {
-    console.log("No valid data or variables array");
     return (
       <div style={{ padding: "16px" }}>
         <Typography>
@@ -226,75 +242,99 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
         <List
           size="small"
           dataSource={filteredVariables}
-          renderItem={(variable) => (
-            <List.Item
-              key={variable.id}
-              style={{
-                cursor: "pointer",
-                padding: "8px 12px",
-                backgroundColor:
-                  variable.id === selectedId ? "#e6f4ff" : "#ffffff",
-                borderRadius: "4px",
-                marginBottom: "4px",
-                transition: "all 0.2s ease",
-                border:
-                  variable.id === selectedId
-                    ? "1px solid #1890ff"
-                    : "1px solid transparent",
-              }}
-              className="variable-item"
-              onClick={() => handleVariableSelect(variable)}
-              onMouseEnter={(e) => {
-                if (variable.id !== selectedId) {
-                  e.currentTarget.style.backgroundColor = "#f5f5f5";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (variable.id !== selectedId) {
-                  e.currentTarget.style.backgroundColor = "#ffffff";
-                }
-              }}
-            >
-              <span
+          renderItem={(variable) => {
+            const defaultValue = getDefaultValue(variable);
+
+            return (
+              <List.Item
+                key={variable.id}
                 style={{
-                  color: variable.id === selectedId ? "#1890ff" : "#000000",
-                  fontWeight: variable.id === selectedId ? 500 : 400,
+                  cursor: "pointer",
+                  padding: "8px 12px",
+                  backgroundColor:
+                    variable.id === selectedId ? "#e6f4ff" : "#ffffff",
+                  borderRadius: "4px",
+                  marginBottom: "4px",
+                  transition: "all 0.2s ease",
+                  border:
+                    variable.id === selectedId
+                      ? "1px solid #1890ff"
+                      : "1px solid transparent",
+                }}
+                className="variable-item"
+                onClick={() => setSelectedId(variable.id)}
+                onMouseEnter={(e) => {
+                  if (variable.id !== selectedId) {
+                    e.currentTarget.style.backgroundColor = "#f5f5f5";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (variable.id !== selectedId) {
+                    e.currentTarget.style.backgroundColor = "#ffffff";
+                  }
                 }}
               >
-                {variable.name}
-              </span>
-              <span
-                style={{
-                  color: variable.id === selectedId ? "#1890ff" : "#666666",
-                  opacity: variable.id === selectedId ? 1 : 0.8,
-                  marginLeft: "8px",
-                }}
-              >
-                {formatValue(
-                  variable.valuesByMode[variable.defaultModeId || ""],
-                  variable.defaultModeId
-                )}
-              </span>
-            </List.Item>
-          )}
+                <span
+                  style={{
+                    color: variable.id === selectedId ? "#1890ff" : "#000000",
+                    fontWeight: variable.id === selectedId ? 500 : 400,
+                  }}
+                >
+                  {variable.name}
+                </span>
+                <span
+                  style={{
+                    color: variable.id === selectedId ? "#1890ff" : "#666666",
+                    opacity: variable.id === selectedId ? 1 : 0.8,
+                    marginLeft: "8px",
+                  }}
+                >
+                  {formatValue(defaultValue, variable.defaultModeId)}
+                </span>
+              </List.Item>
+            );
+          }}
           locale={{
-            emptyText: searchTerm 
-              ? `No variables found matching "${searchTerm}"` 
+            emptyText: searchTerm
+              ? `No variables found matching "${searchTerm}"`
               : `No ${data.type === "all" ? "" : data.type} variables found`,
           }}
-          style={{ backgroundColor: "#ffffff", maxHeight: "300px", overflowY: "auto" }}
+          style={{
+            backgroundColor: "#ffffff",
+            maxHeight: "300px",
+            overflowY: "auto",
+          }}
         />
       </div>
 
       <div style={{ borderTop: "1px solid #f0f0f0", paddingTop: "16px" }}>
-        <Button
-          onClick={() =>
-            parent.postMessage({ pluginMessage: { type: "close" } }, "*")
-          }
-          block
-        >
-          Cancel
-        </Button>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <Button
+            onClick={() =>
+              parent.postMessage({ pluginMessage: { type: "close" } }, "*")
+            }
+            style={{ flex: 1 }}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => {
+              if (selectedId) {
+                const selectedVariable = filteredVariables.find(
+                  (v) => v.id === selectedId
+                );
+                if (selectedVariable) {
+                  handleVariableSelect(selectedVariable);
+                }
+              }
+            }}
+            disabled={!selectedId}
+            style={{ flex: 1 }}
+          >
+            Select
+          </Button>
+        </div>
       </div>
     </div>
   );
