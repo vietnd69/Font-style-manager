@@ -176,6 +176,60 @@ export const checkStyleChanged = (
     return cacheValue !== localValue;
   };
 
+  // Hàm helper để so sánh lineHeight
+  const compareLineHeight = (
+    cacheLineHeight: LineHeight,
+    localLineHeight: LineHeight,
+    cacheStyle: textStyleType,
+    localStyle: textStyleType
+  ): boolean => {
+    const cacheHasVariable = hasBoundVariable(cacheStyle, "lineHeight");
+    const localHasVariable = hasBoundVariable(localStyle, "lineHeight");
+
+    // Nếu một trong hai có variable và giá trị khác nhau, return true
+    if (cacheHasVariable !== localHasVariable) return true;
+    
+    // Nếu cả hai đều có variable, so sánh ID của variable
+    if (cacheHasVariable && localHasVariable) {
+      return cacheStyle.boundVariables!["lineHeight"].id !== localStyle.boundVariables!["lineHeight"].id;
+    }
+
+    // Nếu cả hai đều không có variable, so sánh giá trị
+    if (cacheLineHeight.unit !== localLineHeight.unit) return true;
+    if (cacheLineHeight.unit === "AUTO" && localLineHeight.unit === "AUTO") return false;
+    if (cacheLineHeight.unit === "AUTO" || localLineHeight.unit === "AUTO") return true;
+    return cacheLineHeight.value !== localLineHeight.value;
+  };
+
+  // Hàm helper để so sánh letterSpacing
+  const compareLetterSpacing = (
+    cacheLetterSpacing: LetterSpacing,
+    localLetterSpacing: LetterSpacing,
+    cacheStyle: textStyleType,
+    localStyle: textStyleType
+  ): boolean => {
+    const cacheHasVariable = hasBoundVariable(cacheStyle, "letterSpacing");
+    const localHasVariable = hasBoundVariable(localStyle, "letterSpacing");
+
+    // Nếu một trong hai có variable và giá trị khác nhau, return true
+    if (cacheHasVariable !== localHasVariable) return true;
+    
+    // Nếu cả hai đều có variable, so sánh ID của variable
+    if (cacheHasVariable && localHasVariable) {
+      return cacheStyle.boundVariables!["letterSpacing"].id !== localStyle.boundVariables!["letterSpacing"].id;
+    }
+
+    // Nếu cả hai đều không có variable, so sánh giá trị
+    if (cacheLetterSpacing.unit !== localLetterSpacing.unit) return true;
+    if (cacheLetterSpacing.unit === "PIXELS" && localLetterSpacing.unit === "PIXELS") {
+      return cacheLetterSpacing.value !== localLetterSpacing.value;
+    }
+    if (cacheLetterSpacing.unit === "PERCENT" && localLetterSpacing.unit === "PERCENT") {
+      return cacheLetterSpacing.value !== localLetterSpacing.value;
+    }
+    return true;
+  };
+
   return {
     fontFamily: compareWithVariable(
       cacheStyle.fontName.family,
@@ -198,19 +252,17 @@ export const checkStyleChanged = (
       localStyle,
       "fontSize"
     ),
-    lineHeight: compareWithVariable(
+    lineHeight: compareLineHeight(
       cacheStyle.lineHeight,
       localStyle.lineHeight,
       cacheStyle,
-      localStyle,
-      "lineHeight"
+      localStyle
     ),
-    letterSpacing: compareWithVariable(
+    letterSpacing: compareLetterSpacing(
       cacheStyle.letterSpacing,
       localStyle.letterSpacing,
       cacheStyle,
-      localStyle,
-      "letterSpacing"
+      localStyle
     ),
     description: cacheStyle.description !== localStyle.description,
   };
