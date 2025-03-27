@@ -77,7 +77,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     unit: "",
   });
 
-  const [checkedGroup, setCheckedGroup] = useSyncedState("checkedGroup", "");
+
   const [checkedFamily, setCheckedFamily] = useSyncedState("checkedFamily", "");
   const [checkedStyle, setCheckedStyle] = useSyncedState("checkedStyle", "");
   const [checkedFontSize, setCheckedFontSize] = useSyncedState(
@@ -197,7 +197,6 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     setSearchStyle: (value: string) => void,
     setSearchFontSize: (value: string) => void,
     setCheckedFamily: (value: string) => void,
-    setCheckedGroup: (value: string) => void,
     setCheckedStyle: (value: string) => void,
     setCheckedFontSize: (value: string) => void,
     setCheckedLineHeight: (value: LineHeight | { unit: "" }) => void,
@@ -482,7 +481,6 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     setSearchStyle("");
     setSearchFontSize("");
     setCheckedFamily("");
-    setCheckedGroup("");
     setCheckedStyle("");
     setCheckedFontSize("");
     setCheckedLineHeight({ unit: "" });
@@ -514,13 +512,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
           );
           let hasChanges = false;
 
-          if (checkedGroup != "") {
-            console.log(
-              `[handleChangeSelectedStyle] Updating group for ${cache.name}: ${checkedGroup}`
-            );
-            cache.name = checkedGroup + "/" + getNameStyle(cache.name);
-            hasChanges = true;
-          }
+          
           if (checkedFamily != "") {
             console.log(
               `[handleChangeSelectedStyle] Updating font family for ${cache.name}: ${checkedFamily}`
@@ -1048,32 +1040,13 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
           </AutoLayout>
           {/* content */}
           <AutoLayout direction={"vertical"} width={"fill-parent"} spacing={12}>
-            {/* group */}
             <AutoLayout
               spacing={24}
               verticalAlignItems={"center"}
               width={"fill-parent"}
               overflow={"scroll"}
             >              
-              <AutoLayout
-                padding={16}
-                fill={"#eee"}
-                cornerRadius={8}
-                width={"fill-parent"}
-                spacing={12}
-                verticalAlignItems={"end"}
-                stroke={"#ccc"}
-                strokeWidth={1}
-              >
-                <SVG src={folderSvg} />
-                <Input
-                  width={"fill-parent"}
-                  fontSize={22}
-                  value={checkedGroup}
-                  onTextEditEnd={(e) => setCheckedGroup(e.characters)}
-                  placeholder="Move to group"
-                />
-              </AutoLayout>
+              
               {/* font family */}
               <AutoLayout
                 padding={16}
@@ -1104,7 +1077,20 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                     })
                   }
                 />
-
+                <SVG
+                  src={variableOutlineSvg}
+                  tooltip="Choice variable"
+                        onClick={() =>
+                          showUi({
+                            moduleName: "choiceVariableSelected",
+                            name: "Choice variable",
+                            data: {
+                              type: "fontFamily",
+                              variables: localVariableList || [],
+                            },
+                          })
+                        }
+                      />
               </AutoLayout>
               {/* font style */}
               <AutoLayout
@@ -1432,7 +1418,6 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                               type: "fontFamily",
                               id: style.id,
                               value: cache.fontName.family,
-                              variables: localVariableList || [],
                             },
                           })
                         }
@@ -1537,7 +1522,6 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                               type: "fontStyle",
                               id: style.id,
                               value: cache.fontName.style,
-                              variables: localVariableList || [],
                             },
                           })
                         }
@@ -1613,7 +1597,6 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                               type: "fontSize",
                               id: style.id,
                               value: cache.fontSize.toString(),
-                              variables: localVariableList || [],
                             },
                           })
                         }
@@ -1851,7 +1834,6 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
               setSearchStyle,
               setSearchFontSize,
               setCheckedFamily,
-              setCheckedGroup,
               setCheckedStyle,
               setCheckedFontSize,
               setCheckedLineHeight,

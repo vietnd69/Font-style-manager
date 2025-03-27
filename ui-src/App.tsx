@@ -31,6 +31,7 @@ function App() {
         {module === "editShowGroup" && <EditShowGroup data={data} />}
         {module === "editTypeList" && <EditShowType data={data} />}
         {module === "choiceVariable" && <ChoiceVariable data={data} />}
+        {module === "choiceVariableSelected" && <ChoiceVariable data={data} />}
         {module === "processing" && <Processing data={data} />}
       </Suspense>
     </div>

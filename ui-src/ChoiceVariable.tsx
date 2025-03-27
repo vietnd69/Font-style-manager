@@ -8,8 +8,8 @@ const { Title, Paragraph } = Typography;
 type ChoiceVariableProps = {
   data: {
     type: string;
-    id: string;
-    value: string | number;
+    id?: string;
+    value?: string | number;
     variables: CustomVariable[];
   };
 };
@@ -153,8 +153,17 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
   );
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isForSelectedElements, setIsForSelectedElements] = useState<boolean>(false);
+  const [loading, setLoading] = useState(true);
+  const [propertyType, setPropertyType] = useState("");
+  const [styleId, setStyleId] = useState("");
+  const [currentValue, setCurrentValue] = useState("");
 
   useEffect(() => {
+    // Kiểm tra xem đây có phải là chế độ "choiceVariableSelected" hay không
+    // bằng cách xem có id trong data hay không
+    setIsForSelectedElements(!data.id);
+
     if (data.variables) {
       const rule =
         FILTER_RULES.find((r) => r.type === data.type) ||
@@ -177,6 +186,33 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
       setVariables(filtered);
       setFilteredVariables(filtered);
     }
+
+    // Lấy dữ liệu ban đầu từ plugin
+    window.onmessage = (event) => {
+      const message = event.data.pluginMessage;
+      
+      if (message && message.moduleName === "choiceVariable") {
+        // Nhận thông tin cơ bản
+        setPropertyType(message.data.type);
+        setStyleId(message.data.id);
+        setCurrentValue(message.data.value);
+        
+        // Yêu cầu danh sách variables
+        parent.postMessage({
+          pluginMessage: {
+            type: "getVariables",
+            propertyType: message.data.type
+          }
+        }, "*");
+      }
+      
+      // Nhận danh sách variables
+      if (message && message.type === "updateVariables") {
+        setVariables(message.variables);
+        setFilteredVariables(message.variables);
+        setLoading(false);
+      }
+    };
   }, [data]);
 
   useEffect(() => {
@@ -228,18 +264,36 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
       return;
     }
 
-    parent.postMessage(
-      {
-        pluginMessage: {
-          type: "setVariable",
-          variableId: variable.id,
-          styleId: data.id,
-          propertyType: propertyType,
+    // Xử lý khác nhau cho choiceVariable và choiceVariableSelected
+    if (isForSelectedElements) {
+      parent.postMessage(
+        {
+          pluginMessage: {
+            type: "setVariableForSelected",
+            variableId: variable.id,
+            propertyType: propertyType,
+          },
         },
-      },
-      "*"
-    );
+        "*"
+      );
+    } else {
+      parent.postMessage(
+        {
+          pluginMessage: {
+            type: "setVariable",
+            variableId: variable.id,
+            styleId: data.id,
+            propertyType: propertyType,
+          },
+        },
+        "*"
+      );
+    }
   };
+
+  if (loading) {
+    return <div>Đang tải variables...</div>;
+  }
 
   if (!data || !Array.isArray(data.variables)) {
     return (
@@ -263,7 +317,9 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
             type="secondary"
             style={{ fontSize: "13px", marginBottom: 8 }}
           >
-            Select a variable to bind to this property
+            {isForSelectedElements 
+              ? "Select a variable to apply to selected elements" 
+              : "Select a variable to bind to this property"}
           </Paragraph>
         </Typography>
 

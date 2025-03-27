@@ -68,6 +68,15 @@ export type msgType =
       variableId: string; // ID of the selected variable
       styleId: string; // ID of the style to bind variable to
       propertyType: string; // Type of property (e.g., "fontStyle", "fontFamily")
+    }
+  | {
+      type: "setVariableForSelected"; // Set variable for selected elements
+      variableId: string; // ID of the selected variable
+      propertyType: string; // Type of property (e.g., "fontStyle", "fontFamily")
+    }
+  | {
+      type: "getVariables"; // Yêu cầu lấy variables
+      propertyType: string; // Loại property để filter variables (nếu cần)
     };
 
 /**
@@ -978,6 +987,18 @@ function Widget() {
     if (msg.type === "setVariable") {
       handleSetVariable(msg.variableId, msg.styleId, msg.propertyType);
     }
+    if (msg.type === "setVariableForSelected") {
+      handleSetVariableForSelected(msg.variableId, msg.propertyType);
+    }
+    if (msg.type === "getVariables") {
+      const propertyType = msg.propertyType;
+      // Gửi variables về UI
+      figma.ui.postMessage({ 
+        type: "updateVariables",
+        variables: localVariableList,
+        propertyType: propertyType
+      });
+    }
   };
 
   // const [findKeys, setFindKeys] = useSyncedState("findKeys", { family: "", style: "" });
@@ -1202,6 +1223,28 @@ function Widget() {
     });
 
     return hasWeightStyle;
+  };
+
+  /**
+   * Apply variable to selected text nodes
+   * @param variableId - ID of the variable to bind
+   * @param propertyType - Type of property to bind (fontFamily, fontSize, etc.)
+   */
+  const handleSetVariableForSelected = async (
+    variableId: string,
+    propertyType: string
+  ) => {
+    console.log(
+      "Setting variable for selected elements:",
+      variableId,
+      "property:",
+      propertyType
+    );
+
+    // log variableid
+    console.log(variableId);
+
+    figma.closePlugin();
   };
 
   return (
