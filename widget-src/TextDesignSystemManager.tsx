@@ -52,6 +52,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     isOpenSearchBar,
     showEditType,
     localVariableList,
+    currentModeID,
   } = value;
   const [filterStyles, setFilterStyles] = useSyncedState<textStyleType[]>(
     "filterStyles",
@@ -108,40 +109,6 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     "cacheStyle",
     []
   );
-
-  const [currentModeID, setCurrentModeID] = useSyncedState<string | undefined>(
-    "currentModeID",
-    undefined
-  );
-
-  // Hàm lấy mode hiện tại
-  const getCurrentMode = async () => {
-    try {
-      // Lấy tất cả collection biến
-      const collections =
-        await figma.variables.getLocalVariableCollectionsAsync();
-
-      if (collections.length > 0) {
-        // Lấy collection đầu tiên hoặc collection đang active
-        // Figma API hiện không có hàm để lấy trực tiếp active mode
-        const activeCollection = collections[0];
-
-        if (activeCollection.modes.length > 0) {
-          // Lấy mode mặc định hoặc mode đầu tiên
-          const modeID =
-            activeCollection.defaultModeId || activeCollection.modes[0].modeId;
-          setCurrentModeID(modeID);
-        }
-      }
-    } catch (error) {
-      console.error("Error getting current mode:", error);
-    }
-  };
-
-  // Gọi hàm lấy current mode khi component được khởi tạo
-  if (!currentModeID) {
-    getCurrentMode();
-  }
 
   /**
    * Toggle selection state for a specific text style
@@ -1080,17 +1047,17 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                 <SVG
                   src={variableOutlineSvg}
                   tooltip="Choice variable"
-                        onClick={() =>
-                          showUi({
-                            moduleName: "choiceVariableSelected",
-                            name: "Choice variable",
-                            data: {
-                              type: "fontFamily",
-                              variables: localVariableList || [],
-                            },
-                          })
-                        }
-                      />
+                  onClick={() =>
+                    showUi({
+                      moduleName: "choiceVariableSelected",
+                      name: "Choice variable",
+                      data: {
+                        type: "fontFamily",
+                        variables: localVariableList || [],
+                      },
+                    })
+                  }
+                />
               </AutoLayout>
               {/* font style */}
               <AutoLayout
@@ -1418,6 +1385,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                               type: "fontFamily",
                               id: style.id,
                               value: cache.fontName.family,
+                              variables: localVariableList || [],
                             },
                           })
                         }
@@ -1522,6 +1490,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                               type: "fontStyle",
                               id: style.id,
                               value: cache.fontName.style,
+                              variables: localVariableList || [],
                             },
                           })
                         }
@@ -1597,6 +1566,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                               type: "fontSize",
                               id: style.id,
                               value: cache.fontSize.toString(),
+                              variables: localVariableList || [],
                             },
                           })
                         }

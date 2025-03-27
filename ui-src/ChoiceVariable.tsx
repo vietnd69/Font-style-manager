@@ -11,6 +11,7 @@ type ChoiceVariableProps = {
     id?: string;
     value?: string | number;
     variables: CustomVariable[];
+    moduleName?: string;
   };
 };
 
@@ -155,9 +156,6 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isForSelectedElements, setIsForSelectedElements] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
-  const [propertyType, setPropertyType] = useState("");
-  const [styleId, setStyleId] = useState("");
-  const [currentValue, setCurrentValue] = useState("");
 
   useEffect(() => {
     // Kiểm tra xem đây có phải là chế độ "choiceVariableSelected" hay không
@@ -185,34 +183,8 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
 
       setVariables(filtered);
       setFilteredVariables(filtered);
+      setLoading(false);
     }
-
-    // Lấy dữ liệu ban đầu từ plugin
-    window.onmessage = (event) => {
-      const message = event.data.pluginMessage;
-      
-      if (message && message.moduleName === "choiceVariable") {
-        // Nhận thông tin cơ bản
-        setPropertyType(message.data.type);
-        setStyleId(message.data.id);
-        setCurrentValue(message.data.value);
-        
-        // Yêu cầu danh sách variables
-        parent.postMessage({
-          pluginMessage: {
-            type: "getVariables",
-            propertyType: message.data.type
-          }
-        }, "*");
-      }
-      
-      // Nhận danh sách variables
-      if (message && message.type === "updateVariables") {
-        setVariables(message.variables);
-        setFilteredVariables(message.variables);
-        setLoading(false);
-      }
-    };
   }, [data]);
 
   useEffect(() => {

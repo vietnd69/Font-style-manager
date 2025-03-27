@@ -138,6 +138,7 @@ export type textDesignManagerType = {
   isOpenSearchBar: boolean; // Search bar visibility state
   showEditType: ShowType; // Typography display options
   localVariableList: CustomVariable[]; // Available variables
+  currentModeID?: string; // Current mode ID của variable collection
 };
 
 /**
@@ -532,6 +533,12 @@ function Widget() {
   const [localVariableList, setLocalVariableList] = useSyncedState<
     CustomVariable[]
   >("localVariableList", []);
+
+  // Thêm state mới để lưu trữ current mode của variable collection
+  const [currentModeID, setCurrentModeID] = useSyncedState<string | undefined>(
+    "currentModeID",
+    undefined
+  );
 
   const widgetId = useWidgetId();
 
@@ -990,15 +997,6 @@ function Widget() {
     if (msg.type === "setVariableForSelected") {
       handleSetVariableForSelected(msg.variableId, msg.propertyType);
     }
-    if (msg.type === "getVariables") {
-      const propertyType = msg.propertyType;
-      // Gửi variables về UI
-      figma.ui.postMessage({ 
-        type: "updateVariables",
-        variables: localVariableList,
-        propertyType: propertyType
-      });
-    }
   };
 
   // const [findKeys, setFindKeys] = useSyncedState("findKeys", { family: "", style: "" });
@@ -1071,6 +1069,27 @@ function Widget() {
       }
     }
     setLocalVariableList(variablesData);
+
+    // Lấy currentMode từ collections
+    if (variablesData.length > 0) {
+      try {
+        // Lấy collection ID từ variable đầu tiên
+        const firstVariable = variablesData[0];
+        const collectionId = firstVariable.variableCollectionId;
+        
+        // Lấy collection từ API
+        const collection = await figma.variables.getVariableCollectionByIdAsync(collectionId);
+        
+        if (collection && collection.modes.length > 0) {
+          // Lấy mode mặc định hoặc mode đầu tiên
+          const modeID = collection.defaultModeId || collection.modes[0].modeId;
+          setCurrentModeID(modeID);
+        }
+      } catch (error) {
+        console.error("Error getting current mode:", error);
+      }
+    }
+
     figma.notify(
       "✅ Style loaded successfully, Waiting for import data to widget"
     );
@@ -1383,6 +1402,7 @@ function Widget() {
             isOpenSearchBar,
             showEditType,
             localVariableList,
+            currentModeID,
           }}
         />
       )}
