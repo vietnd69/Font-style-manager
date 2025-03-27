@@ -193,13 +193,48 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
 
   const handleVariableSelect = (variable: CustomVariable) => {
     setSelectedId(variable.id);
+    const defaultValue = getDefaultValue(variable);
+
+    // Trường hợp đặc biệt: fontStyle là number thì trả về fontWeight
+    let propertyType = data.type;
+
+    // 1. fontStyle là number -> chuyển sang fontWeight
+    if (data.type === "fontStyle" && typeof defaultValue === "number") {
+      propertyType = "fontWeight";
+    }
+
+    // 2. Kiểm tra scope của variable có phù hợp với propertyType không
+    const hasValidScope = hasCompatibleScope(
+      variable,
+      FILTER_RULES.find((r) => r.type === propertyType)?.scopes || []
+    );
+
+    if (!hasValidScope) {
+      console.error(`Variable không có scope phù hợp với ${propertyType}`);
+      // Không tiếp tục nếu scope không phù hợp
+      return;
+    }
+
+    // 3. Kiểm tra kiểu dữ liệu có phù hợp không
+    const valueType = getValueType(defaultValue);
+    const expectedTypes =
+      FILTER_RULES.find((r) => r.type === propertyType)?.valueTypes || [];
+
+    if (!expectedTypes.includes(valueType) && !expectedTypes.includes("any")) {
+      console.error(
+        `Variable có kiểu dữ liệu ${valueType} không phù hợp với ${propertyType}`
+      );
+      // Không tiếp tục nếu kiểu dữ liệu không phù hợp
+      return;
+    }
+
     parent.postMessage(
       {
         pluginMessage: {
           type: "setVariable",
           variableId: variable.id,
           styleId: data.id,
-          propertyType: data.type,
+          propertyType: propertyType,
         },
       },
       "*"

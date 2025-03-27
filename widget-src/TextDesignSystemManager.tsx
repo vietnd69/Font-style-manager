@@ -234,6 +234,122 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
               isUpdate = true;
             });
           }
+
+          // Bind variables to text style if they exist in boundVariables
+          if (cache.boundVariables) {
+            await figma.loadFontAsync({ ...cache.fontName }).then(async () => {
+              // Xử lý đặc biệt cho fontFamily trước
+              const boundVariables = cache.boundVariables; // Tạo biến tạm để tránh lỗi TypeScript
+
+              if (boundVariables && "fontFamily" in boundVariables) {
+                try {
+                  const variableId = (
+                    boundVariables.fontFamily as VariableAlias
+                  ).id;
+                  const variable =
+                    await figma.variables.getVariableByIdAsync(variableId);
+
+                  if (variable) {
+                    // Bind fontFamily trước
+                    textStyle.setBoundVariable("fontFamily", variable);
+                    isUpdate = true;
+
+                    // Kiểm tra xem fontStyle có còn tương thích với fontFamily mới không
+                    const fontName = textStyle.fontName; // Lấy fontName cập nhật sau khi bind fontFamily
+
+                    try {
+                      await figma.loadFontAsync(fontName);
+                    } catch (e) {
+                      // fontStyle không tương thích với fontFamily mới
+                      // Tìm font style tương tự nhất
+                      const fontVariants =
+                        await figma.listAvailableFontsAsync();
+                      const familyVariants = fontVariants.filter(
+                        (font) => font.fontName.family === fontName.family
+                      );
+
+                      if (familyVariants.length > 0) {
+                        // Tìm font style default hoặc đầu tiên
+                        const defaultStyle =
+                          familyVariants.find(
+                            (font) => font.fontName.style === "Regular"
+                          ) || familyVariants[0];
+
+                        // Cập nhật fontStyle
+                        textStyle.fontName = defaultStyle.fontName;
+                        figma.notify(
+                          `Font style "${fontName.style}" không tương thích với font family "${fontName.family}". Đã đổi sang "${defaultStyle.fontName.style}"`
+                        );
+                      }
+                    }
+                  }
+                } catch (e) {
+                  figma.notify(`Failed to bind variable to fontFamily: ${e}`, {
+                    error: true,
+                  });
+                }
+              }
+
+              // Sau đó mới xử lý các biến khác
+              if (boundVariables) {
+                for (const [property, variableAlias] of Object.entries(
+                  boundVariables
+                )) {
+                  // Bỏ qua fontFamily vì đã xử lý ở trên
+                  if (property === "fontFamily") continue;
+
+                  if (variableAlias) {
+                    // Get the Variable instance from variable ID
+                    const variableId = (variableAlias as VariableAlias).id;
+                    const variable =
+                      await figma.variables.getVariableByIdAsync(variableId);
+
+                    if (variable) {
+                      try {
+                        // Special case for fontStyle property when variable is a number type (it should be bound to fontWeight)
+                        if (
+                          property === "fontStyle" &&
+                          variable.resolvedType === "FLOAT"
+                        ) {
+                          // Unbind from fontStyle if it exists
+                          textStyle.setBoundVariable("fontStyle", null);
+                          // Bind to fontWeight instead
+                          textStyle.setBoundVariable("fontWeight", variable);
+                        } else {
+                          // For all other properties, bind to the correct property
+                          textStyle.setBoundVariable(
+                            property as VariableBindableTextField,
+                            variable
+                          );
+                        }
+                        isUpdate = true;
+                      } catch (e) {
+                        figma.notify(
+                          `Failed to bind variable to ${property}: ${e}`,
+                          { error: true }
+                        );
+                      }
+                    }
+                  } else if (property) {
+                    // If variableAlias is null, unbind the variable
+                    try {
+                      textStyle.setBoundVariable(
+                        property as VariableBindableTextField,
+                        null
+                      );
+                      isUpdate = true;
+                    } catch (e) {
+                      figma.notify(
+                        `Failed to unbind variable from ${property}: ${e}`,
+                        { error: true }
+                      );
+                    }
+                  }
+                }
+              }
+            });
+          }
+
           // if (isUpdate) {
           //   figma.notify("✓ " + textStyle.name + "Style has update", {
           //     timeout: 300,

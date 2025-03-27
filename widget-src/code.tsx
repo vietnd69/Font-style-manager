@@ -149,7 +149,10 @@ export const checkStyleChanged = (
   description: boolean;
 } => {
   // Hàm helper để kiểm tra xem một thuộc tính có bound variable không
-  const hasBoundVariable = (style: textStyleType, property: string): boolean => {
+  const hasBoundVariable = (
+    style: textStyleType,
+    property: string
+  ): boolean => {
     return !!style.boundVariables?.[property];
   };
 
@@ -166,10 +169,13 @@ export const checkStyleChanged = (
 
     // Nếu một trong hai có variable và giá trị khác nhau, return true
     if (cacheHasVariable !== localHasVariable) return true;
-    
+
     // Nếu cả hai đều có variable, so sánh ID của variable
     if (cacheHasVariable && localHasVariable) {
-      return cacheStyle.boundVariables![property].id !== localStyle.boundVariables![property].id;
+      return (
+        cacheStyle.boundVariables![property].id !==
+        localStyle.boundVariables![property].id
+      );
     }
 
     // Nếu cả hai đều không có variable, so sánh giá trị
@@ -188,16 +194,21 @@ export const checkStyleChanged = (
 
     // Nếu một trong hai có variable và giá trị khác nhau, return true
     if (cacheHasVariable !== localHasVariable) return true;
-    
+
     // Nếu cả hai đều có variable, so sánh ID của variable
     if (cacheHasVariable && localHasVariable) {
-      return cacheStyle.boundVariables!["lineHeight"].id !== localStyle.boundVariables!["lineHeight"].id;
+      return (
+        cacheStyle.boundVariables!["lineHeight"].id !==
+        localStyle.boundVariables!["lineHeight"].id
+      );
     }
 
     // Nếu cả hai đều không có variable, so sánh giá trị
     if (cacheLineHeight.unit !== localLineHeight.unit) return true;
-    if (cacheLineHeight.unit === "AUTO" && localLineHeight.unit === "AUTO") return false;
-    if (cacheLineHeight.unit === "AUTO" || localLineHeight.unit === "AUTO") return true;
+    if (cacheLineHeight.unit === "AUTO" && localLineHeight.unit === "AUTO")
+      return false;
+    if (cacheLineHeight.unit === "AUTO" || localLineHeight.unit === "AUTO")
+      return true;
     return cacheLineHeight.value !== localLineHeight.value;
   };
 
@@ -213,18 +224,27 @@ export const checkStyleChanged = (
 
     // Nếu một trong hai có variable và giá trị khác nhau, return true
     if (cacheHasVariable !== localHasVariable) return true;
-    
+
     // Nếu cả hai đều có variable, so sánh ID của variable
     if (cacheHasVariable && localHasVariable) {
-      return cacheStyle.boundVariables!["letterSpacing"].id !== localStyle.boundVariables!["letterSpacing"].id;
+      return (
+        cacheStyle.boundVariables!["letterSpacing"].id !==
+        localStyle.boundVariables!["letterSpacing"].id
+      );
     }
 
     // Nếu cả hai đều không có variable, so sánh giá trị
     if (cacheLetterSpacing.unit !== localLetterSpacing.unit) return true;
-    if (cacheLetterSpacing.unit === "PIXELS" && localLetterSpacing.unit === "PIXELS") {
+    if (
+      cacheLetterSpacing.unit === "PIXELS" &&
+      localLetterSpacing.unit === "PIXELS"
+    ) {
       return cacheLetterSpacing.value !== localLetterSpacing.value;
     }
-    if (cacheLetterSpacing.unit === "PERCENT" && localLetterSpacing.unit === "PERCENT") {
+    if (
+      cacheLetterSpacing.unit === "PERCENT" &&
+      localLetterSpacing.unit === "PERCENT"
+    ) {
       return cacheLetterSpacing.value !== localLetterSpacing.value;
     }
     return true;
@@ -515,8 +535,10 @@ function Widget() {
         field = "fontFamily";
         break;
       case "fontStyle":
-      case "fontWeight":
         field = "fontStyle";
+        break;
+      case "fontWeight":
+        field = "fontWeight";
         break;
       case "fontSize":
         field = "fontSize";
@@ -535,6 +557,20 @@ function Widget() {
         return;
     }
     console.log("Mapped field:", field);
+
+    // Get variable value to check type
+    const defaultModeId = variableToApply.defaultModeId;
+    if (defaultModeId) {
+      const variableValue = variableToApply.valuesByMode[defaultModeId];
+
+      // Special case: if fontStyle variable contains a number, use fontWeight field instead
+      if (propertyType === "fontStyle" && typeof variableValue === "number") {
+        field = "fontWeight";
+        console.log(
+          "Using fontWeight instead of fontStyle for number variable"
+        );
+      }
+    }
 
     // Update cache.boundVariables and corresponding value
     setCacheStyle((prev: textStyleType[]) =>
@@ -608,17 +644,93 @@ function Widget() {
               }
               console.log("Updated fontName:", updatedStyle.fontName);
               break;
+            case "fontWeight":
+              // Handle fontWeight variable (it should be a number)
+              if (typeof variableValue === "number") {
+                // Check if font supports weight
+                const fontSupportsWeight = checkFontWeightSupport(
+                  style.fontName.family
+                );
+
+                if (fontSupportsWeight) {
+                  // If weight is supported, convert to corresponding style name
+                  const weightToStyle: { [key: number]: string } = {
+                    100: "Thin",
+                    200: "ExtraLight",
+                    300: "Light",
+                    400: "Regular",
+                    500: "Medium",
+                    600: "SemiBold",
+                    700: "Bold",
+                    800: "ExtraBold",
+                    900: "Black",
+                  };
+                  updatedStyle.fontName = {
+                    ...style.fontName,
+                    style: weightToStyle[variableValue] || "Regular",
+                  };
+                } else {
+                  // If weight is not supported, keep current style
+                  console.warn(
+                    `Font ${style.fontName.family} does not support weight ${variableValue}`
+                  );
+                  return style;
+                }
+              } else {
+                console.warn(
+                  `fontWeight variable should be a number, got ${typeof variableValue}`
+                );
+                return style;
+              }
+              console.log(
+                "Updated fontName (from weight):",
+                updatedStyle.fontName
+              );
+              break;
             case "fontSize":
               updatedStyle.fontSize = variableValue as number;
               console.log("Updated fontSize:", updatedStyle.fontSize);
               break;
             case "lineHeight":
-              console.log("Current lineHeight:", updatedStyle.lineHeight);
-              // Keep current lineHeight value as it's a complex object
+              // LineHeight là object phức tạp với unit và value
+              if (typeof variableValue === "number") {
+                // Giữ nguyên unit hiện tại, chỉ cập nhật value
+                // Nếu unit là AUTO, chuyển sang PIXELS
+                if (style.lineHeight.unit === "AUTO") {
+                  updatedStyle.lineHeight = {
+                    unit: "PIXELS",
+                    value: variableValue,
+                  };
+                } else {
+                  updatedStyle.lineHeight = {
+                    ...style.lineHeight,
+                    value: variableValue,
+                  };
+                }
+                console.log("Updated lineHeight:", updatedStyle.lineHeight);
+              } else {
+                console.warn(
+                  `LineHeight variable phải là số, nhận được ${typeof variableValue}`
+                );
+              }
               break;
             case "letterSpacing":
-              console.log("Current letterSpacing:", updatedStyle.letterSpacing);
-              // Keep current letterSpacing value as it's a complex object
+              // LetterSpacing cũng là object phức tạp với unit và value
+              if (typeof variableValue === "number") {
+                // Giữ nguyên unit hiện tại, chỉ cập nhật value
+                updatedStyle.letterSpacing = {
+                  ...style.letterSpacing,
+                  value: variableValue,
+                };
+                console.log(
+                  "Updated letterSpacing:",
+                  updatedStyle.letterSpacing
+                );
+              } else {
+                console.warn(
+                  `LetterSpacing variable phải là số, nhận được ${typeof variableValue}`
+                );
+              }
               break;
             default:
               console.warn(
@@ -903,7 +1015,6 @@ function Widget() {
 
     return hasWeightStyle;
   };
-
 
   return (
     <AutoLayout
