@@ -166,7 +166,23 @@ export const compareVariableAndDirectValue = (
   const variableValue =
     foundVariable.valuesByMode[variableCollection.currentMode];
 
+  // Hiển thị thông tin để debug
+  console.log(`Comparing variable value: "${variableValue}" (${typeof variableValue}) with direct value: "${directValue}" (${typeof directValue})`);
+  
   // So sánh giá trị của biến với giá trị trực tiếp
+  // Chuyển đổi kiểu dữ liệu nếu cần
+  if (typeof variableValue === "string" && typeof directValue === "string") {
+    // So sánh các chuỗi không phân biệt chữ hoa/thường
+    return variableValue.toLowerCase() === directValue.toLowerCase();
+  } else if (typeof variableValue === "number" && typeof directValue === "string") {
+    // Có thể là fontWeight (số) vs fontStyle (chuỗi)
+    return variableValue.toString() === directValue;
+  } else if (typeof variableValue === "string" && typeof directValue === "number") {
+    // Ngược lại
+    return variableValue === directValue.toString();
+  }
+  
+  // Các trường hợp khác, so sánh trực tiếp
   return variableValue === directValue;
 };
 
@@ -232,36 +248,24 @@ export const checkFontStyleChanged = (
   const localHasStyleVar = !!localStyle.boundVariables?.fontStyle;
   const localHasWeightVar = !!localStyle.boundVariables?.fontWeight;
 
-  // Nếu trạng thái variable khác nhau
+  // Ghi log để debug
+  console.log(`checkFontStyleChanged - cache: "${cacheStyle.fontName.style}", local: "${localStyle.fontName.style}"`);
+  if (cacheHasStyleVar) 
+    console.log(`Cache has fontStyle variable: ${cacheStyle.boundVariables?.fontStyle}`);
+  if (cacheHasWeightVar)
+    console.log(`Cache has fontWeight variable: ${cacheStyle.boundVariables?.fontWeight}`);
+  if (localHasStyleVar)
+    console.log(`Local has fontStyle variable: ${localStyle.boundVariables?.fontStyle}`);
+  if (localHasWeightVar)
+    console.log(`Local has fontWeight variable: ${localStyle.boundVariables?.fontWeight}`);
+
+  // Nếu trạng thái variable khác nhau (một bên có variable, bên kia không)
+  // => luôn coi là có thay đổi, bất kể giá trị có giống nhau hay không
   if (
     cacheHasStyleVar !== localHasStyleVar ||
     cacheHasWeightVar !== localHasWeightVar
   ) {
-    // Kiểm tra giá trị variable vs giá trị trực tiếp nếu có variableCollection
-    if (variableCollection) {
-      // Kiểm tra tất cả các trường hợp
-      if (cacheHasStyleVar && !localHasStyleVar) {
-        return !compareVariableAndDirectValue(
-          cacheStyle.boundVariables?.fontStyle as VariableAlias,
-          localStyle.fontName.style,
-          variableCollection
-        );
-      } else if (cacheHasWeightVar && !localHasWeightVar) {
-        // Cần convert weight từ number sang style name
-        // Logic phức tạp, cài đặt đầy đủ nếu cần
-        return true;
-      } else if (!cacheHasStyleVar && localHasStyleVar) {
-        return !compareVariableAndDirectValue(
-          localStyle.boundVariables?.fontStyle as VariableAlias,
-          cacheStyle.fontName.style,
-          variableCollection
-        );
-      } else if (!cacheHasWeightVar && localHasWeightVar) {
-        // Cần convert weight từ number sang style name
-        return true;
-      }
-    }
-
+    // Luôn trả về true khi một bên có biến và bên kia không
     return true;
   }
 
@@ -281,7 +285,9 @@ export const checkFontStyleChanged = (
   }
 
   // Không biến, so sánh giá trị trực tiếp
-  return cacheStyle.fontName.style !== localStyle.fontName.style;
+  const result = cacheStyle.fontName.style !== localStyle.fontName.style;
+  console.log(`Direct comparison result: ${result}`);
+  return result;
 };
 
 // Kiểm tra font size
