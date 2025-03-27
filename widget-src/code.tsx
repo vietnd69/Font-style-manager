@@ -132,14 +132,288 @@ export type textDesignManagerType = {
 };
 
 /**
- * Kiểm tra xem style trong cache có khác với local style không
- * @param cacheStyle - Style từ cache
- * @param localStyle - Style từ local
- * @returns object - Object chứa thông tin về các thuộc tính đã thay đổi
+ * Kiểm tra nếu biến và giá trị trực tiếp có cùng giá trị thực tế
+ * @param variable - Biến cần kiểm tra
+ * @param directValue - Giá trị trực tiếp để so sánh
+ * @param variableCollection - Danh sách biến và mode hiện tại
+ * @returns true nếu biến và giá trị trực tiếp giống nhau về mặt giá trị
+ */
+export const compareVariableAndDirectValue = (
+  variable: VariableAlias | undefined,
+  directValue: any,
+  variableCollection: { variables: any[]; currentMode: string | undefined }
+): boolean => {
+  if (!variable) return false;
+
+  // Tìm biến trong collection
+  const foundVariable = variableCollection.variables.find(
+    (v) => v.id === variable.id
+  );
+
+  if (!foundVariable || !variableCollection.currentMode) return false;
+
+  // Lấy giá trị của biến trong mode hiện tại
+  const variableValue =
+    foundVariable.valuesByMode[variableCollection.currentMode];
+
+  // So sánh giá trị của biến với giá trị trực tiếp
+  return variableValue === directValue;
+};
+
+/**
+ * Tạo các hàm kiểm tra riêng cho từng thuộc tính
+ */
+
+// Kiểm tra font family
+export const checkFontFamilyChanged = (
+  cacheStyle: textStyleType,
+  localStyle: textStyleType,
+  variableCollection?: { variables: any[]; currentMode: string | undefined }
+): boolean => {
+  const cacheHasVariable = !!cacheStyle.boundVariables?.fontFamily;
+  const localHasVariable = !!localStyle.boundVariables?.fontFamily;
+
+  // Trường hợp 1: Một trong hai có biến, một không có biến
+  if (cacheHasVariable !== localHasVariable) {
+    // Nếu có variableCollection, kiểm tra xem biến có giá trị giống với giá trị trực tiếp không
+    if (variableCollection) {
+      if (cacheHasVariable) {
+        // Kiểm tra xem biến trong cache có giá trị giống với giá trị trực tiếp trong local không
+        return !compareVariableAndDirectValue(
+          cacheStyle.boundVariables?.fontFamily as VariableAlias,
+          localStyle.fontName.family,
+          variableCollection
+        );
+      } else if (localHasVariable) {
+        // Kiểm tra xem biến trong local có giá trị giống với giá trị trực tiếp trong cache không
+        return !compareVariableAndDirectValue(
+          localStyle.boundVariables?.fontFamily as VariableAlias,
+          cacheStyle.fontName.family,
+          variableCollection
+        );
+      }
+    }
+
+    // Nếu không có variableCollection, coi là khác nhau
+    return true;
+  }
+
+  // Trường hợp 2: Cả hai đều có biến, so sánh ID của biến
+  if (cacheHasVariable && localHasVariable) {
+    return (
+      (cacheStyle.boundVariables!.fontFamily as VariableAlias).id !==
+      (localStyle.boundVariables!.fontFamily as VariableAlias).id
+    );
+  }
+
+  // Trường hợp 3: Cả hai đều không có biến, so sánh giá trị
+  return cacheStyle.fontName.family !== localStyle.fontName.family;
+};
+
+// Kiểm tra font style
+export const checkFontStyleChanged = (
+  cacheStyle: textStyleType,
+  localStyle: textStyleType,
+  variableCollection?: { variables: any[]; currentMode: string | undefined }
+): boolean => {
+  // Kiểm tra cả fontStyle và fontWeight vì chúng liên quan đến nhau
+  const cacheHasStyleVar = !!cacheStyle.boundVariables?.fontStyle;
+  const cacheHasWeightVar = !!cacheStyle.boundVariables?.fontWeight;
+  const localHasStyleVar = !!localStyle.boundVariables?.fontStyle;
+  const localHasWeightVar = !!localStyle.boundVariables?.fontWeight;
+
+  // Nếu trạng thái variable khác nhau
+  if (
+    cacheHasStyleVar !== localHasStyleVar ||
+    cacheHasWeightVar !== localHasWeightVar
+  ) {
+    // Kiểm tra giá trị variable vs giá trị trực tiếp nếu có variableCollection
+    if (variableCollection) {
+      // Kiểm tra tất cả các trường hợp
+      if (cacheHasStyleVar && !localHasStyleVar) {
+        return !compareVariableAndDirectValue(
+          cacheStyle.boundVariables?.fontStyle as VariableAlias,
+          localStyle.fontName.style,
+          variableCollection
+        );
+      } else if (cacheHasWeightVar && !localHasWeightVar) {
+        // Cần convert weight từ number sang style name
+        // Logic phức tạp, cài đặt đầy đủ nếu cần
+        return true;
+      } else if (!cacheHasStyleVar && localHasStyleVar) {
+        return !compareVariableAndDirectValue(
+          localStyle.boundVariables?.fontStyle as VariableAlias,
+          cacheStyle.fontName.style,
+          variableCollection
+        );
+      } else if (!cacheHasWeightVar && localHasWeightVar) {
+        // Cần convert weight từ number sang style name
+        return true;
+      }
+    }
+
+    return true;
+  }
+
+  // Nếu cùng có biến, so sánh ID biến
+  if (cacheHasStyleVar && localHasStyleVar) {
+    return (
+      (cacheStyle.boundVariables!.fontStyle as VariableAlias).id !==
+      (localStyle.boundVariables!.fontStyle as VariableAlias).id
+    );
+  }
+
+  if (cacheHasWeightVar && localHasWeightVar) {
+    return (
+      (cacheStyle.boundVariables!.fontWeight as VariableAlias).id !==
+      (localStyle.boundVariables!.fontWeight as VariableAlias).id
+    );
+  }
+
+  // Không biến, so sánh giá trị trực tiếp
+  return cacheStyle.fontName.style !== localStyle.fontName.style;
+};
+
+// Kiểm tra font size
+export const checkFontSizeChanged = (
+  cacheStyle: textStyleType,
+  localStyle: textStyleType,
+  variableCollection?: { variables: any[]; currentMode: string | undefined }
+): boolean => {
+  const cacheHasVariable = !!cacheStyle.boundVariables?.fontSize;
+  const localHasVariable = !!localStyle.boundVariables?.fontSize;
+
+  // Một có biến, một không có biến
+  if (cacheHasVariable !== localHasVariable) {
+    // Kiểm tra giá trị của biến vs giá trị trực tiếp
+    if (variableCollection) {
+      if (cacheHasVariable) {
+        return !compareVariableAndDirectValue(
+          cacheStyle.boundVariables?.fontSize as VariableAlias,
+          localStyle.fontSize,
+          variableCollection
+        );
+      } else if (localHasVariable) {
+        return !compareVariableAndDirectValue(
+          localStyle.boundVariables?.fontSize as VariableAlias,
+          cacheStyle.fontSize,
+          variableCollection
+        );
+      }
+    }
+
+    return true;
+  }
+
+  // Cả hai đều có biến, so sánh ID biến
+  if (cacheHasVariable && localHasVariable) {
+    return (
+      (cacheStyle.boundVariables!.fontSize as VariableAlias).id !==
+      (localStyle.boundVariables!.fontSize as VariableAlias).id
+    );
+  }
+
+  // Cả hai đều không có biến, so sánh giá trị
+  return cacheStyle.fontSize !== localStyle.fontSize;
+};
+
+// Kiểm tra line height
+export const checkLineHeightChanged = (
+  cacheStyle: textStyleType,
+  localStyle: textStyleType,
+  variableCollection?: { variables: any[]; currentMode: string | undefined }
+): boolean => {
+  const cacheHasVariable = !!cacheStyle.boundVariables?.lineHeight;
+  const localHasVariable = !!localStyle.boundVariables?.lineHeight;
+
+  // Một có biến, một không có biến
+  if (cacheHasVariable !== localHasVariable) {
+    // Line height phức tạp với nhiều trường hợp (AUTO, PIXELS, PERCENT)
+    // Cần so sánh giá trị biến và giá trị trực tiếp
+    // Để đơn giản, coi là khác nhau
+    return true;
+  }
+
+  // Cả hai đều có biến, so sánh ID biến
+  if (cacheHasVariable && localHasVariable) {
+    return (
+      (cacheStyle.boundVariables!.lineHeight as VariableAlias).id !==
+      (localStyle.boundVariables!.lineHeight as VariableAlias).id
+    );
+  }
+
+  // Cả hai đều không có biến, so sánh giá trị
+  if (cacheStyle.lineHeight.unit !== localStyle.lineHeight.unit) return true;
+  if (
+    cacheStyle.lineHeight.unit === "AUTO" &&
+    localStyle.lineHeight.unit === "AUTO"
+  )
+    return false;
+  if (
+    cacheStyle.lineHeight.unit === "AUTO" ||
+    localStyle.lineHeight.unit === "AUTO"
+  )
+    return true;
+  return cacheStyle.lineHeight.value !== localStyle.lineHeight.value;
+};
+
+// Kiểm tra letter spacing
+export const checkLetterSpacingChanged = (
+  cacheStyle: textStyleType,
+  localStyle: textStyleType,
+  variableCollection?: { variables: any[]; currentMode: string | undefined }
+): boolean => {
+  const cacheHasVariable = !!cacheStyle.boundVariables?.letterSpacing;
+  const localHasVariable = !!localStyle.boundVariables?.letterSpacing;
+
+  // Một có biến, một không có biến
+  if (cacheHasVariable !== localHasVariable) {
+    // Letter spacing cũng phức tạp với unit là PIXELS hoặc PERCENT
+    // Để đơn giản, coi là khác nhau
+    return true;
+  }
+
+  // Cả hai đều có biến, so sánh ID biến
+  if (cacheHasVariable && localHasVariable) {
+    return (
+      (cacheStyle.boundVariables!.letterSpacing as VariableAlias).id !==
+      (localStyle.boundVariables!.letterSpacing as VariableAlias).id
+    );
+  }
+
+  // Cả hai đều không có biến, so sánh giá trị
+  if (cacheStyle.letterSpacing.unit !== localStyle.letterSpacing.unit)
+    return true;
+  if (
+    cacheStyle.letterSpacing.unit === "PIXELS" &&
+    localStyle.letterSpacing.unit === "PIXELS"
+  ) {
+    return cacheStyle.letterSpacing.value !== localStyle.letterSpacing.value;
+  }
+  if (
+    cacheStyle.letterSpacing.unit === "PERCENT" &&
+    localStyle.letterSpacing.unit === "PERCENT"
+  ) {
+    return cacheStyle.letterSpacing.value !== localStyle.letterSpacing.value;
+  }
+  return true;
+};
+
+// Kiểm tra description
+export const checkDescriptionChanged = (
+  cacheStyle: textStyleType,
+  localStyle: textStyleType
+): boolean => {
+  return cacheStyle.description !== localStyle.description;
+};
+
+/**
+ * Hàm gốc được giữ lại để tương thích ngược, sử dụng các hàm con ở trên
  */
 export const checkStyleChanged = (
   cacheStyle: textStyleType,
-  localStyle: textStyleType
+  localStyle: textStyleType,
+  variableCollection?: { variables: any[]; currentMode: string | undefined }
 ): {
   fontFamily: boolean;
   fontStyle: boolean;
@@ -148,143 +422,29 @@ export const checkStyleChanged = (
   letterSpacing: boolean;
   description: boolean;
 } => {
-  // Hàm helper để kiểm tra xem một thuộc tính có bound variable không
-  const hasBoundVariable = (
-    style: textStyleType,
-    property: string
-  ): boolean => {
-    return !!style.boundVariables?.[property];
-  };
-
-  // Hàm helper để so sánh giá trị có tính đến bound variable
-  const compareWithVariable = (
-    cacheValue: any,
-    localValue: any,
-    cacheStyle: textStyleType,
-    localStyle: textStyleType,
-    property: string
-  ): boolean => {
-    const cacheHasVariable = hasBoundVariable(cacheStyle, property);
-    const localHasVariable = hasBoundVariable(localStyle, property);
-
-    // Nếu một trong hai có variable và giá trị khác nhau, return true
-    if (cacheHasVariable !== localHasVariable) return true;
-
-    // Nếu cả hai đều có variable, so sánh ID của variable
-    if (cacheHasVariable && localHasVariable) {
-      return (
-        cacheStyle.boundVariables![property].id !==
-        localStyle.boundVariables![property].id
-      );
-    }
-
-    // Nếu cả hai đều không có variable, so sánh giá trị
-    return cacheValue !== localValue;
-  };
-
-  // Hàm helper để so sánh lineHeight
-  const compareLineHeight = (
-    cacheLineHeight: LineHeight,
-    localLineHeight: LineHeight,
-    cacheStyle: textStyleType,
-    localStyle: textStyleType
-  ): boolean => {
-    const cacheHasVariable = hasBoundVariable(cacheStyle, "lineHeight");
-    const localHasVariable = hasBoundVariable(localStyle, "lineHeight");
-
-    // Nếu một trong hai có variable và giá trị khác nhau, return true
-    if (cacheHasVariable !== localHasVariable) return true;
-
-    // Nếu cả hai đều có variable, so sánh ID của variable
-    if (cacheHasVariable && localHasVariable) {
-      return (
-        cacheStyle.boundVariables!["lineHeight"].id !==
-        localStyle.boundVariables!["lineHeight"].id
-      );
-    }
-
-    // Nếu cả hai đều không có variable, so sánh giá trị
-    if (cacheLineHeight.unit !== localLineHeight.unit) return true;
-    if (cacheLineHeight.unit === "AUTO" && localLineHeight.unit === "AUTO")
-      return false;
-    if (cacheLineHeight.unit === "AUTO" || localLineHeight.unit === "AUTO")
-      return true;
-    return cacheLineHeight.value !== localLineHeight.value;
-  };
-
-  // Hàm helper để so sánh letterSpacing
-  const compareLetterSpacing = (
-    cacheLetterSpacing: LetterSpacing,
-    localLetterSpacing: LetterSpacing,
-    cacheStyle: textStyleType,
-    localStyle: textStyleType
-  ): boolean => {
-    const cacheHasVariable = hasBoundVariable(cacheStyle, "letterSpacing");
-    const localHasVariable = hasBoundVariable(localStyle, "letterSpacing");
-
-    // Nếu một trong hai có variable và giá trị khác nhau, return true
-    if (cacheHasVariable !== localHasVariable) return true;
-
-    // Nếu cả hai đều có variable, so sánh ID của variable
-    if (cacheHasVariable && localHasVariable) {
-      return (
-        cacheStyle.boundVariables!["letterSpacing"].id !==
-        localStyle.boundVariables!["letterSpacing"].id
-      );
-    }
-
-    // Nếu cả hai đều không có variable, so sánh giá trị
-    if (cacheLetterSpacing.unit !== localLetterSpacing.unit) return true;
-    if (
-      cacheLetterSpacing.unit === "PIXELS" &&
-      localLetterSpacing.unit === "PIXELS"
-    ) {
-      return cacheLetterSpacing.value !== localLetterSpacing.value;
-    }
-    if (
-      cacheLetterSpacing.unit === "PERCENT" &&
-      localLetterSpacing.unit === "PERCENT"
-    ) {
-      return cacheLetterSpacing.value !== localLetterSpacing.value;
-    }
-    return true;
-  };
-
   return {
-    fontFamily: compareWithVariable(
-      cacheStyle.fontName.family,
-      localStyle.fontName.family,
+    fontFamily: checkFontFamilyChanged(
       cacheStyle,
       localStyle,
-      "fontFamily"
+      variableCollection
     ),
-    fontStyle: compareWithVariable(
-      cacheStyle.fontName.style,
-      localStyle.fontName.style,
+    fontStyle: checkFontStyleChanged(
       cacheStyle,
       localStyle,
-      "fontStyle"
+      variableCollection
     ),
-    fontSize: compareWithVariable(
-      cacheStyle.fontSize,
-      localStyle.fontSize,
+    fontSize: checkFontSizeChanged(cacheStyle, localStyle, variableCollection),
+    lineHeight: checkLineHeightChanged(
       cacheStyle,
       localStyle,
-      "fontSize"
+      variableCollection
     ),
-    lineHeight: compareLineHeight(
-      cacheStyle.lineHeight,
-      localStyle.lineHeight,
+    letterSpacing: checkLetterSpacingChanged(
       cacheStyle,
-      localStyle
+      localStyle,
+      variableCollection
     ),
-    letterSpacing: compareLetterSpacing(
-      cacheStyle.letterSpacing,
-      localStyle.letterSpacing,
-      cacheStyle,
-      localStyle
-    ),
-    description: cacheStyle.description !== localStyle.description,
+    description: checkDescriptionChanged(cacheStyle, localStyle),
   };
 };
 

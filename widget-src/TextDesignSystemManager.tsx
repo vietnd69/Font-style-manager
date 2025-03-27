@@ -109,6 +109,40 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     []
   );
 
+  const [currentModeID, setCurrentModeID] = useSyncedState<string | undefined>(
+    "currentModeID",
+    undefined
+  );
+
+  // Hàm lấy mode hiện tại
+  const getCurrentMode = async () => {
+    try {
+      // Lấy tất cả collection biến
+      const collections =
+        await figma.variables.getLocalVariableCollectionsAsync();
+
+      if (collections.length > 0) {
+        // Lấy collection đầu tiên hoặc collection đang active
+        // Figma API hiện không có hàm để lấy trực tiếp active mode
+        const activeCollection = collections[0];
+
+        if (activeCollection.modes.length > 0) {
+          // Lấy mode mặc định hoặc mode đầu tiên
+          const modeID =
+            activeCollection.defaultModeId || activeCollection.modes[0].modeId;
+          setCurrentModeID(modeID);
+        }
+      }
+    } catch (error) {
+      console.error("Error getting current mode:", error);
+    }
+  };
+
+  // Gọi hàm lấy current mode khi component được khởi tạo
+  if (!currentModeID) {
+    getCurrentMode();
+  }
+
   /**
    * Toggle selection state for a specific text style
    * @param id - ID of the text style to toggle
@@ -1270,7 +1304,10 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                         fontFamily={"Roboto"}
                         width={"fill-parent"}
                         fill={
-                          checkStyleChanged(cache, style).fontFamily
+                          checkStyleChanged(cache, style, {
+                            variables: localVariableList || [],
+                            currentMode: currentModeID,
+                          }).fontFamily
                             ? "#0B68D6"
                             : "#000000"
                         }
@@ -1348,7 +1385,10 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                         fontFamily={"Roboto"}
                         width={"fill-parent"}
                         fill={
-                          checkStyleChanged(cache, style).fontStyle
+                          checkStyleChanged(cache, style, {
+                            variables: localVariableList || [],
+                            currentMode: currentModeID,
+                          }).fontStyle
                             ? "#0B68D6"
                             : "#000000"
                         }
@@ -1429,7 +1469,10 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                         fontFamily={"Roboto"}
                         width={"fill-parent"}
                         fill={
-                          checkStyleChanged(cache, style).fontSize
+                          checkStyleChanged(cache, style, {
+                            variables: localVariableList || [],
+                            currentMode: currentModeID,
+                          }).fontSize
                             ? "#0B68D6"
                             : "#000000"
                         }
@@ -1492,7 +1535,10 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                         fontFamily={"Roboto"}
                         width={"fill-parent"}
                         fill={
-                          checkStyleChanged(cache, style).lineHeight
+                          checkStyleChanged(cache, style, {
+                            variables: localVariableList || [],
+                            currentMode: currentModeID,
+                          }).lineHeight
                             ? "#0B68D6"
                             : "#000000"
                         }
@@ -1571,7 +1617,10 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                             fontFamily={"Roboto"}
                             width={"fill-parent"}
                             fill={
-                              checkStyleChanged(cache, style).letterSpacing
+                              checkStyleChanged(cache, style, {
+                                variables: localVariableList || [],
+                                currentMode: currentModeID,
+                              }).letterSpacing
                                 ? "#0B68D6"
                                 : "#000000"
                             }
@@ -1602,7 +1651,10 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                           fontFamily={"Roboto"}
                           width={"fill-parent"}
                           fill={
-                            checkStyleChanged(cache, style).description
+                            checkStyleChanged(cache, style, {
+                              variables: localVariableList || [],
+                              currentMode: currentModeID,
+                            }).description
                               ? "#0B68D6"
                               : "#000000"
                           }
