@@ -232,6 +232,62 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
             style.id
           )) as TextStyle;
           let isUpdate = false;
+
+          // Kiểm tra và unbind các biến đã bị xóa (chuyển từ variable sang giá trị thông thường)
+          if (textStyle.boundVariables) {
+            // Tìm các biến có trong textStyle (style gốc từ Figma) nhưng không có trong cache (style đã sửa)
+            // Đây là các biến đã bị người dùng xóa và cần unbind
+            for (const [property, _] of Object.entries(
+              textStyle.boundVariables
+            )) {
+              if (
+                !cache.boundVariables ||
+                !(property in cache.boundVariables)
+              ) {
+                try {
+                  // Biến đã bị xóa trong cache, unbind nó từ textStyle
+                  console.log(
+                    `Unbinding variable for ${property} as it was removed in the updated style`
+                  );
+                  textStyle.setBoundVariable(
+                    property as VariableBindableTextField,
+                    null
+                  );
+                  isUpdate = true;
+
+                  // Cập nhật giá trị mới từ cache sau khi unbind
+                  if (property === "fontFamily") {
+                    await figma.loadFontAsync({
+                      family: cache.fontName.family,
+                      style: cache.fontName.style,
+                    });
+                    textStyle.fontName = { ...cache.fontName };
+                  } else if (
+                    property === "fontStyle" ||
+                    property === "fontWeight"
+                  ) {
+                    await figma.loadFontAsync({
+                      family: cache.fontName.family,
+                      style: cache.fontName.style,
+                    });
+                    textStyle.fontName = { ...cache.fontName };
+                  } else if (property === "fontSize") {
+                    textStyle.fontSize = cache.fontSize;
+                  } else if (property === "lineHeight") {
+                    textStyle.lineHeight = cache.lineHeight;
+                  } else if (property === "letterSpacing") {
+                    textStyle.letterSpacing = cache.letterSpacing;
+                  }
+                } catch (e) {
+                  figma.notify(
+                    `Failed to unbind variable from ${property}: ${e}`,
+                    { error: true }
+                  );
+                }
+              }
+            }
+          }
+
           // console.log(textStyle);
           if (cache.name !== style.name) {
             textStyle.name = cache.name;
@@ -469,6 +525,18 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
             console.log(
               `[handleChangeSelectedStyle] Updating font family for ${cache.name}: ${checkedFamily}`
             );
+            // Xóa biến fontFamily nếu có
+            if (cache.boundVariables?.fontFamily) {
+              console.log(
+                `[handleChangeSelectedStyle] Removing fontFamily variable for ${cache.name}`
+              );
+              const newBoundVariables = { ...cache.boundVariables };
+              delete newBoundVariables.fontFamily;
+              cache.boundVariables =
+                Object.keys(newBoundVariables).length > 0
+                  ? newBoundVariables
+                  : undefined;
+            }
             cache.fontName = {
               ...cache.fontName,
               family: checkedFamily,
@@ -479,16 +547,44 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
             console.log(
               `[handleChangeSelectedStyle] Updating font style for ${cache.name}: ${checkedStyle}`
             );
+            // Xóa biến fontStyle và fontWeight nếu có
+            if (
+              cache.boundVariables?.fontStyle ||
+              cache.boundVariables?.fontWeight
+            ) {
+              console.log(
+                `[handleChangeSelectedStyle] Removing fontStyle/fontWeight variables for ${cache.name}`
+              );
+              const newBoundVariables = { ...cache.boundVariables };
+              delete newBoundVariables.fontStyle;
+              delete newBoundVariables.fontWeight;
+              cache.boundVariables =
+                Object.keys(newBoundVariables).length > 0
+                  ? newBoundVariables
+                  : undefined;
+            }
             cache.fontName = {
               ...cache.fontName,
               style: checkedStyle,
             };
             hasChanges = true;
           }
-          if (checkedFontSize != "" || isNaN(Number(checkedFontSize))) {
+          if (checkedFontSize != "" && !isNaN(Number(checkedFontSize))) {
             console.log(
               `[handleChangeSelectedStyle] Updating font size for ${cache.name}: ${checkedFontSize}`
             );
+            // Xóa biến fontSize nếu có
+            if (cache.boundVariables?.fontSize) {
+              console.log(
+                `[handleChangeSelectedStyle] Removing fontSize variable for ${cache.name}`
+              );
+              const newBoundVariables = { ...cache.boundVariables };
+              delete newBoundVariables.fontSize;
+              cache.boundVariables =
+                Object.keys(newBoundVariables).length > 0
+                  ? newBoundVariables
+                  : undefined;
+            }
             cache.fontSize = Number(checkedFontSize);
             hasChanges = true;
           }
@@ -496,6 +592,18 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
             console.log(
               `[handleChangeSelectedStyle] Updating line height for ${cache.name}: ${JSON.stringify(checkedLineHeight)}`
             );
+            // Xóa biến lineHeight nếu có
+            if (cache.boundVariables?.lineHeight) {
+              console.log(
+                `[handleChangeSelectedStyle] Removing lineHeight variable for ${cache.name}`
+              );
+              const newBoundVariables = { ...cache.boundVariables };
+              delete newBoundVariables.lineHeight;
+              cache.boundVariables =
+                Object.keys(newBoundVariables).length > 0
+                  ? newBoundVariables
+                  : undefined;
+            }
             cache.lineHeight = checkedLineHeight;
             hasChanges = true;
           }
@@ -503,6 +611,18 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
             console.log(
               `[handleChangeSelectedStyle] Updating letter spacing for ${cache.name}: ${JSON.stringify(checkedLetterSpacing)}`
             );
+            // Xóa biến letterSpacing nếu có
+            if (cache.boundVariables?.letterSpacing) {
+              console.log(
+                `[handleChangeSelectedStyle] Removing letterSpacing variable for ${cache.name}`
+              );
+              const newBoundVariables = { ...cache.boundVariables };
+              delete newBoundVariables.letterSpacing;
+              cache.boundVariables =
+                Object.keys(newBoundVariables).length > 0
+                  ? newBoundVariables
+                  : undefined;
+            }
             cache.letterSpacing = checkedLetterSpacing;
             hasChanges = true;
           }
