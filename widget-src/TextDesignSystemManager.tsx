@@ -827,36 +827,6 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     return { value, unit } as LetterSpacing;
   };
 
-  const getDataVariable = async (variableId: string) => {
-    const data = await figma.variables.getVariableByIdAsync(variableId);
-    if (data) {
-      const modes = await figma.variables.getVariableCollectionByIdAsync(
-        data.variableCollectionId
-      );
-
-      if (modes) {
-        // Get defaultModeId from collection or first mode
-        const defaultModeId = modes.defaultModeId || modes.modes[0]?.modeId;
-
-        // Check if defaultModeId is valid
-        if (!defaultModeId) {
-          console.warn(`Variable ${variableId} has no valid defaultModeId`);
-          return undefined;
-        }
-
-        return {
-          id: data.id,
-          name: data.name,
-          key: data.key,
-          variableCollectionId: data.variableCollectionId,
-          scopes: data.scopes,
-          valuesByMode: data.valuesByMode,
-          defaultModeId,
-        };
-      }
-    }
-    return undefined;
-  };
 
   return (
     <Fragment>
@@ -867,6 +837,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
           verticalAlignItems={"end"}
           width={"fill-parent"}
         >
+          {/* clear search */}
           <AutoLayout
             padding={10}
             verticalAlignItems={"center"}
@@ -875,12 +846,14 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
             tooltip={"Clear search"}
           >
             <SVG src={closeSvg} />
-          </AutoLayout>
+            </AutoLayout>
+          {/* search content */}
           <AutoLayout
             spacing={12}
             width={"fill-parent"}
             verticalAlignItems={"end"}
           >
+            {/* search group */}
             <AutoLayout width={466} spacing={12} direction={"vertical"}>
               <AutoLayout
                 padding={16}
@@ -901,6 +874,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                   width={"fill-parent"}
                 />
               </AutoLayout>
+              {/* search name */}
               <AutoLayout
                 padding={16}
                 fill={"#eee"}
@@ -921,7 +895,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                 />
               </AutoLayout>
             </AutoLayout>
-
+            {/* search family */}
             <AutoLayout
               padding={16}
               fill={"#eee"}
@@ -930,7 +904,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
               verticalAlignItems={"end"}
               stroke={"#ccc"}
               strokeWidth={1}
-              width={"fill-parent"}
+              width={321}
             >
               <SVG src={fontFamilySvg} />
               <Input
@@ -941,6 +915,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                 width={"fill-parent"}
               />
             </AutoLayout>
+            {/* search style */}
             <AutoLayout
               padding={16}
               fill={"#eee"}
@@ -949,7 +924,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
               verticalAlignItems={"end"}
               stroke={"#ccc"}
               strokeWidth={1}
-              width={372}
+              width={363}
             >
               <SVG src={fontStyleSvg} />
               <Input
@@ -960,6 +935,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                 placeholder="Find style"
               />
             </AutoLayout>
+            {/* search size */}
             <AutoLayout
               padding={16}
               fill={"#eee"}
@@ -968,7 +944,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
               verticalAlignItems={"end"}
               stroke={"#ccc"}
               strokeWidth={1}
-              width={172}
+              width={213}
             >
               <SVG src={fontSizeSvg} />
               <Input
@@ -979,6 +955,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                 placeholder="Find size"
               />
             </AutoLayout>
+            {/* search line height */}
             <AutoLayout
               padding={16}
               fill={"#eee"}
@@ -987,7 +964,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
               verticalAlignItems={"end"}
               stroke={"#ccc"}
               strokeWidth={1}
-              width={194}
+              width={193}
             >
               <SVG src={lineHeightSvg} />
               <Input
@@ -1008,7 +985,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                 placeholder="Line height"
               />
             </AutoLayout>
-
+            {/* search letter spacing */}
             {showEditType.letterSpacing && (
               <AutoLayout
                 padding={16}
@@ -1039,11 +1016,11 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
               </AutoLayout>
             )}
           </AutoLayout>
-
+          {/* search button */}
           <AutoLayout
             hoverStyle={{ fill: "#1A7CF0" }}
             onClick={() => handleSearch()}
-            width={150}
+            width={250}
             padding={{ top: 14, bottom: 14, right: 24, left: 24 }}
             verticalAlignItems={"center"}
             horizontalAlignItems={"center"}
@@ -1056,8 +1033,10 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
           </AutoLayout>
         </AutoLayout>
       )}
+      {/* change all selected styles */}
       {stylesChecked?.length !== 0 && (
         <Fragment>
+          {/* title */}
           <AutoLayout
             width={"fill-parent"}
             verticalAlignItems={"center"}
@@ -1067,13 +1046,15 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
             <Text fontSize={24}>Change all selected styles</Text>
             <Rectangle width={"fill-parent"} height={1} fill={"#ccc"} />
           </AutoLayout>
+          {/* content */}
           <AutoLayout direction={"vertical"} width={"fill-parent"} spacing={12}>
+            {/* group */}
             <AutoLayout
               spacing={24}
               verticalAlignItems={"center"}
               width={"fill-parent"}
               overflow={"scroll"}
-            >
+            >              
               <AutoLayout
                 padding={16}
                 fill={"#eee"}
@@ -1093,6 +1074,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                   placeholder="Move to group"
                 />
               </AutoLayout>
+              {/* font family */}
               <AutoLayout
                 padding={16}
                 fill={"#eee"}
@@ -1109,7 +1091,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                   fontSize={22}
                   value={checkedFamily}
                   onTextEditEnd={(e) => setCheckedFamily(e.characters)}
-                  placeholder="Change to font family"
+                  placeholder="To font family"
                 />
                 <SVG
                   src={listSvg}
@@ -1122,7 +1104,9 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                     })
                   }
                 />
+
               </AutoLayout>
+              {/* font style */}
               <AutoLayout
                 padding={16}
                 fill={"#eee"}
@@ -1140,9 +1124,10 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                   fontSize={22}
                   value={checkedStyle}
                   onTextEditEnd={(e) => setCheckedStyle(e.characters)}
-                  placeholder="Change to font style"
+                  placeholder="To font style"
                 />
               </AutoLayout>
+              {/* font size */}
               <AutoLayout
                 padding={16}
                 fill={"#eee"}
@@ -1159,9 +1144,10 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                   fontSize={22}
                   value={checkedFontSize}
                   onTextEditEnd={(e) => setCheckedFontSize(e.characters)}
-                  placeholder="Change to font size"
+                  placeholder="To font size"
                 />
               </AutoLayout>
+              {/* line height */}
               <AutoLayout
                 padding={16}
                 fill={"#eee"}
@@ -1189,9 +1175,10 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                   onTextEditEnd={(e) =>
                     setCheckedLineHeight(getLineHeight(e.characters))
                   }
-                  placeholder="Change line height"
+                  placeholder="To line height"
                 />
               </AutoLayout>
+              {/* letter spacing */}
               {showEditType.letterSpacing && (
                 <AutoLayout
                   padding={16}
@@ -1218,10 +1205,11 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                     onTextEditEnd={(e) =>
                       setCheckedLetterSpacing(getLetterSpacing(e.characters))
                     }
-                    placeholder="Change letter spacing"
+                    placeholder="To letter spacing"
                   />
                 </AutoLayout>
               )}
+              {/* change selected */}
               <AutoLayout
                 onClick={() => handleChangeSelectedStyle()}
                 padding={{
@@ -1267,13 +1255,13 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
           <Text
             fontSize={24}
             fontFamily={"Roboto"}
-            width={"fill-parent"}
+            width={310}
             fill={"#eee"}
           >
             Font family
           </Text>
           <Rectangle width={1} height={60} fill={"#ccc"} />
-          <AutoLayout width={360}>
+          <AutoLayout width={350}>
             <Text fontSize={24} fontFamily={"Roboto"} fill={"#ccc"}>
               Style
             </Text>
@@ -1288,7 +1276,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
             </Text>
           </AutoLayout>
           <Rectangle width={1} height={60} fill={"#ccc"} />
-          <Text fontSize={24} width={160} fontFamily={"Roboto"} fill={"#ccc"}>
+          <Text fontSize={24} width={200} fontFamily={"Roboto"} fill={"#ccc"}>
             Size
           </Text>
           <Rectangle width={1} height={60} fill={"#ccc"} />
@@ -1324,6 +1312,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
 
         {/* table content */}
         <AutoLayout direction={"vertical"} spacing={0} width={"fill-parent"}>
+          {/* filter styles */}
           {filterStyles.length !== 0 &&
           cacheStyle.length !== 0 &&
           cacheStyle.length === filterStyles.length ? (
@@ -1368,7 +1357,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                     {/* font family */}
                     <Rectangle width={1} height={50} fill={"#ccc"} />
                     <AutoLayout
-                      width={"fill-parent"}
+                      width={310}
                       verticalAlignItems={"center"}
                       spacing={8}
                       cornerRadius={
@@ -1432,11 +1421,27 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                             : "#000000"
                         }
                       />
+                      <SVG
+                        src={variableOutlineSvg}
+                        tooltip="Choice variable"
+                        onClick={() =>
+                          showUi({
+                            moduleName: "choiceVariable",
+                            name: "Choice variable",
+                            data: {
+                              type: "fontFamily",
+                              id: style.id,
+                              value: cache.fontName.family,
+                              variables: localVariableList || [],
+                            },
+                          })
+                        }
+                      />
                     </AutoLayout>
                     {/* Font weight */}
                     <Rectangle width={1} height={50} fill={"#ccc"} />
                     <AutoLayout
-                      width={360}
+                      width={350}
                       verticalAlignItems={"center"}
                       spacing={8}
                       cornerRadius={
@@ -1541,7 +1546,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                     {/* Font size */}
                     <Rectangle width={1} height={50} fill={"#ccc"} />
                     <AutoLayout
-                      width={160}
+                      width={200}
                       verticalAlignItems={"center"}
                       spacing={8}
                       cornerRadius={
@@ -1595,6 +1600,22 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                           }).fontSize
                             ? "#0B68D6"
                             : "#000000"
+                        }
+                      />
+                      <SVG
+                        src={variableOutlineSvg}
+                        tooltip="Choice variable"
+                        onClick={() =>
+                          showUi({
+                            moduleName: "choiceVariable",
+                            name: "Choice variable",
+                            data: {
+                              type: "fontSize",
+                              id: style.id,
+                              value: cache.fontSize.toString(),
+                              variables: localVariableList || [],
+                            },
+                          })
                         }
                       />
                     </AutoLayout>

@@ -772,21 +772,35 @@ function Widget() {
                 );
 
                 if (fontSupportsWeight) {
-                  // If weight is supported, convert to corresponding style name
-                  const weightToStyle: { [key: number]: string } = {
-                    100: "Thin",
-                    200: "ExtraLight",
-                    300: "Light",
-                    400: "Regular",
-                    500: "Medium",
-                    600: "SemiBold",
-                    700: "Bold",
-                    800: "ExtraBold",
-                    900: "Black",
-                  };
+                  // Sử dụng getFontWeightValue để tìm tên style phù hợp với font weight
+                  const fontStyles = localFonts
+                    .filter((font) => font.fontName.family === style.fontName.family)
+                    .map((font) => font.fontName.style);
+                  
+                  // Tìm style phù hợp nhất với weight được chỉ định
+                  let bestStyleMatch = "Regular";
+                  let closestWeight = 400;
+                  
+                  for (const fontStyle of fontStyles) {
+                    const weightInfo = getFontWeightValue(fontStyle);
+                    if (weightInfo.fontWeight === variableValue) {
+                      bestStyleMatch = fontStyle;
+                      break;
+                    } else if (weightInfo.fontWeight !== undefined) {
+                      // Nếu không tìm thấy trùng khớp chính xác, lưu lại style có weight gần nhất
+                      const currentDiff = Math.abs((weightInfo.fontWeight as number) - (variableValue as number));
+                      const closestDiff = Math.abs(closestWeight - (variableValue as number));
+                      
+                      if (currentDiff < closestDiff) {
+                        closestWeight = weightInfo.fontWeight;
+                        bestStyleMatch = fontStyle;
+                      }
+                    }
+                  }
+                  
                   updatedStyle.fontName = {
                     ...style.fontName,
-                    style: weightToStyle[variableValue] || "Regular",
+                    style: bestStyleMatch,
                   };
                 } else {
                   // If weight is not supported, keep current style
@@ -813,21 +827,35 @@ function Widget() {
                 );
 
                 if (fontSupportsWeight) {
-                  // If weight is supported, convert to corresponding style name
-                  const weightToStyle: { [key: number]: string } = {
-                    100: "Thin",
-                    200: "ExtraLight",
-                    300: "Light",
-                    400: "Regular",
-                    500: "Medium",
-                    600: "SemiBold",
-                    700: "Bold",
-                    800: "ExtraBold",
-                    900: "Black",
-                  };
+                  // Sử dụng getFontWeightValue để tìm tên style phù hợp với font weight
+                  const fontStyles = localFonts
+                    .filter((font) => font.fontName.family === style.fontName.family)
+                    .map((font) => font.fontName.style);
+                  
+                  // Tìm style phù hợp nhất với weight được chỉ định
+                  let bestStyleMatch = "Regular";
+                  let closestWeight = 400;
+                  
+                  for (const fontStyle of fontStyles) {
+                    const weightInfo = getFontWeightValue(fontStyle);
+                    if (weightInfo.fontWeight === variableValue) {
+                      bestStyleMatch = fontStyle;
+                      break;
+                    } else if (weightInfo.fontWeight !== undefined) {
+                      // Nếu không tìm thấy trùng khớp chính xác, lưu lại style có weight gần nhất
+                      const currentDiff = Math.abs((weightInfo.fontWeight as number) - (variableValue as number));
+                      const closestDiff = Math.abs(closestWeight - (variableValue as number));
+                      
+                      if (currentDiff < closestDiff) {
+                        closestWeight = weightInfo.fontWeight;
+                        bestStyleMatch = fontStyle;
+                      }
+                    }
+                  }
+                  
                   updatedStyle.fontName = {
                     ...style.fontName,
-                    style: weightToStyle[variableValue] || "Regular",
+                    style: bestStyleMatch,
                   };
                 } else {
                   // If weight is not supported, keep current style
@@ -1178,7 +1206,7 @@ function Widget() {
 
   return (
     <AutoLayout
-      width={mode === "edit" ? 1980 : 1200}
+      width={mode === "edit" ? 2280 : 1200}
       height={"hug-contents"}
       fill={"#fff"}
       padding={{
@@ -1245,7 +1273,7 @@ function Widget() {
       </AutoLayout>
       <AutoLayout
         positioning={"absolute"}
-        x={mode === "edit" ? 1995 : 1215}
+        x={mode === "edit" ? 2295 : 1215}
         y={120}
         width={82}
       >
