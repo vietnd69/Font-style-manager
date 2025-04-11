@@ -1,57 +1,209 @@
-#choiceFont  {
-    min-height: 100%;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
+#choiceFont {
+  min-height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--figma-color-bg);
+  color: var(--figma-color-text);
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 60px;
 }
 #choiceFont .input {
-    width: 100%;
-    margin-bottom: 4px;
-    
-    font-size: 14px;
+  width: 100%;
+  margin-bottom: 4px;
+  font-size: 14px;
+  background-color: var(--figma-color-bg);
+  color: var(--figma-color-text);
 }
 #choiceFont .label {
-margin-bottom: 8px;
+  margin-bottom: 8px;
 }
 
-#choiceFont .font-name, #choiceFont .font-weight {
-    position: relative;
-    border-bottom: solid 1px #ccc;
-    
+#choiceFont .font-name,
+#choiceFont .font-weight {
+  position: relative;
+  border-bottom: solid 1px var(--figma-color-border);
 }
-#choiceFont .font-name .icon, #choiceFont .font-weight .icon {
-    position: absolute;
-    left: 8px;
-    top: 9px;
-    z-index: 1;
-    width: 16px;
+#choiceFont .font-name .icon,
+#choiceFont .font-weight .icon {
+  position: absolute;
+  left: 8px;
+  top: 9px;
+  z-index: 1;
+  width: 16px;
+  fill: var(--figma-color-icon);
 }
 #choiceFont .search:focus ~ .font-list {
-    display: block;
+  display: block;
 }
 #choiceFont .font-list {
-    display: none;
-    height: 160px;
-    overflow: auto;
-    flex-direction: column;
-}
-#choiceFont .font-list:hover {
-    display: flex;
-}
-#choiceFont .font-list .name {
-    cursor: pointer;
-    padding: 6px 12px;
-    margin: 0;
-    font-size: 14px;
-}
-#choiceFont .font-list .name:hover {
-    background-color: #ccc;
-}
-#choiceFont .font-weight .weight-select {
-    width: 100%;
-    padding: 10px 12px 10px 32px;
-    margin: 0;
-    border: none;
-    font-size: 14px;
+  display: none;
+  height: 160px;
+  overflow: auto;
+  flex-direction: column;
+  background-color: var(--figma-color-bg);
+  position: relative;
+  padding-right: 3px;
 }
 
+/* Custom scrollbar cho danh sách font */
+#choiceFont .font-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+#choiceFont .font-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#choiceFont .font-list::-webkit-scrollbar-thumb {
+  background-color: var(--figma-color-bg-tertiary);
+  border-radius: 2px;
+}
+
+#choiceFont .font-list:hover::-webkit-scrollbar-thumb {
+  background-color: var(--figma-color-border);
+}
+
+html.figma-dark #choiceFont .font-list:hover::-webkit-scrollbar-thumb {
+  background-color: var(--figma-color-border-strong);
+}
+
+#choiceFont .font-list:hover {
+  display: flex;
+}
+#choiceFont .font-list .name {
+  cursor: pointer;
+  padding: 6px 12px;
+  margin: 0;
+  font-size: 14px;
+  color: var(--figma-color-text);
+}
+#choiceFont .font-list .name:hover {
+  background-color: var(--figma-color-bg-hover);
+}
+#choiceFont .font-weight .weight-select {
+  width: 100%;
+  padding: 10px 12px 10px 32px;
+  margin: 0;
+  border: none;
+  font-size: 14px;
+  background-color: var(--figma-color-bg);
+  color: var(--figma-color-text);
+}
+
+/* Style cho action buttons */
+#choiceFont .action {
+  display: flex;
+  margin-top: auto;
+  border-top: 1px solid var(--figma-color-border);
+  padding: 12px 16px;
+  position: fixed;
+  bottom: 0;
+  background-color: var(--figma-color-bg);
+  gap: 8px;
+  width: 100%;
+  left: 0;
+  right: 0;
+  margin-left: 0;
+  margin-right: 0;
+  box-sizing: border-box;
+  z-index: 100;
+}
+
+#choiceFont .action button {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background-color 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  line-height: 1;
+}
+
+#choiceFont .action .close {
+  background-color: var(--figma-color-bg-secondary);
+  color: var(--figma-color-text);
+  border: 1px solid var(--figma-color-border);
+}
+
+#choiceFont .action .close:hover {
+  background-color: var(--figma-color-bg-hover);
+}
+
+#choiceFont .action .close:active {
+  background-color: var(--figma-color-bg-pressed);
+}
+
+#choiceFont .action .ok {
+  background-color: var(--figma-color-bg-brand);
+  color: var(--figma-color-text-onbrand);
+  font-weight: 500;
+}
+
+#choiceFont .action .ok:hover {
+  background-color: var(--figma-color-bg-brand-hover);
+}
+
+#choiceFont .action .ok:active {
+  background-color: var(--figma-color-bg-brand-pressed);
+}
+
+/* Style cho react-select theo theme của Figma */
+#choiceFont .react-select__control {
+  background-color: var(--figma-color-bg) !important;
+  border-color: var(--figma-color-border) !important;
+  box-shadow: none !important;
+}
+
+#choiceFont .react-select__control:hover {
+  border-color: var(--figma-color-border-brand) !important;
+}
+
+#choiceFont .react-select__single-value {
+  color: var(--figma-color-text) !important;
+}
+
+#choiceFont .react-select__menu {
+  background-color: var(--figma-color-bg) !important;
+  border: 1px solid var(--figma-color-border) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+#choiceFont .react-select__option {
+  background-color: var(--figma-color-bg) !important;
+  color: var(--figma-color-text) !important;
+}
+
+#choiceFont .react-select__option:hover,
+#choiceFont .react-select__option--is-focused {
+  background-color: var(--figma-color-bg-hover) !important;
+}
+
+#choiceFont .react-select__option--is-selected {
+  background-color: var(--figma-color-bg-selected) !important;
+  color: var(--figma-color-text-brand) !important;
+}
+
+#choiceFont .react-select__indicator {
+  color: var(--figma-color-icon-secondary) !important;
+}
+
+#choiceFont .react-select__indicator:hover {
+  color: var(--figma-color-icon) !important;
+}
+
+#choiceFont .react-select__placeholder {
+  color: var(--figma-color-text-tertiary) !important;
+}
+
+/* Dark mode overrides nếu cần thiết */
+html.figma-dark #choiceFont .react-select__menu {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}

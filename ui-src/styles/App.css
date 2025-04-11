@@ -3,9 +3,11 @@
   flex-direction: column;
   min-height: 100%;
   width: 100%;
+  background-color: var(--figma-color-bg);
+  color: var(--figma-color-text);
 }
 .action {
-  border-top: solid 1px #ccc;
+  border-top: solid 1px var(--figma-color-border);
   width: 100%;
   margin-top: auto;
   margin-bottom: 0;
@@ -17,12 +19,12 @@
   width: 50%;
   padding: 14px;
   cursor: pointer;
-  background-color: white;
+  background-color: var(--figma-color-bg);
 }
 .action button:hover {
   filter: brightness(0.9);
 }
 .action .ok {
-  background-color: #0b68d6;
-  color: white;
+  background-color: var(--figma-color-bg-brand);
+  color: var(--figma-color-text-on-brand);
 }

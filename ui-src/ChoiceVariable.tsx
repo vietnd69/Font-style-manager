@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./styles/ChoiceVariable.css";
-import { Button, Input, List, Typography } from "antd";
+import { Button, Input, Typography } from "antd";
 import type { CustomVariable } from "../widget-src/code";
 
 const { Title, Paragraph } = Typography;
@@ -154,7 +154,8 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
   );
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [isForSelectedElements, setIsForSelectedElements] = useState<boolean>(false);
+  const [isForSelectedElements, setIsForSelectedElements] =
+    useState<boolean>(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -264,119 +265,77 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
   };
 
   if (loading) {
-    return <div>Đang tải variables...</div>;
+    return <div className="choice-variable loading">Đang tải variables...</div>;
   }
 
   if (!data || !Array.isArray(data.variables)) {
     return (
-      <div style={{ padding: "16px" }}>
-        <Typography>
+      <div className="choice-variable">
+        <div className="no-variables">
           <Paragraph type="secondary">No variables available</Paragraph>
-        </Typography>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: "16px", backgroundColor: "#ffffff" }}>
-      <div style={{ marginBottom: "16px" }}>
-        <Typography>
-          <Title level={5} style={{ margin: 0 }}>
+    <div className="choice-variable">
+      <div className="search-container">
+        <div className="title-container">
+          <Title level={5} className="section-title">
             Choose {data.type === "all" ? "" : data.type} Variable (
             {filteredVariables.length} available)
           </Title>
-          <Paragraph
-            type="secondary"
-            style={{ fontSize: "13px", marginBottom: 8 }}
-          >
-            {isForSelectedElements 
-              ? "Select a variable to apply to selected elements" 
+          <Paragraph type="secondary" className="section-description">
+            {isForSelectedElements
+              ? "Select a variable to apply to selected elements"
               : "Select a variable to bind to this property"}
           </Paragraph>
-        </Typography>
+        </div>
 
         <Input
           placeholder="Search variables..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ marginBottom: 16 }}
+          className="search-input"
         />
 
-        <List
-          size="small"
-          dataSource={filteredVariables}
-          renderItem={(variable) => {
-            const defaultValue = getDefaultValue(variable);
+        <div className="variables-list auto-hide-scrollbar">
+          {filteredVariables.length > 0 ? (
+            filteredVariables.map((variable) => {
+              const defaultValue = getDefaultValue(variable);
+              const isSelected = variable.id === selectedId;
 
-            return (
-              <List.Item
-                key={variable.id}
-                style={{
-                  cursor: "pointer",
-                  padding: "8px 12px",
-                  backgroundColor:
-                    variable.id === selectedId ? "#e6f4ff" : "#ffffff",
-                  borderRadius: "4px",
-                  marginBottom: "4px",
-                  transition: "all 0.2s ease",
-                  border:
-                    variable.id === selectedId
-                      ? "1px solid #1890ff"
-                      : "1px solid transparent",
-                }}
-                className="variable-item"
-                onClick={() => setSelectedId(variable.id)}
-                onMouseEnter={(e) => {
-                  if (variable.id !== selectedId) {
-                    e.currentTarget.style.backgroundColor = "#f5f5f5";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (variable.id !== selectedId) {
-                    e.currentTarget.style.backgroundColor = "#ffffff";
-                  }
-                }}
-              >
-                <span
-                  style={{
-                    color: variable.id === selectedId ? "#1890ff" : "#000000",
-                    fontWeight: variable.id === selectedId ? 500 : 400,
-                  }}
+              return (
+                <div
+                  key={variable.id}
+                  className={`variable-item ${isSelected ? "selected" : ""}`}
+                  onClick={() => setSelectedId(variable.id)}
                 >
-                  {variable.name}
-                </span>
-                <span
-                  style={{
-                    color: variable.id === selectedId ? "#1890ff" : "#666666",
-                    opacity: variable.id === selectedId ? 1 : 0.8,
-                    marginLeft: "8px",
-                  }}
-                >
-                  {formatValue(defaultValue, variable.defaultModeId)}
-                </span>
-              </List.Item>
-            );
-          }}
-          locale={{
-            emptyText: searchTerm
-              ? `No variables found matching "${searchTerm}"`
-              : `No ${data.type === "all" ? "" : data.type} variables found`,
-          }}
-          style={{
-            backgroundColor: "#ffffff",
-            maxHeight: "300px",
-            overflowY: "auto",
-          }}
-        />
+                  <span className="variable-name">{variable.name}</span>
+                  <span className="variable-value">
+                    {formatValue(defaultValue, variable.defaultModeId)}
+                  </span>
+                </div>
+              );
+            })
+          ) : (
+            <div className="no-variables">
+              {searchTerm
+                ? `No variables found matching "${searchTerm}"`
+                : `No ${data.type === "all" ? "" : data.type} variables found`}
+            </div>
+          )}
+        </div>
       </div>
 
-      <div style={{ borderTop: "1px solid #f0f0f0", paddingTop: "16px" }}>
-        <div style={{ display: "flex", gap: "8px" }}>
+      <div className="action-container">
+        <div className="button-group">
           <Button
             onClick={() =>
               parent.postMessage({ pluginMessage: { type: "close" } }, "*")
             }
-            style={{ flex: 1 }}
+            className="cancel-button"
           >
             Cancel
           </Button>
@@ -393,7 +352,7 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
               }
             }}
             disabled={!selectedId}
-            style={{ flex: 1 }}
+            className="select-button"
           >
             Select
           </Button>

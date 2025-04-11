@@ -1,61 +1,269 @@
 .edit-show {
-    position: relative;
-    padding-bottom: 100px;
-    width: 100%;
-    overflow-x: hidden;
+  position: relative;
+  padding-bottom: 100px;
+  width: 100%;
+  overflow-x: hidden;
+  background-color: var(--figma-color-bg);
+  color: var(--figma-color-text);
 }
+
+/* Style cho scrollbar trong edit-show */
+.edit-show::-webkit-scrollbar {
+  width: 4px;
+}
+
+.edit-show::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.edit-show::-webkit-scrollbar-thumb {
+  background-color: var(--figma-color-bg-tertiary);
+  border-radius: 2px;
+}
+
+.edit-show::-webkit-scrollbar-thumb:hover {
+  background-color: var(--figma-color-border);
+}
+
+html.figma-dark .edit-show::-webkit-scrollbar-thumb {
+  background-color: var(--figma-color-bg-tertiary);
+}
+
+html.figma-dark .edit-show::-webkit-scrollbar-thumb:hover {
+  background-color: var(--figma-color-border-strong);
+}
+
 .edit-show .title {
-    width: 100%;
-    display: block;
-    font-size: 22px;
-    font-weight: 600;
-    text-align: center;
-    padding: 16px 0;
-    border-bottom: solid 1px #dfdfdf;
-}
-.edit-show .action{
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 10;
-
-    
-}
-.edit-show label{
-    user-select: none;
-    padding-left: 18px;
+  width: 100%;
+  display: block;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: center;
+  padding: 16px;
+  border-bottom: solid 1px var(--figma-color-border);
+  background-color: var(--figma-color-bg);
+  margin: 0;
 }
 
-.edit-show ul, .edit-show li{
-    list-style: none;
-    margin-left: 0;
-    padding: 0;
+.edit-show .action {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  background-color: var(--figma-color-bg);
+  border-top: 1px solid var(--figma-color-border);
+  padding: 12px 16px;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.edit-show label {
+  user-select: none;
+  padding-left: 8px;
+  font-size: 13px;
+  color: var(--figma-color-text);
+}
+
+.edit-show ul,
+.edit-show li {
+  list-style: none;
+  margin-left: 0;
+  padding: 0;
 }
 
 .edit-show li.item {
-    display: flex;
-    align-items: center;
-    padding:  8px 16px;
-    border-bottom: solid 1px #dfdfdf;
-    border-left: solid 1px #dfdfdf;
-    cursor: pointer;
-}
-.edit-show li.item:hover {
-    background-color: #eee;
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-bottom: solid 1px var(--figma-color-border);
+  cursor: pointer;
 }
 
+.edit-show li.item:hover {
+  background-color: var(--figma-color-bg-hover);
+}
+
+.edit-show li.toggle-all {
+  padding: 8px 16px;
+  background-color: var(--figma-color-bg-secondary);
+  width: 100%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  border-bottom: solid 1px var(--figma-color-border);
+}
+
+.edit-show li.toggle-all:hover {
+  background-color: var(--figma-color-bg-hover);
+}
 
 .edit-show ul.group {
-    padding: 0;
-    margin-top: 16px;
-    position: relative;
-    margin-bottom: 0;
-    border-top:  solid 1px #dfdfdf;
+  padding: 0;
+  margin-top: 0;
+  position: relative;
+  margin-bottom: 0;
+  border-top: none;
 }
 
-
 .style-list {
-    position: relative;
-    /* padding: 0 16px; */
+  position: relative;
+  overflow-y: auto;
+  max-height: calc(100vh - 180px);
+  padding-right: 0;
+}
+
+.style-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.style-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.style-list::-webkit-scrollbar-thumb {
+  background-color: var(--figma-color-bg-tertiary);
+  border-radius: 2px;
+  opacity: 0.3;
+  transition:
+    opacity 0.3s ease,
+    background-color 0.3s ease;
+}
+
+.style-list:hover::-webkit-scrollbar-thumb {
+  background-color: var(--figma-color-border);
+  opacity: 1;
+}
+
+html.figma-dark .style-list:hover::-webkit-scrollbar-thumb {
+  background-color: var(--figma-color-border-strong);
+}
+
+.edit-show .action button {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background-color 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  line-height: 1;
+}
+
+.edit-show .action .close {
+  background-color: var(--figma-color-bg-secondary);
+  color: var(--figma-color-text);
+  border: 1px solid var(--figma-color-border);
+}
+
+.edit-show .action .close:hover {
+  background-color: var(--figma-color-bg-hover);
+}
+
+.edit-show .action .close:active {
+  background-color: var(--figma-color-bg-pressed);
+}
+
+.edit-show .action .ok {
+  background-color: var(--figma-color-bg-brand);
+  color: var(--figma-color-text-onbrand);
+  font-weight: 500;
+}
+
+.edit-show .action .ok:hover {
+  background-color: var(--figma-color-bg-brand-hover);
+}
+
+.edit-show .action .ok:active {
+  background-color: var(--figma-color-bg-brand-pressed);
+}
+
+/* Custom style cho checkbox */
+.edit-show input[type="checkbox"] {
+  margin-right: 8px;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--figma-color-border-strong);
+  border-radius: 3px;
+  background-color: var(--figma-color-bg);
+  position: relative;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.edit-show input[type="checkbox"]:checked {
+  background-color: var(--figma-color-bg-brand);
+  border-color: var(--figma-color-bg-brand);
+}
+
+.edit-show input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 5px;
+  height: 8px;
+  border: solid var(--figma-color-text-onbrand);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.edit-show input[type="checkbox"]:hover {
+  border-color: var(--figma-color-border-brand-strong);
+}
+
+.edit-show input[type="checkbox"].switch {
+  width: 28px;
+  height: 16px;
+  border-radius: 10px;
+  background-color: var(--figma-color-bg-disabled);
+  transition: background-color 0.2s;
+  margin-right: 8px;
+}
+
+.edit-show input[type="checkbox"].switch:checked {
+  background-color: var(--figma-color-bg-brand);
+}
+
+.edit-show input[type="checkbox"].switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--figma-color-bg);
+  transition: transform 0.2s;
+}
+
+.edit-show input[type="checkbox"].switch:checked::after {
+  transform: translateX(12px);
+  border: none;
+}
+
+.ant-tree {
+  background: transparent !important;
+}
+
+.ant-tree-treenode {
+  width: 100% !important;
+  padding: 4px 0 !important;
+}
+
+.ant-tree-node-content-wrapper {
+  flex: 1 !important;
+  width: auto !important;
+}
+
+html.figma-dark .edit-show li.toggle-all {
+  background-color: var(--figma-color-bg-secondary);
 }

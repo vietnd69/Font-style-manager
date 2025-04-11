@@ -1,0 +1,155 @@
+.edit-show-type {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px 16px 0 16px;
+  background-color: var(--figma-color-bg);
+  color: var(--figma-color-text);
+  overflow: hidden;
+}
+
+.edit-show-type-content {
+  flex: 1;
+  overflow: auto;
+}
+
+.edit-show-type-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.edit-show-type-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.edit-show-type-content::-webkit-scrollbar-thumb {
+  background-color: var(--figma-color-bg-tertiary);
+  border-radius: 2px;
+  opacity: 0.3;
+  transition:
+    opacity 0.3s ease,
+    background-color 0.3s ease;
+}
+
+.edit-show-type-content:hover::-webkit-scrollbar-thumb {
+  background-color: var(--figma-color-border);
+  opacity: 1;
+}
+
+html.figma-dark .edit-show-type-content:hover::-webkit-scrollbar-thumb {
+  background-color: var(--figma-color-border-strong);
+}
+
+/* Override Ant Design styles */
+.edit-show-type .ant-typography {
+  color: var(--figma-color-text) !important;
+}
+
+.edit-show-type .ant-typography.ant-typography-secondary {
+  color: var(--figma-color-text-secondary) !important;
+}
+
+.edit-show-type .ant-list-item {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--figma-color-border) !important;
+}
+
+.edit-show-type .ant-checkbox-wrapper {
+  color: var(--figma-color-text) !important;
+}
+
+.edit-show-type .ant-checkbox-checked .ant-checkbox-inner {
+  background-color: var(--figma-color-bg-brand) !important;
+  border-color: var(--figma-color-border-brand) !important;
+}
+
+.edit-show-type .ant-checkbox-inner {
+  border-color: var(--figma-color-border) !important;
+  background-color: var(--figma-color-bg) !important;
+}
+
+.edit-show-type .ant-checkbox-wrapper:hover .ant-checkbox-inner {
+  border-color: var(--figma-color-border-brand) !important;
+}
+
+/* Action footer */
+.edit-show-type-footer {
+  padding: 12px 16px;
+  margin-left: -16px;
+  margin-right: -16px;
+  margin-top: auto;
+  border-top: 1px solid var(--figma-color-border);
+  background-color: var(--figma-color-bg);
+  z-index: 100;
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.edit-show-type-footer .ant-btn-primary {
+  background-color: var(--figma-color-bg-brand) !important;
+  border-color: var(--figma-color-bg-brand) !important;
+  color: var(--figma-color-text-onbrand) !important;
+  font-weight: 500;
+  font-size: 13px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-show-type-footer .ant-btn-primary:hover {
+  background-color: var(--figma-color-bg-brand-hover) !important;
+}
+
+.edit-show-type-footer .ant-btn-primary:active {
+  background-color: var(--figma-color-bg-brand-pressed) !important;
+}
+
+/* Auto-hide scrollbar - một phần được thêm vào để nhất quán với các component khác */
+.edit-show-type .auto-hide-scrollbar {
+  overflow: auto;
+}
+
+.edit-show-type .auto-hide-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--figma-color-bg-tertiary);
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+.edit-show-type .auto-hide-scrollbar:hover::-webkit-scrollbar-thumb {
+  opacity: 1;
+  background-color: var(--figma-color-border);
+}
+
+/* Dark mode overrides */
+html.figma-dark .edit-show-type-footer .ant-btn-primary {
+  background-color: var(--figma-color-bg-brand) !important;
+}
+
+html.figma-dark .edit-show-type .ant-list-item {
+  border-bottom-color: var(--figma-color-border) !important;
+}
+
+html.figma-dark
+  .edit-show-type
+  .auto-hide-scrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: var(--figma-color-border-strong);
+}
+
+.edit-show-type .section-title {
+  margin: 0 !important;
+  color: var(--figma-color-text) !important;
+  font-size: 16px !important;
+}
+
+.edit-show-type .section-description {
+  font-size: 13px;
+  margin-bottom: 0 !important;
+  color: var(--figma-color-text-secondary) !important;
+}
+
+.edit-show-type .checkbox-list {
+  margin-top: 8px;
+}

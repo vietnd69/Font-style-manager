@@ -7,22 +7,24 @@
   width: 100%;
   min-height: 100%;
   box-sizing: border-box;
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: var(--figma-color-bg);
 }
 
 .processing-content {
   width: 100%;
   max-width: 400px;
   padding: 20px;
-  background-color: white;
+  background-color: var(--figma-color-bg);
   text-align: center;
   box-sizing: border-box;
+  border: 1px solid var(--figma-color-border);
+  border-radius: 8px;
 }
 
 .processing-content h2 {
   margin-top: 0;
   margin-bottom: 15px;
-  color: #333;
+  color: var(--figma-color-text);
   font-size: 20px;
   word-wrap: break-word;
 }
@@ -32,13 +34,13 @@
   justify-content: center;
   margin-bottom: 10px;
   font-size: 14px;
-  color: #555;
+  color: var(--figma-color-text-secondary);
 }
 
 .progress-bar-container {
   width: 100%;
   height: 10px;
-  background-color: #f0f0f0;
+  background-color: var(--figma-color-bg-secondary);
   border-radius: 5px;
   overflow: hidden;
   margin-bottom: 15px;
@@ -46,20 +48,20 @@
 
 .progress-bar {
   height: 100%;
-  background-color: #0B68D6;
+  background-color: var(--figma-color-bg-brand);
   border-radius: 5px;
   transition: width 0.3s ease;
 }
 
 .processing-message {
   font-size: 16px;
-  color: #666;
+  color: var(--figma-color-text-secondary);
   margin-top: 10px;
   word-wrap: break-word;
 }
 
 .processing-message.success {
-  color: #28a745;
+  color: var(--figma-color-bg-success);
   font-weight: bold;
 }
 
@@ -71,8 +73,8 @@
 }
 
 .close-button {
-  background-color: #0B68D6;
-  color: white;
+  background-color: var(--figma-color-bg-brand);
+  color: var(--figma-color-text-on-brand);
   border: none;
   padding: 8px 20px;
   font-size: 14px;
@@ -82,12 +84,12 @@
 }
 
 .close-button:hover {
-  background-color: #0951a5;
+  background-color: var(--figma-color-bg-brand-hover);
 }
 
 /* Styles for completed state */
 .completed .progress-bar {
-  background-color: #28a745;
+  background-color: var(--figma-color-bg-success);
 }
 
 /* Responsive styles */
@@ -95,17 +97,17 @@
   .processing-content {
     padding: 15px;
   }
-  
+
   .processing-content h2 {
     font-size: 18px;
     margin-bottom: 10px;
   }
-  
+
   .progress-info {
     font-size: 12px;
   }
-  
+
   .processing-message {
     font-size: 14px;
   }
-} 
+}

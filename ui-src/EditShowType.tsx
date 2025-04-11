@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ShowType } from "../widget-src/code";
 import { Checkbox, Button, List, Typography, Space } from "antd";
+import "./styles/EditShowType.css";
 
 const { Title, Paragraph } = Typography;
 
@@ -33,24 +34,14 @@ const EditShowType = ({ data }: { data: ShowType }) => {
   }));
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        padding: "16px 16px 0 16px",
-      }}
-    >
-      <div style={{ flex: 1, overflow: "auto" }}>
+    <div className="edit-show-type">
+      <div className="edit-show-type-content auto-hide-scrollbar">
         <Space direction="vertical" size="middle" style={{ width: "100%" }}>
           <Typography>
-            <Title level={5} style={{ margin: 0 }}>
+            <Title level={5} className="section-title">
               Edit Show Type Component
             </Title>
-            <Paragraph
-              type="secondary"
-              style={{ fontSize: "13px", marginBottom: 0 }}
-            >
+            <Paragraph type="secondary" className="section-description">
               Select the elements to display in the table if there are too many
               columns. Check the boxes to show elements or uncheck them to hide.
             </Paragraph>
@@ -59,9 +50,9 @@ const EditShowType = ({ data }: { data: ShowType }) => {
           <List
             size="small"
             dataSource={checkboxItems}
-            style={{ marginTop: 8 }}
+            className="checkbox-list"
             renderItem={(item) => (
-              <List.Item style={{ padding: "8px 0" }}>
+              <List.Item>
                 <Checkbox
                   checked={item.checked}
                   onChange={() => handleChange(item.value as keyof ShowType)}
@@ -74,21 +65,8 @@ const EditShowType = ({ data }: { data: ShowType }) => {
         </Space>
       </div>
 
-      <div
-        style={{
-          padding: "16px",
-          marginLeft: -16,
-          marginRight: -16,
-          borderTop: "1px solid #f0f0f0",
-          backgroundColor: "#fff",
-        }}
-      >
-        <Button
-          type="primary"
-          block
-          onClick={handleSubmit}
-          style={{ height: "32px" }}
-        >
+      <div className="edit-show-type-footer">
+        <Button type="primary" block onClick={handleSubmit}>
           Save Changes
         </Button>
       </div>

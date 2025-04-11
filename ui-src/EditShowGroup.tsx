@@ -223,7 +223,7 @@ const EditShowGroup = ({ data }: { data: textStyleType[] }) => {
           className="switch"
           type="checkbox"
           checked={isShowGroup(index)}
-        />{" "}
+        />
         <label>{level.groupName.replace("No group/", "")}</label>
       </li>
       <ul style={{ paddingLeft: 16 + "px" }}>
@@ -233,7 +233,7 @@ const EditShowGroup = ({ data }: { data: textStyleType[] }) => {
             key={child.id}
             onClick={() => handleClickStyle(child)}
           >
-            <input type="checkbox" checked={isShowStyle(child.id)} />{" "}
+            <input type="checkbox" checked={isShowStyle(child.id)} />
             <label>{getOnlyName(child.name)}</label>
           </li>
         ))}
@@ -264,19 +264,11 @@ const EditShowGroup = ({ data }: { data: textStyleType[] }) => {
     );
   return (
     <div className="edit-show">
-      <span className="title">Choice of group display or Typography style</span>
+      <div className="title">Choice of group display or Typography style</div>
       <Tree treeData={treeData} />
-      <div className="style-list">
-        <li
-          onClick={() => toggleShowAll()}
-          style={{
-            padding: "8px 16px",
-            background: "#eee",
-            width: "100%",
-            cursor: "pointer",
-          }}
-        >
-          <input className="switch" type="checkbox" checked={isShowAll} />{" "}
+      <div className="style-list auto-hide-scrollbar">
+        <li onClick={() => toggleShowAll()} className="toggle-all">
+          <input className="switch" type="checkbox" checked={isShowAll} />
           <label>
             {!isShowAll ? "Choice all style" : "Unchosen all style"}
           </label>

@@ -167,21 +167,29 @@ export const compareVariableAndDirectValue = (
     foundVariable.valuesByMode[variableCollection.currentMode];
 
   // Hiển thị thông tin để debug
-  console.log(`Comparing variable value: "${variableValue}" (${typeof variableValue}) with direct value: "${directValue}" (${typeof directValue})`);
-  
+  console.log(
+    `Comparing variable value: "${variableValue}" (${typeof variableValue}) with direct value: "${directValue}" (${typeof directValue})`
+  );
+
   // So sánh giá trị của biến với giá trị trực tiếp
   // Chuyển đổi kiểu dữ liệu nếu cần
   if (typeof variableValue === "string" && typeof directValue === "string") {
     // So sánh các chuỗi không phân biệt chữ hoa/thường
     return variableValue.toLowerCase() === directValue.toLowerCase();
-  } else if (typeof variableValue === "number" && typeof directValue === "string") {
+  } else if (
+    typeof variableValue === "number" &&
+    typeof directValue === "string"
+  ) {
     // Có thể là fontWeight (số) vs fontStyle (chuỗi)
     return variableValue.toString() === directValue;
-  } else if (typeof variableValue === "string" && typeof directValue === "number") {
+  } else if (
+    typeof variableValue === "string" &&
+    typeof directValue === "number"
+  ) {
     // Ngược lại
     return variableValue === directValue.toString();
   }
-  
+
   // Các trường hợp khác, so sánh trực tiếp
   return variableValue === directValue;
 };
@@ -249,15 +257,25 @@ export const checkFontStyleChanged = (
   const localHasWeightVar = !!localStyle.boundVariables?.fontWeight;
 
   // Ghi log để debug
-  console.log(`checkFontStyleChanged - cache: "${cacheStyle.fontName.style}", local: "${localStyle.fontName.style}"`);
-  if (cacheHasStyleVar) 
-    console.log(`Cache has fontStyle variable: ${cacheStyle.boundVariables?.fontStyle}`);
+  console.log(
+    `checkFontStyleChanged - cache: "${cacheStyle.fontName.style}", local: "${localStyle.fontName.style}"`
+  );
+  if (cacheHasStyleVar)
+    console.log(
+      `Cache has fontStyle variable: ${cacheStyle.boundVariables?.fontStyle}`
+    );
   if (cacheHasWeightVar)
-    console.log(`Cache has fontWeight variable: ${cacheStyle.boundVariables?.fontWeight}`);
+    console.log(
+      `Cache has fontWeight variable: ${cacheStyle.boundVariables?.fontWeight}`
+    );
   if (localHasStyleVar)
-    console.log(`Local has fontStyle variable: ${localStyle.boundVariables?.fontStyle}`);
+    console.log(
+      `Local has fontStyle variable: ${localStyle.boundVariables?.fontStyle}`
+    );
   if (localHasWeightVar)
-    console.log(`Local has fontWeight variable: ${localStyle.boundVariables?.fontWeight}`);
+    console.log(
+      `Local has fontWeight variable: ${localStyle.boundVariables?.fontWeight}`
+    );
 
   // Nếu trạng thái variable khác nhau (một bên có variable, bên kia không)
   // => luôn coi là có thay đổi, bất kể giá trị có giống nhau hay không
@@ -796,13 +814,15 @@ function Widget() {
                 if (fontSupportsWeight) {
                   // Sử dụng getFontWeightValue để tìm tên style phù hợp với font weight
                   const fontStyles = localFonts
-                    .filter((font) => font.fontName.family === style.fontName.family)
+                    .filter(
+                      (font) => font.fontName.family === style.fontName.family
+                    )
                     .map((font) => font.fontName.style);
-                  
+
                   // Tìm style phù hợp nhất với weight được chỉ định
                   let bestStyleMatch = "Regular";
                   let closestWeight = 400;
-                  
+
                   for (const fontStyle of fontStyles) {
                     const weightInfo = getFontWeightValue(fontStyle);
                     if (weightInfo.fontWeight === variableValue) {
@@ -810,16 +830,21 @@ function Widget() {
                       break;
                     } else if (weightInfo.fontWeight !== undefined) {
                       // Nếu không tìm thấy trùng khớp chính xác, lưu lại style có weight gần nhất
-                      const currentDiff = Math.abs((weightInfo.fontWeight as number) - (variableValue as number));
-                      const closestDiff = Math.abs(closestWeight - (variableValue as number));
-                      
+                      const currentDiff = Math.abs(
+                        (weightInfo.fontWeight as number) -
+                          (variableValue as number)
+                      );
+                      const closestDiff = Math.abs(
+                        closestWeight - (variableValue as number)
+                      );
+
                       if (currentDiff < closestDiff) {
                         closestWeight = weightInfo.fontWeight;
                         bestStyleMatch = fontStyle;
                       }
                     }
                   }
-                  
+
                   updatedStyle.fontName = {
                     ...style.fontName,
                     style: bestStyleMatch,
@@ -851,13 +876,15 @@ function Widget() {
                 if (fontSupportsWeight) {
                   // Sử dụng getFontWeightValue để tìm tên style phù hợp với font weight
                   const fontStyles = localFonts
-                    .filter((font) => font.fontName.family === style.fontName.family)
+                    .filter(
+                      (font) => font.fontName.family === style.fontName.family
+                    )
                     .map((font) => font.fontName.style);
-                  
+
                   // Tìm style phù hợp nhất với weight được chỉ định
                   let bestStyleMatch = "Regular";
                   let closestWeight = 400;
-                  
+
                   for (const fontStyle of fontStyles) {
                     const weightInfo = getFontWeightValue(fontStyle);
                     if (weightInfo.fontWeight === variableValue) {
@@ -865,16 +892,21 @@ function Widget() {
                       break;
                     } else if (weightInfo.fontWeight !== undefined) {
                       // Nếu không tìm thấy trùng khớp chính xác, lưu lại style có weight gần nhất
-                      const currentDiff = Math.abs((weightInfo.fontWeight as number) - (variableValue as number));
-                      const closestDiff = Math.abs(closestWeight - (variableValue as number));
-                      
+                      const currentDiff = Math.abs(
+                        (weightInfo.fontWeight as number) -
+                          (variableValue as number)
+                      );
+                      const closestDiff = Math.abs(
+                        closestWeight - (variableValue as number)
+                      );
+
                       if (currentDiff < closestDiff) {
                         closestWeight = weightInfo.fontWeight;
                         bestStyleMatch = fontStyle;
                       }
                     }
                   }
-                  
+
                   updatedStyle.fontName = {
                     ...style.fontName,
                     style: bestStyleMatch,
@@ -1082,10 +1114,11 @@ function Widget() {
         // Lấy collection ID từ variable đầu tiên
         const firstVariable = variablesData[0];
         const collectionId = firstVariable.variableCollectionId;
-        
+
         // Lấy collection từ API
-        const collection = await figma.variables.getVariableCollectionByIdAsync(collectionId);
-        
+        const collection =
+          await figma.variables.getVariableCollectionByIdAsync(collectionId);
+
         if (collection && collection.modes.length > 0) {
           // Lấy mode mặc định hoặc mode đầu tiên
           const modeID = collection.defaultModeId || collection.modes[0].modeId;
@@ -1215,6 +1248,7 @@ function Widget() {
         width: size?.width || 300,
         height: size?.height || 350,
         title: name,
+        themeColors: true,
       });
       figma.ui.postMessage({ moduleName, data });
     });
@@ -1297,11 +1331,13 @@ function Widget() {
           direction={"vertical"}
           padding={{ bottom: 6 }}
         >
-          <Text fontSize={46} fontWeight={700}>
+          <Text fontSize={46} fontWeight={700} fill={"#000000"}>
             {mode === "edit" ? "FONT STYLES MANAGER" : "FONT STYLES LIST"}
           </Text>
           {mode === "edit" ? (
-            <Text fontSize={18}>Choose styles you want to change</Text>
+            <Text fontSize={18} fill={"#000000"}>
+              Choose styles you want to change
+            </Text>
           ) : (
             <Input
               width={600}
@@ -1359,7 +1395,7 @@ function Widget() {
             onClick={() => handleSetMode()}
             tooltip={mode === "edit" ? "Open view mode" : "Open edit mode"}
           />
-          <Rectangle width={"fill-parent"} height={1} fill={"#888"} />
+          <Rectangle width={"fill-parent"} height={1} fill={"#e6e6e6"} />
           {mode === "edit" && (
             <SVG
               src={isOpenSearchBar ? searchActive : searchDisable}
@@ -1384,7 +1420,7 @@ function Widget() {
               />
             </Fragment>
           )}
-          <Rectangle width={"fill-parent"} height={1} fill={"#888"} />
+          <Rectangle width={"fill-parent"} height={1} fill={"#e6e6e6"} />
           <SVG
             src={coffeeSvg}
             tooltip={"Buy me a coffee"}
