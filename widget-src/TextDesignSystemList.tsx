@@ -30,14 +30,11 @@ const getOnlyName = (name: string) => {
 };
 
 /**
- * TextDesignList Component
- *
- * Renders a list of text styles with their visual representation
- * and properties such as font family, style, size, etc.
- *
- * @param value - Configuration with styles and groups to show
+ * Split a style name into name and group components
+ * 
+ * @param name - Style name in format "Group/Name" or just "Name"
+ * @returns Object with separated name and group
  */
-
 const splitNameAndGroup = (name: string): { name: string; group: string } => {
   if (name.includes("/")) {
     const parts = name.split("/");
@@ -49,14 +46,37 @@ const splitNameAndGroup = (name: string): { name: string; group: string } => {
   }
 };
 
+/**
+ * TextDesignList Component
+ *
+ * Renders a list of text styles with their visual representation
+ * and properties such as font family, style, size, etc.
+ *
+ * @param value - Configuration with styles and groups to show
+ */
 const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
   const { showStyle } = value;
   const styleList = showStyle;
+
+  /**
+   * Format line height value for display
+   */
+  const formatLineHeight = (lineHeight: LineHeight) => {
+    if (lineHeight.unit !== "AUTO" && lineHeight.value) {
+      return lineHeight.unit === "PIXELS" 
+        ? `${lineHeight.value}px`
+        : parseFloat((lineHeight.value / 100).toPrecision(3));
+    }
+    return "auto";
+  };
 
   return (
     <AutoLayout direction={"vertical"} width={"fill-parent"}>
       {styleList.length !== 0 &&
         styleList.map((style: textStyleType, index: number) => {
+          const { name, group } = splitNameAndGroup(style.name);
+          const fontWeight = getFontWeightValue(style.fontName.style).fontWeight as FontWeightNumerical;
+          
           return (
             <AutoLayout
               key={index}
@@ -75,10 +95,7 @@ const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
                     width={170}
                     fontSize={style.fontSize}
                     fontFamily={style.fontName.family}
-                    fontWeight={
-                      getFontWeightValue(style.fontName.style)
-                        .fontWeight as FontWeightNumerical
-                    }
+                    fontWeight={fontWeight}
                   >
                     Ag
                   </Text>
@@ -88,9 +105,9 @@ const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
                     direction="vertical"
                   >
                     <Text fontSize={18} fill={"#777"}>
-                      {splitNameAndGroup(style.name).group}
+                      {group}
                     </Text>
-                    <Text fontSize={22}>{getOnlyName(style.name)}</Text>
+                    <Text fontSize={22}>{name}</Text>
                   </AutoLayout>
                 </AutoLayout>
                 <AutoLayout
@@ -141,7 +158,7 @@ const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
                       fontWeight={600}
                       fontSize={24}
                     >
-                      {getFontWeightValue(style.fontName.style).fontWeight}
+                      {fontWeight}
                     </Text>
                     <Text
                       fontFamily={"Roboto Slab"}
@@ -164,13 +181,7 @@ const TextDesignList = ({ value }: { value: TextDesignSystemListType }) => {
                       fontSize={24}
                       fontWeight={600}
                     >
-                      {style.lineHeight.unit != "AUTO" && style.lineHeight.value
-                        ? style.lineHeight.unit === "PIXELS"
-                          ? style.lineHeight.value.toString() + "px"
-                          : parseFloat(
-                              (style.lineHeight.value / 100).toPrecision(3)
-                            )
-                        : "auto"}
+                      {formatLineHeight(style.lineHeight)}
                     </Text>
                   </AutoLayout>
                 </AutoLayout>

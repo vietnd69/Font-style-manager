@@ -147,10 +147,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
    * @param id - ID of the text style to toggle
    */
   const handleCheck = (id: string) => {
-    // Check if style is already in the selected list
-    const hasStyleInList = stylesChecked.find((idStyle) => idStyle === id)
-      ? true
-      : false;
+    const hasStyleInList = stylesChecked.includes(id);
 
     if (hasStyleInList) {
       // If already selected, remove it
@@ -173,15 +170,9 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
    */
   const handleCheckAll = () => {
     setHasCheckAll((prev) => {
-      if (!prev) {
-        // If not all selected, select all styles
-        setStylesChecked(filterStyles.map((style) => style.id));
-      } else {
-        // If all selected, clear selection
-        setStylesChecked([]);
-      }
-
-      return !prev;
+      const newValue = !prev;
+      setStylesChecked(newValue ? filterStyles.map((style) => style.id) : []);
+      return newValue;
     });
   };
 
@@ -834,25 +825,22 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     }
   };
 
+  /**
+   * Extract name part from a style's full name
+   * e.g., "Heading/H1" returns "H1"
+   */
   const getNameStyle = (name: string): string => {
-    const lastDirectoryPart = name.lastIndexOf("/");
-
-    if (lastDirectoryPart === -1) {
-      return name.trim();
-    } else {
-      const nameStyle = name.slice(lastDirectoryPart + 1);
-      return nameStyle.trim();
-    }
+    return name.includes("/") ? name.split("/").pop() || "" : name;
   };
-  const getGroupStyle = (name: string): string => {
-    const lastDirectoryPart = name.lastIndexOf("/");
 
-    if (lastDirectoryPart === -1) {
-      return "";
-    } else {
-      const groupStyle = name.slice(0, lastDirectoryPart);
-      return groupStyle.trim();
-    }
+  /**
+   * Extract group part from a style's full name
+   * e.g., "Heading/H1" returns "Heading"
+   */
+  const getGroupStyle = (name: string): string => {
+    return name.includes("/") 
+      ? name.substring(0, name.lastIndexOf("/")) 
+      : "";
   };
 
   const findAll = (data: {

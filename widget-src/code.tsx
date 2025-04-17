@@ -182,11 +182,6 @@ export const compareVariableAndDirectValue = (
   const variableValue =
     foundVariable.valuesByMode[variableCollection.currentMode];
 
-  // Hiển thị thông tin để debug
-  console.log(
-    `Comparing variable value: "${variableValue}" (${typeof variableValue}) with direct value: "${directValue}" (${typeof directValue})`
-  );
-
   // So sánh giá trị của biến với giá trị trực tiếp
   // Chuyển đổi kiểu dữ liệu nếu cần
   if (typeof variableValue === "string" && typeof directValue === "string") {
@@ -198,15 +193,8 @@ export const compareVariableAndDirectValue = (
   ) {
     // Có thể là fontWeight (số) vs fontStyle (chuỗi)
     return variableValue.toString() === directValue;
-  } else if (
-    typeof variableValue === "string" &&
-    typeof directValue === "number"
-  ) {
-    // Ngược lại
-    return variableValue === directValue.toString();
   }
 
-  // Các trường hợp khác, so sánh trực tiếp
   return variableValue === directValue;
 };
 
@@ -272,27 +260,6 @@ export const checkFontStyleChanged = (
   const localHasStyleVar = !!localStyle.boundVariables?.fontStyle;
   const localHasWeightVar = !!localStyle.boundVariables?.fontWeight;
 
-  // Ghi log để debug
-  console.log(
-    `checkFontStyleChanged - cache: "${cacheStyle.fontName.style}", local: "${localStyle.fontName.style}"`
-  );
-  if (cacheHasStyleVar)
-    console.log(
-      `Cache has fontStyle variable: ${cacheStyle.boundVariables?.fontStyle}`
-    );
-  if (cacheHasWeightVar)
-    console.log(
-      `Cache has fontWeight variable: ${cacheStyle.boundVariables?.fontWeight}`
-    );
-  if (localHasStyleVar)
-    console.log(
-      `Local has fontStyle variable: ${localStyle.boundVariables?.fontStyle}`
-    );
-  if (localHasWeightVar)
-    console.log(
-      `Local has fontWeight variable: ${localStyle.boundVariables?.fontWeight}`
-    );
-
   // Nếu trạng thái variable khác nhau (một bên có variable, bên kia không)
   // => luôn coi là có thay đổi, bất kể giá trị có giống nhau hay không
   if (
@@ -320,7 +287,6 @@ export const checkFontStyleChanged = (
 
   // Không biến, so sánh giá trị trực tiếp
   const result = cacheStyle.fontName.style !== localStyle.fontName.style;
-  console.log(`Direct comparison result: ${result}`);
   return result;
 };
 
