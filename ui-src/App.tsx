@@ -1,5 +1,6 @@
 import React, { useState, Suspense, lazy } from "react";
 import "./styles/App.css";
+import Loading from "./Loading";
 // import { cleanFontType } from "../widget-src/code";
 
 // Lazy load components
@@ -25,7 +26,7 @@ function App() {
 
   return (
     <div className="App">
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<Loading />}>
         {module === "buyCoffee" && <BuyMeACoffee />}
         {module === "choiceFont" && <ChoiceFont data={data} />}
         {module === "editShowGroup" && <EditShowGroup data={data} />}

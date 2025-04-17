@@ -482,6 +482,13 @@ export const checkStyleChanged = (
   };
 };
 
+// Tạo một interface hoặc type cho checkedFamily
+type CheckedFamilyType = {
+  value: string;
+  type: "string" | "variable";
+  variableId?: string;
+};
+
 /**
  * Main Widget component for the Font Style Manager
  * Manages state, UI modes, and handles communication with Figma API
@@ -511,7 +518,10 @@ function Widget() {
   );
 
   // Font selection state
-  const [checkedFamily, setCheckedFamily] = useSyncedState("checkedFamily", "");
+  const [checkedFamily, setCheckedFamily] = useSyncedState<CheckedFamilyType>(
+    "checkedFamily",
+    { value: "", type: "string", variableId: undefined }
+  );
   const [checkedStyle, setCheckedStyle] = useSyncedState("checkedStyle", "");
 
   const [cacheStyle, setCacheStyle] = useSyncedState<textStyleType[]>(
@@ -1011,7 +1021,12 @@ function Widget() {
    */
   const handleGetUiMessage = (msg: msgType) => {
     if (msg.type === "setFamilyAndWeight") {
-      setCheckedFamily(msg.data.family);
+      // Chuyển đổi string thành object CheckedFamilyType
+      setCheckedFamily({
+        value: msg.data.family,
+        type: "string",
+        variableId: undefined
+      });
       setCheckedStyle(msg.data.weight);
       figma.closePlugin();
     }

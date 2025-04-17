@@ -27,15 +27,20 @@ function BuyMeACoffee() {
         />
         <a
           style={{
-            padding: "12px 32px",
+            display: "inline-block",
+            alignSelf: "center",
+            padding: "8px 16px",
             backgroundColor: "var(--figma-color-bg-brand)",
-            margin: "0 auto 0",
-            borderRadius: 24,
+            borderRadius: 6,
             textDecoration: "none",
-            fontSize: 16,
-            fontWeight: 600,
+            fontSize: 11,
+            fontWeight: 500,
+            lineHeight: "16px",
             color: "var(--figma-color-text-on-brand)",
-            fontFamily: '"roboto", sans-serif',
+            fontFamily: "Inter, Roboto, sans-serif",
+            border: "none",
+            cursor: "pointer",
+            textAlign: "center",
           }}
           href="https://www.buymeacoffee.com/vboy234"
           target="_blank"

@@ -1,0 +1,31 @@
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  gap: 12px;
+  height: 100%;
+  background-color: var(--figma-color-bg);
+}
+
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--figma-color-border);
+  border-top: 2px solid var(--figma-color-bg-brand);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  font-size: 11px;
+  color: var(--figma-color-text);
+  font-weight: 500;
+  font-family: Inter, Roboto, sans-serif;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+} 

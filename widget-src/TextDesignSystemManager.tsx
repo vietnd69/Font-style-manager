@@ -28,6 +28,13 @@ import {
   variableOutlineSvg,
 } from "./svg";
 
+// Tạo một interface hoặc type cho checkedFamily
+type CheckedFamilyType = {
+  value: string;
+  type: "string" | "variable";
+  variableId?: string;
+};
+
 /**
  * TextDesignManager Component
  *
@@ -79,7 +86,11 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
   });
 
 
-  const [checkedFamily, setCheckedFamily] = useSyncedState("checkedFamily", "");
+  const [checkedFamily, setCheckedFamily] = useSyncedState<CheckedFamilyType>("checkedFamily", {
+    value: "",
+    type: "string",
+    variableId: undefined
+  });
   const [checkedStyle, setCheckedStyle] = useSyncedState("checkedStyle", "");
   const [checkedFontSize, setCheckedFontSize] = useSyncedState(
     "checkedFontSize",
@@ -163,7 +174,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     setSearchFamily: (value: string) => void,
     setSearchStyle: (value: string) => void,
     setSearchFontSize: (value: string) => void,
-    setCheckedFamily: (value: string) => void,
+    setCheckedFamily: (value: CheckedFamilyType | ((currValue: CheckedFamilyType) => CheckedFamilyType)) => void,
     setCheckedStyle: (value: string) => void,
     setCheckedFontSize: (value: string) => void,
     setCheckedLineHeight: (value: LineHeight | { unit: "" }) => void,
@@ -447,7 +458,11 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     setSearchFamily("");
     setSearchStyle("");
     setSearchFontSize("");
-    setCheckedFamily("");
+    setCheckedFamily({
+      value: "",
+      type: "string",
+      variableId: undefined
+    });
     setCheckedStyle("");
     setCheckedFontSize("");
     setCheckedLineHeight({ unit: "" });
@@ -480,9 +495,9 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
           let hasChanges = false;
 
           
-          if (checkedFamily != "") {
+          if (checkedFamily.value != "") {
             console.log(
-              `[handleChangeSelectedStyle] Updating font family for ${cache.name}: ${checkedFamily}`
+              `[handleChangeSelectedStyle] Updating font family for ${cache.name}: ${checkedFamily.value}`
             );
             // Xóa biến fontFamily nếu có
             if (cache.boundVariables?.fontFamily) {
@@ -496,10 +511,23 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                   ? newBoundVariables
                   : undefined;
             }
-            cache.fontName = {
-              ...cache.fontName,
-              family: checkedFamily,
-            };
+            
+            // Nếu là variable type, thêm biến vào boundVariables
+            if (checkedFamily.type === "variable" && checkedFamily.variableId) {
+              // Tạo hoặc cập nhật boundVariables
+              const newBoundVariables = cache.boundVariables || {};
+              newBoundVariables.fontFamily = {
+                type: "VARIABLE_ALIAS",
+                id: checkedFamily.variableId
+              };
+              cache.boundVariables = newBoundVariables;
+            } else {
+              // Nếu là string type, cập nhật fontName
+              cache.fontName = {
+                ...cache.fontName,
+                family: checkedFamily.value,
+              };
+            }
             hasChanges = true;
           }
           if (checkedStyle != "") {
@@ -1016,23 +1044,39 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
               
               {/* font family */}
               <AutoLayout
-                padding={16}
+                padding={{ top: 10, bottom: 10, left: 16, right: 16 }}
                 fill={"#eee"}
                 cornerRadius={8}
+                verticalAlignItems={"center"}
                 width={"fill-parent"}
                 spacing={12}
-                verticalAlignItems={"end"}
                 stroke={"#ccc"}
                 strokeWidth={1}
               >
                 <SVG src={fontFamilySvg} />
-                <Input
+                <AutoLayout
                   width={"fill-parent"}
-                  fontSize={22}
-                  value={checkedFamily}
-                  onTextEditEnd={(e) => setCheckedFamily(e.characters)}
-                  placeholder="To font family"
-                />
+                  verticalAlignItems={"center"}
+                  spacing={8}
+                  cornerRadius={checkedFamily.type === "variable" ? 8 : 0}
+                  fill={checkedFamily.type === "variable" ? "#eeeeee" : "#ffffff00"}
+                  padding={{ vertical: 6, horizontal: 10 }}
+                >
+                  {checkedFamily.type === "variable" && (
+                    <SVG src={variableSvg} />
+                  )}
+                  <Input
+                    width={"fill-parent"}
+                    fontSize={22}
+                    value={checkedFamily.value}
+                    onTextEditEnd={(e) => setCheckedFamily({
+                      value: e.characters,
+                      type: "string",
+                      variableId: undefined
+                    })}
+                    placeholder="To font family"
+                  />
+                </AutoLayout>
                 <SVG
                   src={listSvg}
                   tooltip="Choice font"
