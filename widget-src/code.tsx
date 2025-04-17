@@ -1067,16 +1067,8 @@ function Widget() {
       // Cập nhật checkedStyle
       setCheckedStyle(styleData);
       
-      // Đảm bảo dữ liệu được lưu trước khi đóng plugin
-      figma.clientStorage.setAsync("tempCheckedStyle", styleData)
-        .then(() => {
-          console.log("Style data saved, closing plugin");
-          figma.closePlugin();
-        })
-        .catch(err => {
-          console.error("Error saving style data:", err);
-          figma.closePlugin();
-        });
+      // Đóng plugin ngay lập tức
+      figma.closePlugin();
     }
     if (msg.type === "setFontSizeAsVariable") {
       // Cập nhật checkedFontSize với loại variable
