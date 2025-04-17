@@ -1088,9 +1088,9 @@ function Widget() {
       console.log("Received setStyleAsVariable message:", msg);
       console.log("Value type:", typeof msg.value, "Value:", msg.value, "Declared type:", msg.valueType);
       
-      // Lưu dữ liệu vào biến tạm
+      // Lưu dữ liệu vào biến tạm, giữ nguyên kiểu dữ liệu gốc
       const styleData: CheckedStyleType = {
-        value: msg.valueType === "number" ? Number(msg.value) : msg.value,
+        value: msg.valueType === "number" || typeof msg.value === "number" ? Number(msg.value) : msg.value,
         type: "variable" as "string" | "variable",
         variableId: msg.variableId,
         valueTypes: ["string", "number"]

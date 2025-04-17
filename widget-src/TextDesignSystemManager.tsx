@@ -544,6 +544,25 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
             
             // Nếu là variable type, thêm biến vào boundVariables
             if (checkedFamily.type === "variable" && checkedFamily.variableId) {
+              // Tìm biến trong localVariableList
+              const variableToApply = localVariableList.find(
+                (variable) => variable.id === checkedFamily.variableId
+              );
+              
+              if (variableToApply && variableToApply.defaultModeId) {
+                // Lấy giá trị biến từ mode mặc định
+                const variableValue = variableToApply.valuesByMode[variableToApply.defaultModeId];
+                
+                if (typeof variableValue === "string") {
+                  // Cập nhật cả fontName để đảm bảo rendering đúng
+                  cache.fontName = {
+                    ...cache.fontName,
+                    family: variableValue,
+                  };
+                  console.log(`[handleChangeSelectedStyle] Updated fontName.family to ${variableValue} from variable`);
+                }
+              }
+              
               // Tạo hoặc cập nhật boundVariables
               const newBoundVariables = cache.boundVariables || {};
               newBoundVariables.fontFamily = {
@@ -562,7 +581,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
           }
           if (checkedStyle.value != "") {
             console.log(
-              `[handleChangeSelectedStyle] Updating font style for ${cache.name}: ${checkedStyle.value}`
+              `[handleChangeSelectedStyle] Updating font style for ${cache.name}: ${checkedStyle.value} (type: ${checkedStyle.type})`
             );
             // Xóa biến fontStyle và fontWeight nếu có
             if (
@@ -583,15 +602,80 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
 
             // Nếu là variable type, thêm biến vào boundVariables
             if (checkedStyle.type === "variable" && checkedStyle.variableId) {
+              console.log(
+                `[handleChangeSelectedStyle] Adding fontStyle variable for ${cache.name}: ${checkedStyle.variableId}`
+              );
+              
+              // Xác định nên dùng fontStyle hay fontWeight dựa vào kiểu dữ liệu
+              const variableField = typeof checkedStyle.value === 'number' ? 'fontWeight' : 'fontStyle';
+              console.log(`[handleChangeSelectedStyle] Using field: ${variableField} based on value type`);
+              
+              // Tìm biến trong localVariableList
+              const variableToApply = localVariableList.find(
+                (variable) => variable.id === checkedStyle.variableId
+              );
+              
+              if (variableToApply && variableToApply.defaultModeId) {
+                // Lấy giá trị biến từ mode mặc định
+                const variableValue = variableToApply.valuesByMode[variableToApply.defaultModeId];
+                
+                if (typeof variableValue === "string") {
+                  // Cập nhật fontName.style trực tiếp với giá trị string
+                  cache.fontName = {
+                    ...cache.fontName,
+                    style: variableValue,
+                  };
+                  console.log(`[handleChangeSelectedStyle] Updated fontName.style to "${variableValue}" from variable`);
+                } 
+                else if (typeof variableValue === "number") {
+                  // Cần tìm font style phù hợp với weight
+                  // Tìm các font style hiện có cho font family này
+                  const fontStyles = localFonts
+                    .filter((font) => font.fontName.family === cache.fontName.family)
+                    .map((font) => font.fontName.style);
+                  
+                  if (fontStyles.length > 0) {
+                    // Tìm style phù hợp với weight
+                    let bestStyleMatch = "Regular";
+                    let closestWeight = 400;
+                    
+                    for (const fontStyle of fontStyles) {
+                      const weightInfo = getFontWeightValue(fontStyle);
+                      if (weightInfo.fontWeight === variableValue) {
+                        bestStyleMatch = fontStyle;
+                        break;
+                      } else if (weightInfo.fontWeight !== undefined) {
+                        // Nếu không tìm thấy khớp chính xác, lấy gần đúng nhất
+                        const currentDiff = Math.abs(weightInfo.fontWeight - (variableValue as number));
+                        const closestDiff = Math.abs(closestWeight - (variableValue as number));
+                        
+                        if (currentDiff < closestDiff) {
+                          closestWeight = weightInfo.fontWeight;
+                          bestStyleMatch = fontStyle;
+                        }
+                      }
+                    }
+                    
+                    // Cập nhật fontName.style
+                    cache.fontName = {
+                      ...cache.fontName,
+                      style: bestStyleMatch,
+                    };
+                    console.log(`[handleChangeSelectedStyle] Updated fontName.style to "${bestStyleMatch}" based on weight ${variableValue}`);
+                  }
+                }
+              }
+              
               // Tạo hoặc cập nhật boundVariables
               const newBoundVariables = cache.boundVariables || {};
-              newBoundVariables.fontStyle = {
+              newBoundVariables[variableField] = {
                 type: "VARIABLE_ALIAS",
                 id: checkedStyle.variableId
               };
               cache.boundVariables = newBoundVariables;
             } else {
               // Nếu là string type, cập nhật fontName
+              console.log(`[handleChangeSelectedStyle] Setting direct value: ${checkedStyle.value}`);
               cache.fontName = {
                 ...cache.fontName,
                 style: typeof checkedStyle.value === 'number' ? String(checkedStyle.value) : checkedStyle.value,
@@ -618,6 +702,22 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
             
             // Nếu là variable type, thêm biến vào boundVariables
             if (checkedFontSize.type === "variable" && checkedFontSize.variableId) {
+              // Tìm biến trong localVariableList
+              const variableToApply = localVariableList.find(
+                (variable) => variable.id === checkedFontSize.variableId
+              );
+              
+              if (variableToApply && variableToApply.defaultModeId) {
+                // Lấy giá trị biến từ mode mặc định
+                const variableValue = variableToApply.valuesByMode[variableToApply.defaultModeId];
+                
+                if (typeof variableValue === "number") {
+                  // Cập nhật fontSize trực tiếp
+                  cache.fontSize = variableValue;
+                  console.log(`[handleChangeSelectedStyle] Updated fontSize to ${variableValue} from variable`);
+                }
+              }
+              
               // Tạo hoặc cập nhật boundVariables
               const newBoundVariables = cache.boundVariables || {};
               newBoundVariables.fontSize = {
@@ -647,7 +747,14 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                   ? newBoundVariables
                   : undefined;
             }
+            
+            // Cập nhật giá trị trực tiếp
             cache.lineHeight = checkedLineHeight;
+            
+            // Nếu lineHeight được liên kết với biến, hãy thêm nó vào boundVariables
+            // Đây là phần bổ sung để gắn biến nếu cần, nhưng hiện tại UI chưa hỗ trợ gắn biến cho lineHeight
+            // Bạn có thể mở rộng code ở đây khi UI hỗ trợ gắn biến cho lineHeight
+            
             hasChanges = true;
           }
           if (checkedLetterSpacing.unit != "") {
@@ -666,7 +773,14 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                   ? newBoundVariables
                   : undefined;
             }
+            
+            // Cập nhật giá trị trực tiếp
             cache.letterSpacing = checkedLetterSpacing;
+            
+            // Nếu letterSpacing được liên kết với biến, hãy thêm nó vào boundVariables
+            // Đây là phần bổ sung để gắn biến nếu cần, nhưng hiện tại UI chưa hỗ trợ gắn biến cho letterSpacing
+            // Bạn có thể mở rộng code ở đây khi UI hỗ trợ gắn biến cho letterSpacing
+            
             hasChanges = true;
           }
 

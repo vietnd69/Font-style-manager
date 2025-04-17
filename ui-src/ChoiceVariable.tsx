@@ -259,39 +259,26 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
       else if (propertyType === "fontStyle" || propertyType === "fontWeight") {
         // Lấy giá trị mặc định của biến
         const defaultValue = getDefaultValue(variable);
-        const valueType = typeof defaultValue;
         
-        // Log thông tin debug
-        console.log(`Setting ${propertyType} variable. Value:`, defaultValue, "Type:", valueType);
-        
-        // Gửi message tương ứng dựa vào kiểu dữ liệu
-        if (valueType === "number") {
-          // Nếu là số, gửi setStyleAsVariable với kiểu dữ liệu rõ ràng
-          parent.postMessage(
-            {
-              pluginMessage: {
-                type: "setStyleAsVariable",
-                variableId: variable.id,
-                value: defaultValue,
-                valueType: "number" // Thêm trường để widget biết đây là kiểu số
-              },
-            },
-            "*"
-          );
-        } else {
-          // Nếu là chuỗi hoặc kiểu khác
-          parent.postMessage(
-            {
-              pluginMessage: {
-                type: "setStyleAsVariable",
-                variableId: variable.id,
-                value: valueType === "string" ? defaultValue : defaultValue.toString(),
-                valueType: valueType
-              },
-            },
-            "*"
-          );
+        // Nếu là số, có thể đây là fontWeight chứ không phải fontStyle
+        if (typeof defaultValue === "number") {
+          console.log("Variable has numeric value, might be more suitable for fontWeight:", defaultValue);
         }
+        
+        // Thêm log để debug
+        console.log("Setting fontStyle variable. defaultValue:", defaultValue, "type:", typeof defaultValue);
+        
+        parent.postMessage(
+          {
+            pluginMessage: {
+              type: "setStyleAsVariable",
+              variableId: variable.id,
+              value: defaultValue, // Giữ nguyên kiểu dữ liệu gốc, không chuyển đổi
+              valueType: typeof defaultValue
+            },
+          },
+          "*"
+        );
       }
       // Trường hợp đặc biệt cho fontSize
       else if (propertyType === "fontSize") {
