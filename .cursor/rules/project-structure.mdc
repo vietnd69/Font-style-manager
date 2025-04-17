@@ -27,6 +27,22 @@ alwaysApply: true
 - Message types and structure defined in `msgType` interface
 - Widget listens for UI messages with `figma.ui.onmessage`
 
+## Project Libraries
+
+### External Dependencies
+- React and React DOM for UI components
+- TypeScript for type-safe development
+- CSS modules for styling
+- Vite for UI bundling
+- Webpack for plugin/widget bundling
+- ESLint with @figma/figma-plugins/recommended configuration
+
+### Internal Libraries
+- Font utilities for font management and manipulation
+- Style utilities for creating and managing text styles
+- Variable utilities for Figma variable integration
+- Message handlers for plugin-UI communication
+
 ## Figma Types Integration
 - Utilizes native Figma API types: Font, FontName, LineHeight, LetterSpacing, TextStyle
 - Extends with custom types:
@@ -35,20 +51,26 @@ alwaysApply: true
   - `ShowType`: Display options for typography details
   - `CustomVariable`: Custom variable definition for typography
 
-## Features
-- View and manage text styles in Figma documents
-- Search and filter text styles by various properties
-- Apply text styles to selected elements
-- Clone widgets with different style configurations
-- Link Figma Variables to text properties (fontFamily, fontSize, lineHeight, etc.)
-- Toggle between edit and view modes
+## Documentation
 
-## Data Flow
-1. Widget loads fonts via `figma.listAvailableFontsAsync()` and text styles via `figma.getLocalTextStylesAsync()`
-2. User interacts with widget to open specific UI modules
-3. UI displays relevant data and controls for manipulation
-4. User makes changes and sends data back to widget
-5. Widget applies changes to Figma document using appropriate API calls
+### Plugin API Documentation
+- Figma Plugin API: https://www.figma.com/plugin-docs/
+- Widget API: https://www.figma.com/widget-docs/
+- API Typings: @figma/plugin-typings package
+
+### Development Guidelines
+- Use TypeScript for type safety with `strict: true` in tsconfig.json
+- Follow Figma's plugin linting rules with @figma/figma-plugins/recommended
+- Structure project with separate directories for UI and widget code
+- Bundle code using Webpack for plugins/widgets and Vite for UI
+- Test across various Figma document contexts before publishing
+
+### Performance Considerations
+- Load resources only when needed
+- Consider memory usage when working with large documents
+- Use bundling to minimize plugin size
+- Handle edge cases (missing fonts, component instances, etc.)
+- Implement error handling for network requests
 
 ## Build Configuration
 - `manifest.json` defines plugin parameters, API versions, and permissions
@@ -56,5 +78,3 @@ alwaysApply: true
 - Configured for both Plugin API 1.0.0 and Widget API 1.0.0
 - Uses `documentAccess: "dynamic-page"` for document access
 - Build process uses separate TypeScript configurations for widget and UI 
-
-
