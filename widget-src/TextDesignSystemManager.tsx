@@ -35,6 +35,21 @@ type CheckedFamilyType = {
   variableId?: string;
 };
 
+// Tạo một interface hoặc type cho checkedStyle tương tự như CheckedFamilyType
+type CheckedStyleType = {
+  value: string | number;
+  type: "string" | "variable";
+  variableId?: string;
+  valueTypes?: ("string" | "number")[];
+};
+
+// Tạo một interface hoặc type cho checkedFontSize tương tự như CheckedFamilyType
+type CheckedFontSizeType = {
+  value: string;
+  type: "string" | "variable";
+  variableId?: string;
+};
+
 /**
  * TextDesignManager Component
  *
@@ -91,11 +106,17 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     type: "string",
     variableId: undefined
   });
-  const [checkedStyle, setCheckedStyle] = useSyncedState("checkedStyle", "");
-  const [checkedFontSize, setCheckedFontSize] = useSyncedState(
-    "checkedFontSize",
-    ""
-  );
+  const [checkedStyle, setCheckedStyle] = useSyncedState<CheckedStyleType>("checkedStyle", {
+    value: "",
+    type: "string",
+    variableId: undefined,
+    valueTypes: ["string", "number"]
+  });
+  const [checkedFontSize, setCheckedFontSize] = useSyncedState<CheckedFontSizeType>("checkedFontSize", {
+    value: "",
+    type: "string",
+    variableId: undefined
+  });
   const [checkedLineHeight, setCheckedLineHeight] = useSyncedState<
     LineHeight | { unit: "" }
   >("checkedLineHeight", {
@@ -175,8 +196,8 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     setSearchStyle: (value: string) => void,
     setSearchFontSize: (value: string) => void,
     setCheckedFamily: (value: CheckedFamilyType | ((currValue: CheckedFamilyType) => CheckedFamilyType)) => void,
-    setCheckedStyle: (value: string) => void,
-    setCheckedFontSize: (value: string) => void,
+    setCheckedStyle: (value: CheckedStyleType | ((currValue: CheckedStyleType) => CheckedStyleType)) => void,
+    setCheckedFontSize: (value: CheckedFontSizeType | ((currValue: CheckedFontSizeType) => CheckedFontSizeType)) => void,
     setCheckedLineHeight: (value: LineHeight | { unit: "" }) => void,
     setCheckedLetterSpacing: (value: LetterSpacing | { unit: "" }) => void,
     setFilterStyles: (value: textStyleType[]) => void,
@@ -463,8 +484,17 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
       type: "string",
       variableId: undefined
     });
-    setCheckedStyle("");
-    setCheckedFontSize("");
+    setCheckedStyle({
+      value: "",
+      type: "string",
+      variableId: undefined,
+      valueTypes: ["string", "number"]
+    });
+    setCheckedFontSize({
+      value: "",
+      type: "string",
+      variableId: undefined
+    });
     setCheckedLineHeight({ unit: "" });
     setCheckedLetterSpacing({ unit: "" });
     setFilterStyles(textStyles);
@@ -530,9 +560,9 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
             }
             hasChanges = true;
           }
-          if (checkedStyle != "") {
+          if (checkedStyle.value != "") {
             console.log(
-              `[handleChangeSelectedStyle] Updating font style for ${cache.name}: ${checkedStyle}`
+              `[handleChangeSelectedStyle] Updating font style for ${cache.name}: ${checkedStyle.value}`
             );
             // Xóa biến fontStyle và fontWeight nếu có
             if (
@@ -550,15 +580,28 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                   ? newBoundVariables
                   : undefined;
             }
-            cache.fontName = {
-              ...cache.fontName,
-              style: checkedStyle,
-            };
+
+            // Nếu là variable type, thêm biến vào boundVariables
+            if (checkedStyle.type === "variable" && checkedStyle.variableId) {
+              // Tạo hoặc cập nhật boundVariables
+              const newBoundVariables = cache.boundVariables || {};
+              newBoundVariables.fontStyle = {
+                type: "VARIABLE_ALIAS",
+                id: checkedStyle.variableId
+              };
+              cache.boundVariables = newBoundVariables;
+            } else {
+              // Nếu là string type, cập nhật fontName
+              cache.fontName = {
+                ...cache.fontName,
+                style: typeof checkedStyle.value === 'number' ? String(checkedStyle.value) : checkedStyle.value,
+              };
+            }
             hasChanges = true;
           }
-          if (checkedFontSize != "" && !isNaN(Number(checkedFontSize))) {
+          if (checkedFontSize.value != "" && !isNaN(Number(checkedFontSize.value))) {
             console.log(
-              `[handleChangeSelectedStyle] Updating font size for ${cache.name}: ${checkedFontSize}`
+              `[handleChangeSelectedStyle] Updating font size for ${cache.name}: ${checkedFontSize.value}`
             );
             // Xóa biến fontSize nếu có
             if (cache.boundVariables?.fontSize) {
@@ -572,7 +615,20 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                   ? newBoundVariables
                   : undefined;
             }
-            cache.fontSize = Number(checkedFontSize);
+            
+            // Nếu là variable type, thêm biến vào boundVariables
+            if (checkedFontSize.type === "variable" && checkedFontSize.variableId) {
+              // Tạo hoặc cập nhật boundVariables
+              const newBoundVariables = cache.boundVariables || {};
+              newBoundVariables.fontSize = {
+                type: "VARIABLE_ALIAS",
+                id: checkedFontSize.variableId
+              };
+              cache.boundVariables = newBoundVariables;
+            } else {
+              // Nếu là string type, cập nhật fontSize
+              cache.fontSize = Number(checkedFontSize.value);
+            }
             hasChanges = true;
           }
           if (checkedLineHeight.unit != "") {
@@ -1059,7 +1115,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                   verticalAlignItems={"center"}
                   spacing={8}
                   cornerRadius={checkedFamily.type === "variable" ? 8 : 0}
-                  fill={checkedFamily.type === "variable" ? "#eeeeee" : "#ffffff00"}
+                  fill={checkedFamily.type === "variable" ? "#dadada" : "#ffffff00"}
                   padding={{ vertical: 6, horizontal: 10 }}
                 >
                   {checkedFamily.type === "variable" && (
@@ -1094,7 +1150,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                   onClick={() =>
                     showUi({
                       moduleName: "choiceVariableSelected",
-                      name: "Choice variable",
+                      name: "Choice variable for font family",
                       data: {
                         type: "fontFamily",
                         variables: localVariableList || [],
@@ -1105,43 +1161,104 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
               </AutoLayout>
               {/* font style */}
               <AutoLayout
-                padding={16}
+                padding={{ top: 10, bottom: 10, left: 16, right: 16 }}
                 fill={"#eee"}
                 cornerRadius={8}
                 width={"fill-parent"}
                 spacing={12}
-                verticalAlignItems={"end"}
+                verticalAlignItems={"center"}
                 stroke={"#ccc"}
                 strokeWidth={1}
                 overflow={"scroll"}
               >
                 <SVG src={fontStyleSvg} />
-                <Input
+                <AutoLayout
                   width={"fill-parent"}
-                  fontSize={22}
-                  value={checkedStyle}
-                  onTextEditEnd={(e) => setCheckedStyle(e.characters)}
-                  placeholder="To font style"
+                  verticalAlignItems={"center"}
+                  spacing={8}
+                  cornerRadius={checkedStyle.type === "variable" ? 8 : 0}
+                  fill={checkedStyle.type === "variable" ? "#dadada" : "#ffffff00"}
+                  padding={{ vertical: 6, horizontal: 10 }}
+                >
+                  {checkedStyle.type === "variable" && (
+                    <SVG src={variableSvg} />
+                  )}
+                  <Input
+                    width={"fill-parent"}
+                    fontSize={22}
+                    value={typeof checkedStyle.value === 'number' ? String(checkedStyle.value) : checkedStyle.value}
+                    onTextEditEnd={(e) => setCheckedStyle({
+                      value: e.characters,
+                      type: "string",
+                      variableId: undefined,
+                      valueTypes: ["string", "number"]
+                    })}
+                    placeholder="To font style"
+                  />
+                </AutoLayout>
+                <SVG
+                  src={variableOutlineSvg}
+                  tooltip="Choice variable"
+                  onClick={() =>
+                    showUi({
+                      moduleName: "choiceVariableSelected",
+                      name: "Choice variable for font style",
+                      data: {
+                        type: "fontStyle",
+                        variables: localVariableList || [],
+                      },
+                    })
+                  }
                 />
               </AutoLayout>
               {/* font size */}
               <AutoLayout
-                padding={16}
+                padding={{ top: 10, bottom: 10, left: 16, right: 16 }}
                 fill={"#eee"}
                 cornerRadius={8}
                 width={"fill-parent"}
                 spacing={12}
-                verticalAlignItems={"end"}
+                verticalAlignItems={"center"}
                 stroke={"#ccc"}
                 strokeWidth={1}
               >
                 <SVG src={fontSizeSvg} />
-                <Input
+                <AutoLayout
                   width={"fill-parent"}
-                  fontSize={22}
-                  value={checkedFontSize}
-                  onTextEditEnd={(e) => setCheckedFontSize(e.characters)}
-                  placeholder="To font size"
+                  verticalAlignItems={"center"}
+                  spacing={8}
+                  cornerRadius={checkedFontSize.type === "variable" ? 8 : 0}
+                  fill={checkedFontSize.type === "variable" ? "#dadada" : "#ffffff00"}
+                  padding={{ vertical: 6, horizontal: 10 }}
+                >
+                  {checkedFontSize.type === "variable" && (
+                    <SVG src={variableSvg} />
+                  )}
+                  <Input
+                    width={"fill-parent"}
+                    fontSize={22}
+                    value={checkedFontSize.value}
+                    onTextEditEnd={(e) => setCheckedFontSize({
+                      value: e.characters,
+                      type: "string",
+                      variableId: undefined
+                    })}
+                    placeholder="To font size"
+                  />
+                </AutoLayout>
+                <SVG
+                  src={variableOutlineSvg}
+                  tooltip="Choice variable"
+                  onClick={() =>
+                    showUi({
+                      moduleName: "choiceVariableSelected",
+                      name: "Choice variable for font size",
+                      data: {
+                        type: "fontSize",
+                        variables: localVariableList || [],
+                      },
+                    })
+                  }
                 />
               </AutoLayout>
               {/* line height */}
@@ -1494,7 +1611,7 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
                                   ...i,
                                   fontName: {
                                     ...i.fontName,
-                                    style: e.characters,
+                                    style: typeof e.characters === 'number' ? String(e.characters) : e.characters,
                                   },
                                   boundVariables: newBoundVariables,
                                 };

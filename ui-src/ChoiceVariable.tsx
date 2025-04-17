@@ -239,16 +239,90 @@ const ChoiceVariable: React.FC<ChoiceVariableProps> = ({ data }) => {
 
     // Xử lý khác nhau cho choiceVariable và choiceVariableSelected
     if (isForSelectedElements) {
-      parent.postMessage(
-        {
-          pluginMessage: {
-            type: "setVariableForSelected",
-            variableId: variable.id,
-            propertyType: propertyType,
+      // Trường hợp đặc biệt: nếu là fontFamily, cập nhật checkedFamily thành variable
+      if (propertyType === "fontFamily") {
+        // Lấy giá trị mặc định của biến
+        const defaultValue = getDefaultValue(variable);
+        
+        parent.postMessage(
+          {
+            pluginMessage: {
+              type: "setFamilyAsVariable",
+              variableId: variable.id,
+              value: typeof defaultValue === "string" ? defaultValue : "",
+            },
           },
-        },
-        "*"
-      );
+          "*"
+        );
+      } 
+      // Trường hợp đặc biệt cho fontStyle
+      else if (propertyType === "fontStyle" || propertyType === "fontWeight") {
+        // Lấy giá trị mặc định của biến
+        const defaultValue = getDefaultValue(variable);
+        const valueType = typeof defaultValue;
+        
+        // Log thông tin debug
+        console.log(`Setting ${propertyType} variable. Value:`, defaultValue, "Type:", valueType);
+        
+        // Gửi message tương ứng dựa vào kiểu dữ liệu
+        if (valueType === "number") {
+          // Nếu là số, gửi setStyleAsVariable với kiểu dữ liệu rõ ràng
+          parent.postMessage(
+            {
+              pluginMessage: {
+                type: "setStyleAsVariable",
+                variableId: variable.id,
+                value: defaultValue,
+                valueType: "number" // Thêm trường để widget biết đây là kiểu số
+              },
+            },
+            "*"
+          );
+        } else {
+          // Nếu là chuỗi hoặc kiểu khác
+          parent.postMessage(
+            {
+              pluginMessage: {
+                type: "setStyleAsVariable",
+                variableId: variable.id,
+                value: valueType === "string" ? defaultValue : defaultValue.toString(),
+                valueType: valueType
+              },
+            },
+            "*"
+          );
+        }
+      }
+      // Trường hợp đặc biệt cho fontSize
+      else if (propertyType === "fontSize") {
+        // Lấy giá trị mặc định của biến
+        const defaultValue = getDefaultValue(variable);
+        
+        parent.postMessage(
+          {
+            pluginMessage: {
+              type: "setFontSizeAsVariable",
+              variableId: variable.id,
+              value: typeof defaultValue === "number" ? defaultValue.toString() : 
+                    typeof defaultValue === "string" ? defaultValue : "",
+            },
+          },
+          "*"
+        );
+      }
+      else {
+        // Xử lý cho các property khác
+        parent.postMessage(
+          {
+            pluginMessage: {
+              type: "setVariableForSelected",
+              variableId: variable.id,
+              propertyType: propertyType,
+            },
+          },
+          "*"
+        );
+      }
     } else {
       parent.postMessage(
         {

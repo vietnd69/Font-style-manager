@@ -52,6 +52,22 @@ export type msgType =
       };
     }
   | {
+      type: "setFamilyAsVariable"; // Set font family as variable
+      variableId: string; // ID của biến được chọn
+      value: string; // Giá trị mặc định của biến
+    }
+  | {
+      type: "setStyleAsVariable"; // Set font style as variable
+      variableId: string; // ID của biến được chọn
+      value: string | number; // Giá trị mặc định của biến
+      valueType?: string; // Kiểu dữ liệu của giá trị: "string" hoặc "number"
+    }
+  | {
+      type: "setFontSizeAsVariable"; // Set font size as variable
+      variableId: string; // ID của biến được chọn
+      value: string; // Giá trị mặc định của biến
+    }
+  | {
       type: "setShowTypoGroup"; // Set typography group to display
       data: textStyleType[];
     }
@@ -489,6 +505,21 @@ type CheckedFamilyType = {
   variableId?: string;
 };
 
+// Tạo một interface hoặc type cho checkedStyle
+type CheckedStyleType = {
+  value: string | number;
+  type: "string" | "variable";
+  variableId?: string;
+  valueTypes?: ("string" | "number")[];
+};
+
+// Tạo một interface hoặc type cho checkedFontSize
+type CheckedFontSizeType = {
+  value: string;
+  type: "string" | "variable";
+  variableId?: string;
+};
+
 /**
  * Main Widget component for the Font Style Manager
  * Manages state, UI modes, and handles communication with Figma API
@@ -522,7 +553,10 @@ function Widget() {
     "checkedFamily",
     { value: "", type: "string", variableId: undefined }
   );
-  const [checkedStyle, setCheckedStyle] = useSyncedState("checkedStyle", "");
+  const [checkedStyle, setCheckedStyle] = useSyncedState<CheckedStyleType>(
+    "checkedStyle",
+    { value: "", type: "string", variableId: undefined, valueTypes: ["string", "number"] }
+  );
 
   const [cacheStyle, setCacheStyle] = useSyncedState<textStyleType[]>(
     "cacheStyle",
@@ -572,6 +606,11 @@ function Widget() {
   const [currentModeID, setCurrentModeID] = useSyncedState<string | undefined>(
     "currentModeID",
     undefined
+  );
+
+  const [checkedFontSize, setCheckedFontSize] = useSyncedState<CheckedFontSizeType>(
+    "checkedFontSize",
+    { value: "", type: "string", variableId: undefined }
   );
 
   const widgetId = useWidgetId();
@@ -1027,7 +1066,59 @@ function Widget() {
         type: "string",
         variableId: undefined
       });
-      setCheckedStyle(msg.data.weight);
+      setCheckedStyle({
+        value: msg.data.weight,
+        type: "string",
+        variableId: undefined,
+        valueTypes: ["string", "number"]
+      });
+      figma.closePlugin();
+    }
+    if (msg.type === "setFamilyAsVariable") {
+      // Cập nhật checkedFamily với loại variable
+      setCheckedFamily({
+        value: msg.value,
+        type: "variable",
+        variableId: msg.variableId
+      });
+      figma.closePlugin();
+    }
+    if (msg.type === "setStyleAsVariable") {
+      // Cập nhật checkedStyle với loại variable
+      console.log("Received setStyleAsVariable message:", msg);
+      console.log("Value type:", typeof msg.value, "Value:", msg.value, "Declared type:", msg.valueType);
+      
+      // Lưu dữ liệu vào biến tạm
+      const styleData: CheckedStyleType = {
+        value: msg.valueType === "number" ? Number(msg.value) : msg.value,
+        type: "variable" as "string" | "variable",
+        variableId: msg.variableId,
+        valueTypes: ["string", "number"]
+      };
+      
+      console.log("Style data to be stored:", styleData);
+      
+      // Cập nhật checkedStyle
+      setCheckedStyle(styleData);
+      
+      // Đảm bảo dữ liệu được lưu trước khi đóng plugin
+      figma.clientStorage.setAsync("tempCheckedStyle", styleData)
+        .then(() => {
+          console.log("Style data saved, closing plugin");
+          figma.closePlugin();
+        })
+        .catch(err => {
+          console.error("Error saving style data:", err);
+          figma.closePlugin();
+        });
+    }
+    if (msg.type === "setFontSizeAsVariable") {
+      // Cập nhật checkedFontSize với loại variable
+      setCheckedFontSize({
+        value: msg.value,
+        type: "variable",
+        variableId: msg.variableId
+      });
       figma.closePlugin();
     }
     if (msg.type === "setShowTypoGroup") {
