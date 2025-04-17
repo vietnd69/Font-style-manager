@@ -1040,7 +1040,7 @@ function Widget() {
       });
       figma.closePlugin();
     }
-    if (msg.type === "setFamilyAsVariable") {
+    else if (msg.type === "setFamilyAsVariable") {
       // Cập nhật checkedFamily với loại variable
       setCheckedFamily({
         value: msg.value,
@@ -1049,28 +1049,24 @@ function Widget() {
       });
       figma.closePlugin();
     }
-    if (msg.type === "setStyleAsVariable") {
+    else if (msg.type === "setStyleAsVariable") {
       // Cập nhật checkedStyle với loại variable
       console.log("Received setStyleAsVariable message:", msg);
-      console.log("Value type:", typeof msg.value, "Value:", msg.value, "Declared type:", msg.valueType);
       
-      // Lưu dữ liệu vào biến tạm, giữ nguyên kiểu dữ liệu gốc
-      const styleData: CheckedStyleType = {
-        value: msg.valueType === "number" || typeof msg.value === "number" ? Number(msg.value) : msg.value,
-        type: "variable" as "string" | "variable",
+      // Chuyển đổi giá trị thành số nếu cần
+      const value = msg.valueType === "number" || typeof msg.value === "number" ? Number(msg.value) : msg.value;
+      
+      // Cập nhật checkedStyle và đóng plugin
+      setCheckedStyle({
+        value,
+        type: "variable",
         variableId: msg.variableId,
         valueTypes: ["string", "number"]
-      };
+      });
       
-      console.log("Style data to be stored:", styleData);
-      
-      // Cập nhật checkedStyle
-      setCheckedStyle(styleData);
-      
-      // Đóng plugin ngay lập tức
       figma.closePlugin();
     }
-    if (msg.type === "setFontSizeAsVariable") {
+    else if (msg.type === "setFontSizeAsVariable") {
       // Cập nhật checkedFontSize với loại variable
       setCheckedFontSize({
         value: msg.value,
@@ -1079,24 +1075,24 @@ function Widget() {
       });
       figma.closePlugin();
     }
-    if (msg.type === "setShowTypoGroup") {
+    else if (msg.type === "setShowTypoGroup") {
       setShowStyle(msg.data);
     }
-    if (msg.type === "setShowDuplicateTypoGroup") {
+    else if (msg.type === "setShowDuplicateTypoGroup") {
       handleCloneWidget(msg.data);
       figma.closePlugin();
     }
-    if (msg.type === "close") {
+    else if (msg.type === "close") {
       figma.closePlugin();
     }
-    if (msg.type === "setShowEditType") {
+    else if (msg.type === "setShowEditType") {
       setShowEditType(msg.data);
       figma.closePlugin();
     }
-    if (msg.type === "setVariable") {
+    else if (msg.type === "setVariable") {
       handleSetVariable(msg.variableId, msg.styleId, msg.propertyType);
     }
-    if (msg.type === "setVariableForSelected") {
+    else if (msg.type === "setVariableForSelected") {
       handleSetVariableForSelected(msg.variableId, msg.propertyType);
     }
   };

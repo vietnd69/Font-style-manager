@@ -495,310 +495,236 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
     setHasReloadLocalFont(true);
   };
 
+  // Helper để xử lý các biến liên quan đến font
+  const handleFontVariableBinding = (
+    cache: textStyleType,
+    variableId: string | undefined,
+    propertyType: string
+  ) => {
+    if (!variableId) return cache;
+    
+    // Tìm biến trong danh sách
+    const variableToApply = localVariableList.find(
+      (variable) => variable.id === variableId
+    );
+    
+    if (!variableToApply || !variableToApply.defaultModeId) return cache;
+    
+    // Lấy giá trị biến từ mode mặc định
+    const variableValue = variableToApply.valuesByMode[variableToApply.defaultModeId];
+    const updatedCache = { ...cache };
+    
+    // Gán variable vào boundVariables
+    const newBoundVariables = updatedCache.boundVariables || {};
+    newBoundVariables[propertyType] = {
+      type: "VARIABLE_ALIAS",
+      id: variableId
+    };
+    updatedCache.boundVariables = newBoundVariables;
+    
+    return updatedCache;
+  };
+  
+  // Helper để xóa biến khỏi cache
+  const removeVariableFromCache = (cache: textStyleType, propertyTypes: string[]) => {
+    if (!cache.boundVariables) return cache;
+    
+    const newBoundVariables = { ...cache.boundVariables };
+    
+    propertyTypes.forEach(propertyType => {
+      if (propertyType in newBoundVariables) {
+        delete newBoundVariables[propertyType];
+      }
+    });
+    
+    return {
+      ...cache,
+      boundVariables: Object.keys(newBoundVariables).length > 0 ? newBoundVariables : undefined
+    };
+  };
+
   const handleChangeSelectedStyle = () => {
-    console.log(
-      "[handleChangeSelectedStyle] Starting to update selected styles"
-    );
-    console.log(
-      `[handleChangeSelectedStyle] Number of selected styles: ${stylesChecked.length}`
-    );
+    console.log("[handleChangeSelectedStyle] Starting to update selected styles");
+    console.log(`[handleChangeSelectedStyle] Number of selected styles: ${stylesChecked.length}`);
 
-    if (stylesChecked.length !== 0) {
-      for (const style of stylesChecked) {
-        console.log(
-          `[handleChangeSelectedStyle] Processing style ID: ${style}`
-        );
-        const cache = cacheStyle.find((i) => i.id === style) as textStyleType;
-        if (cache) {
-          console.log(
-            `[handleChangeSelectedStyle] Found cache for style: ${cache.name}`
-          );
-          let hasChanges = false;
+    if (stylesChecked.length === 0) {
+      console.log("[handleChangeSelectedStyle] No styles selected");
+      return;
+    }
 
+    for (const styleId of stylesChecked) {
+      console.log(`[handleChangeSelectedStyle] Processing style ID: ${styleId}`);
+      const cache = cacheStyle.find((i) => i.id === styleId) as textStyleType;
+      
+      if (!cache) {
+        console.warn(`[handleChangeSelectedStyle] No cache found for style ID: ${styleId}`);
+        continue;
+      }
+      
+      console.log(`[handleChangeSelectedStyle] Found cache for style: ${cache.name}`);
+      let updatedCache = { ...cache };
+      let hasChanges = false;
+
+      // Xử lý font family
+      if (checkedFamily.value !== "") {
+        console.log(`[handleChangeSelectedStyle] Updating font family for ${cache.name}: ${checkedFamily.value}`);
+        
+        // Xóa biến cũ nếu có
+        updatedCache = removeVariableFromCache(updatedCache, ["fontFamily"]);
+        
+        if (checkedFamily.type === "variable" && checkedFamily.variableId) {
+          // Xử lý biến font family
+          updatedCache = handleFontVariableBinding(updatedCache, checkedFamily.variableId, "fontFamily");
           
-          if (checkedFamily.value != "") {
-            console.log(
-              `[handleChangeSelectedStyle] Updating font family for ${cache.name}: ${checkedFamily.value}`
-            );
-            // Xóa biến fontFamily nếu có
-            if (cache.boundVariables?.fontFamily) {
-              console.log(
-                `[handleChangeSelectedStyle] Removing fontFamily variable for ${cache.name}`
-              );
-              const newBoundVariables = { ...cache.boundVariables };
-              delete newBoundVariables.fontFamily;
-              cache.boundVariables =
-                Object.keys(newBoundVariables).length > 0
-                  ? newBoundVariables
-                  : undefined;
-            }
-            
-            // Nếu là variable type, thêm biến vào boundVariables
-            if (checkedFamily.type === "variable" && checkedFamily.variableId) {
-              // Tìm biến trong localVariableList
-              const variableToApply = localVariableList.find(
-                (variable) => variable.id === checkedFamily.variableId
-              );
-              
-              if (variableToApply && variableToApply.defaultModeId) {
-                // Lấy giá trị biến từ mode mặc định
-                const variableValue = variableToApply.valuesByMode[variableToApply.defaultModeId];
-                
-                if (typeof variableValue === "string") {
-                  // Cập nhật cả fontName để đảm bảo rendering đúng
-                  cache.fontName = {
-                    ...cache.fontName,
-                    family: variableValue,
-                  };
-                  console.log(`[handleChangeSelectedStyle] Updated fontName.family to ${variableValue} from variable`);
-                }
-              }
-              
-              // Tạo hoặc cập nhật boundVariables
-              const newBoundVariables = cache.boundVariables || {};
-              newBoundVariables.fontFamily = {
-                type: "VARIABLE_ALIAS",
-                id: checkedFamily.variableId
-              };
-              cache.boundVariables = newBoundVariables;
-            } else {
-              // Nếu là string type, cập nhật fontName
-              cache.fontName = {
-                ...cache.fontName,
-                family: checkedFamily.value,
+          // Cập nhật giá trị trực tiếp của fontName.family từ biến để hiển thị đúng
+          const variableToApply = localVariableList.find(v => v.id === checkedFamily.variableId);
+          if (variableToApply && variableToApply.defaultModeId) {
+            const value = variableToApply.valuesByMode[variableToApply.defaultModeId];
+            if (typeof value === "string") {
+              updatedCache.fontName = {
+                ...updatedCache.fontName,
+                family: value
               };
             }
-            hasChanges = true;
-          }
-          if (checkedStyle.value != "") {
-            console.log(
-              `[handleChangeSelectedStyle] Updating font style for ${cache.name}: ${checkedStyle.value} (type: ${checkedStyle.type})`
-            );
-            // Xóa biến fontStyle và fontWeight nếu có
-            if (
-              cache.boundVariables?.fontStyle ||
-              cache.boundVariables?.fontWeight
-            ) {
-              console.log(
-                `[handleChangeSelectedStyle] Removing fontStyle/fontWeight variables for ${cache.name}`
-              );
-              const newBoundVariables = { ...cache.boundVariables };
-              delete newBoundVariables.fontStyle;
-              delete newBoundVariables.fontWeight;
-              cache.boundVariables =
-                Object.keys(newBoundVariables).length > 0
-                  ? newBoundVariables
-                  : undefined;
-            }
-
-            // Nếu là variable type, thêm biến vào boundVariables
-            if (checkedStyle.type === "variable" && checkedStyle.variableId) {
-              console.log(
-                `[handleChangeSelectedStyle] Adding fontStyle variable for ${cache.name}: ${checkedStyle.variableId}`
-              );
-              
-              // Xác định nên dùng fontStyle hay fontWeight dựa vào kiểu dữ liệu
-              const variableField = typeof checkedStyle.value === 'number' ? 'fontWeight' : 'fontStyle';
-              console.log(`[handleChangeSelectedStyle] Using field: ${variableField} based on value type`);
-              
-              // Tìm biến trong localVariableList
-              const variableToApply = localVariableList.find(
-                (variable) => variable.id === checkedStyle.variableId
-              );
-              
-              if (variableToApply && variableToApply.defaultModeId) {
-                // Lấy giá trị biến từ mode mặc định
-                const variableValue = variableToApply.valuesByMode[variableToApply.defaultModeId];
-                
-                if (typeof variableValue === "string") {
-                  // Cập nhật fontName.style trực tiếp với giá trị string
-                  cache.fontName = {
-                    ...cache.fontName,
-                    style: variableValue,
-                  };
-                  console.log(`[handleChangeSelectedStyle] Updated fontName.style to "${variableValue}" from variable`);
-                } 
-                else if (typeof variableValue === "number") {
-                  // Cần tìm font style phù hợp với weight
-                  // Tìm các font style hiện có cho font family này
-                  const fontStyles = localFonts
-                    .filter((font) => font.fontName.family === cache.fontName.family)
-                    .map((font) => font.fontName.style);
-                  
-                  if (fontStyles.length > 0) {
-                    // Tìm style phù hợp với weight
-                    let bestStyleMatch = "Regular";
-                    let closestWeight = 400;
-                    
-                    for (const fontStyle of fontStyles) {
-                      const weightInfo = getFontWeightValue(fontStyle);
-                      if (weightInfo.fontWeight === variableValue) {
-                        bestStyleMatch = fontStyle;
-                        break;
-                      } else if (weightInfo.fontWeight !== undefined) {
-                        // Nếu không tìm thấy khớp chính xác, lấy gần đúng nhất
-                        const currentDiff = Math.abs(weightInfo.fontWeight - (variableValue as number));
-                        const closestDiff = Math.abs(closestWeight - (variableValue as number));
-                        
-                        if (currentDiff < closestDiff) {
-                          closestWeight = weightInfo.fontWeight;
-                          bestStyleMatch = fontStyle;
-                        }
-                      }
-                    }
-                    
-                    // Cập nhật fontName.style
-                    cache.fontName = {
-                      ...cache.fontName,
-                      style: bestStyleMatch,
-                    };
-                    console.log(`[handleChangeSelectedStyle] Updated fontName.style to "${bestStyleMatch}" based on weight ${variableValue}`);
-                  }
-                }
-              }
-              
-              // Tạo hoặc cập nhật boundVariables
-              const newBoundVariables = cache.boundVariables || {};
-              newBoundVariables[variableField] = {
-                type: "VARIABLE_ALIAS",
-                id: checkedStyle.variableId
-              };
-              cache.boundVariables = newBoundVariables;
-            } else {
-              // Nếu là string type, cập nhật fontName
-              console.log(`[handleChangeSelectedStyle] Setting direct value: ${checkedStyle.value}`);
-              cache.fontName = {
-                ...cache.fontName,
-                style: typeof checkedStyle.value === 'number' ? String(checkedStyle.value) : checkedStyle.value,
-              };
-            }
-            hasChanges = true;
-          }
-          if (checkedFontSize.value != "" && !isNaN(Number(checkedFontSize.value))) {
-            console.log(
-              `[handleChangeSelectedStyle] Updating font size for ${cache.name}: ${checkedFontSize.value}`
-            );
-            // Xóa biến fontSize nếu có
-            if (cache.boundVariables?.fontSize) {
-              console.log(
-                `[handleChangeSelectedStyle] Removing fontSize variable for ${cache.name}`
-              );
-              const newBoundVariables = { ...cache.boundVariables };
-              delete newBoundVariables.fontSize;
-              cache.boundVariables =
-                Object.keys(newBoundVariables).length > 0
-                  ? newBoundVariables
-                  : undefined;
-            }
-            
-            // Nếu là variable type, thêm biến vào boundVariables
-            if (checkedFontSize.type === "variable" && checkedFontSize.variableId) {
-              // Tìm biến trong localVariableList
-              const variableToApply = localVariableList.find(
-                (variable) => variable.id === checkedFontSize.variableId
-              );
-              
-              if (variableToApply && variableToApply.defaultModeId) {
-                // Lấy giá trị biến từ mode mặc định
-                const variableValue = variableToApply.valuesByMode[variableToApply.defaultModeId];
-                
-                if (typeof variableValue === "number") {
-                  // Cập nhật fontSize trực tiếp
-                  cache.fontSize = variableValue;
-                  console.log(`[handleChangeSelectedStyle] Updated fontSize to ${variableValue} from variable`);
-                }
-              }
-              
-              // Tạo hoặc cập nhật boundVariables
-              const newBoundVariables = cache.boundVariables || {};
-              newBoundVariables.fontSize = {
-                type: "VARIABLE_ALIAS",
-                id: checkedFontSize.variableId
-              };
-              cache.boundVariables = newBoundVariables;
-            } else {
-              // Nếu là string type, cập nhật fontSize
-              cache.fontSize = Number(checkedFontSize.value);
-            }
-            hasChanges = true;
-          }
-          if (checkedLineHeight.unit != "") {
-            console.log(
-              `[handleChangeSelectedStyle] Updating line height for ${cache.name}: ${JSON.stringify(checkedLineHeight)}`
-            );
-            // Xóa biến lineHeight nếu có
-            if (cache.boundVariables?.lineHeight) {
-              console.log(
-                `[handleChangeSelectedStyle] Removing lineHeight variable for ${cache.name}`
-              );
-              const newBoundVariables = { ...cache.boundVariables };
-              delete newBoundVariables.lineHeight;
-              cache.boundVariables =
-                Object.keys(newBoundVariables).length > 0
-                  ? newBoundVariables
-                  : undefined;
-            }
-            
-            // Cập nhật giá trị trực tiếp
-            cache.lineHeight = checkedLineHeight;
-            
-            // Nếu lineHeight được liên kết với biến, hãy thêm nó vào boundVariables
-            // Đây là phần bổ sung để gắn biến nếu cần, nhưng hiện tại UI chưa hỗ trợ gắn biến cho lineHeight
-            // Bạn có thể mở rộng code ở đây khi UI hỗ trợ gắn biến cho lineHeight
-            
-            hasChanges = true;
-          }
-          if (checkedLetterSpacing.unit != "") {
-            console.log(
-              `[handleChangeSelectedStyle] Updating letter spacing for ${cache.name}: ${JSON.stringify(checkedLetterSpacing)}`
-            );
-            // Xóa biến letterSpacing nếu có
-            if (cache.boundVariables?.letterSpacing) {
-              console.log(
-                `[handleChangeSelectedStyle] Removing letterSpacing variable for ${cache.name}`
-              );
-              const newBoundVariables = { ...cache.boundVariables };
-              delete newBoundVariables.letterSpacing;
-              cache.boundVariables =
-                Object.keys(newBoundVariables).length > 0
-                  ? newBoundVariables
-                  : undefined;
-            }
-            
-            // Cập nhật giá trị trực tiếp
-            cache.letterSpacing = checkedLetterSpacing;
-            
-            // Nếu letterSpacing được liên kết với biến, hãy thêm nó vào boundVariables
-            // Đây là phần bổ sung để gắn biến nếu cần, nhưng hiện tại UI chưa hỗ trợ gắn biến cho letterSpacing
-            // Bạn có thể mở rộng code ở đây khi UI hỗ trợ gắn biến cho letterSpacing
-            
-            hasChanges = true;
-          }
-
-          if (hasChanges) {
-            console.log(
-              `[handleChangeSelectedStyle] Updating cache for style: ${cache.name}`
-            );
-            setCacheStyle((prev) =>
-              prev.map((i) => (i.id === style ? cache : i))
-            );
-          } else {
-            console.log(
-              `[handleChangeSelectedStyle] No changes needed for style: ${cache.name}`
-            );
           }
         } else {
-          console.warn(
-            `[handleChangeSelectedStyle] No cache found for style ID: ${style}`
-          );
+          // Cập nhật trực tiếp
+          updatedCache.fontName = {
+            ...updatedCache.fontName,
+            family: checkedFamily.value
+          };
         }
+        hasChanges = true;
       }
-      console.log(
-        "[handleChangeSelectedStyle] Finished updating selected styles"
-      );
-    } else {
-      console.log("[handleChangeSelectedStyle] No styles selected");
+
+      // Xử lý font style
+      if (checkedStyle.value !== "") {
+        console.log(`[handleChangeSelectedStyle] Updating font style for ${cache.name}: ${checkedStyle.value} (type: ${checkedStyle.type})`);
+        
+        // Xóa biến cũ nếu có
+        updatedCache = removeVariableFromCache(updatedCache, ["fontStyle", "fontWeight"]);
+        
+        if (checkedStyle.type === "variable" && checkedStyle.variableId) {
+          // Xác định trường variable phù hợp (fontStyle hoặc fontWeight)
+          const fieldType = typeof checkedStyle.value === 'number' ? 'fontWeight' : 'fontStyle';
+          
+          // Xử lý biến font style
+          updatedCache = handleFontVariableBinding(updatedCache, checkedStyle.variableId, fieldType);
+          
+          // Cập nhật giá trị hiển thị trực tiếp
+          const variableToApply = localVariableList.find(v => v.id === checkedStyle.variableId);
+          if (variableToApply && variableToApply.defaultModeId) {
+            const value = variableToApply.valuesByMode[variableToApply.defaultModeId];
+            
+            if (typeof value === "string") {
+              updatedCache.fontName = {
+                ...updatedCache.fontName,
+                style: value
+              };
+            } 
+            else if (typeof value === "number") {
+              // Tìm font style tương ứng với weight
+              const fontStyles = localFonts
+                .filter(font => font.fontName.family === updatedCache.fontName.family)
+                .map(font => font.fontName.style);
+              
+              if (fontStyles.length > 0) {
+                let bestStyleMatch = "Regular";
+                let closestWeight = 400;
+                
+                for (const fontStyle of fontStyles) {
+                  const weightInfo = getFontWeightValue(fontStyle);
+                  if (weightInfo.fontWeight === value) {
+                    bestStyleMatch = fontStyle;
+                    break;
+                  } else if (weightInfo.fontWeight !== undefined) {
+                    const currentDiff = Math.abs(weightInfo.fontWeight - value);
+                    const closestDiff = Math.abs(closestWeight - value);
+                    
+                    if (currentDiff < closestDiff) {
+                      closestWeight = weightInfo.fontWeight;
+                      bestStyleMatch = fontStyle;
+                    }
+                  }
+                }
+                
+                updatedCache.fontName = {
+                  ...updatedCache.fontName,
+                  style: bestStyleMatch
+                };
+              }
+            }
+          }
+        } else {
+          // Cập nhật trực tiếp
+          updatedCache.fontName = {
+            ...updatedCache.fontName,
+            style: typeof checkedStyle.value === 'number' ? String(checkedStyle.value) : checkedStyle.value
+          };
+        }
+        hasChanges = true;
+      }
+
+      // Xử lý font size
+      if (checkedFontSize.value !== "" && !isNaN(Number(checkedFontSize.value))) {
+        console.log(`[handleChangeSelectedStyle] Updating font size for ${cache.name}: ${checkedFontSize.value}`);
+        
+        // Xóa biến cũ nếu có
+        updatedCache = removeVariableFromCache(updatedCache, ["fontSize"]);
+        
+        if (checkedFontSize.type === "variable" && checkedFontSize.variableId) {
+          // Xử lý biến font size
+          updatedCache = handleFontVariableBinding(updatedCache, checkedFontSize.variableId, "fontSize");
+          
+          // Cập nhật giá trị hiển thị trực tiếp
+          const variableToApply = localVariableList.find(v => v.id === checkedFontSize.variableId);
+          if (variableToApply && variableToApply.defaultModeId) {
+            const value = variableToApply.valuesByMode[variableToApply.defaultModeId];
+            if (typeof value === "number") {
+              updatedCache.fontSize = value;
+            }
+          }
+        } else {
+          // Cập nhật trực tiếp
+          updatedCache.fontSize = Number(checkedFontSize.value);
+        }
+        hasChanges = true;
+      }
+
+      // Xử lý lineHeight
+      if (checkedLineHeight.unit !== "") {
+        console.log(`[handleChangeSelectedStyle] Updating line height for ${cache.name}: ${JSON.stringify(checkedLineHeight)}`);
+        
+        // Xóa biến cũ nếu có
+        updatedCache = removeVariableFromCache(updatedCache, ["lineHeight"]);
+        
+        // Cập nhật giá trị trực tiếp
+        updatedCache.lineHeight = checkedLineHeight;
+        hasChanges = true;
+      }
+
+      // Xử lý letterSpacing
+      if (checkedLetterSpacing.unit !== "") {
+        console.log(`[handleChangeSelectedStyle] Updating letter spacing for ${cache.name}: ${JSON.stringify(checkedLetterSpacing)}`);
+        
+        // Xóa biến cũ nếu có
+        updatedCache = removeVariableFromCache(updatedCache, ["letterSpacing"]);
+        
+        // Cập nhật giá trị trực tiếp
+        updatedCache.letterSpacing = checkedLetterSpacing;
+        hasChanges = true;
+      }
+
+      // Cập nhật cache nếu có thay đổi
+      if (hasChanges) {
+        console.log(`[handleChangeSelectedStyle] Updating cache for style: ${cache.name}`);
+        setCacheStyle((prev) => prev.map((i) => (i.id === styleId ? updatedCache : i)));
+      } else {
+        console.log(`[handleChangeSelectedStyle] No changes needed for style: ${cache.name}`);
+      }
     }
+    
+    console.log("[handleChangeSelectedStyle] Finished updating selected styles");
   };
 
   const checkFontName = (font: textStyleType) => {
