@@ -170,6 +170,19 @@ html.figma-dark #choiceFont .font-list:hover::-webkit-scrollbar-thumb {
   color: var(--figma-color-text) !important;
 }
 
+/* Thêm style cho input text khi nhập */
+#choiceFont .react-select__input-container {
+  color: var(--figma-color-text) !important;
+}
+
+#choiceFont .react-select__input {
+  color: var(--figma-color-text) !important;
+}
+
+#choiceFont .react-select__input:focus {
+  outline: none !important;
+}
+
 #choiceFont .react-select__menu {
   background-color: var(--figma-color-bg) !important;
   border: 1px solid var(--figma-color-border) !important;
