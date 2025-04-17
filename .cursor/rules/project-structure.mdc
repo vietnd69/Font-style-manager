@@ -10,6 +10,7 @@ alwaysApply: true
 ### ui-src
 - React-based UI components for interactive interfaces
 - Core modules: ChoiceFont, EditShowGroup, EditShowType, ChoiceVariable, BuyMeACoffee,...
+- Use figma UI theme, and css variables import from figma
 - Built with React, TypeScript and CSS modules
 - Uses Vite for bundling and development
 
