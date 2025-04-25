@@ -1,0 +1,42 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Figma Variable Integration
+
+## Overview
+- Integration with Figma's Variables API for typography management
+- Allows binding text properties to Figma variables
+- Supports dynamic typography that updates with variable changes
+
+## Variable Types
+- Font Family variables: Control typeface selection
+- Font Style variables: Control weight, italic, condensed properties
+- Font Size variables: Control text size dimensions
+- Line Height variables: Control spacing between lines
+- Letter Spacing variables: Control character spacing
+
+## Implementation
+- Uses `setBoundVariable` from Figma API to bind variables to text styles
+- Handles both string variables (family, style) and number variables (weight, size)
+- Stores variable bindings in `boundVariables` property of text styles
+- UI components in [ChoiceVariable.tsx](mdc:ui-src/ChoiceVariable.tsx) for variable selection
+
+## Variable Binding Process
+1. Detect variable type and compatibility with property
+2. Bind variable using `textStyle.setBoundVariable(property, variable)`
+3. Update cached style to reflect variable binding
+4. Special handling for font weight vs font style based on variable type
+
+## Edge Cases
+- Handles font compatibility when font family variable changes
+- Automatically selects best matching style when weight changes
+- Intelligent unbinding of variables when properties are manually set
+- Preserves style attributes (condensed/italic) when reassigning variables
+
+## UI Integration
+- Variable selector UI shows available variables filtered by compatibility
+- Visual indicators in the UI show which properties are bound to variables
+- Variable binding status shown with variable icon in the interface
+

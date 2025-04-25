@@ -1,0 +1,40 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# UI Component Structure
+
+## Main UI Components
+- [App.tsx](mdc:ui-src/App.tsx): Entry point for the UI application
+- [ChoiceFont.tsx](mdc:ui-src/ChoiceFont.tsx): Font selection interface
+- [ChoiceVariable.tsx](mdc:ui-src/ChoiceVariable.tsx): Variable binding UI
+- [EditShowGroup.tsx](mdc:ui-src/EditShowGroup.tsx): Group editing interface
+- [EditShowType.tsx](mdc:ui-src/EditShowType.tsx): Typography display options
+- [Processing.tsx](mdc:ui-src/Processing.tsx): Progress indicator for operations
+- [BuyMeACoffee.tsx](mdc:ui-src/BuyMeACoffee.tsx): Support component
+
+## Widget Components
+- [TextDesignSystemManager.tsx](mdc:widget-src/TextDesignSystemManager.tsx): Main widget interface
+- [TextDesignSystemList.tsx](mdc:widget-src/TextDesignSystemList.tsx): List view for text styles
+- [CheckBox.tsx](mdc:widget-src/components/CheckBox.tsx): Custom checkbox implementation
+
+## Communication Flow
+1. Widget shows UI with `showUi({ moduleName, name, data })`
+2. UI components receive data and render appropriate interfaces
+3. User interacts with UI (selects fonts, variables, etc.)
+4. UI sends messages back to widget using `parent.postMessage`
+5. Widget processes messages and updates text styles
+
+## State Management
+- Widget uses `useSyncedState` for persistent state management
+- UI uses React state for local component state
+- Data is synchronized through message passing
+
+## UI Features
+- Font family and style selection with search and filtering
+- Variable binding with visual indicators
+- Bulk editing of multiple selected text styles
+- Progress tracking for long operations
+- Search and filter functionality for text styles
+

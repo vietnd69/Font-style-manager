@@ -1,0 +1,34 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Font Management Logic
+
+## Text Style Management
+- Handles text styles in Figma through [TextDesignSystemManager.tsx](mdc:widget-src/TextDesignSystemManager.tsx)
+- Enables viewing, filtering, and updating text styles
+- Manages style properties including font family, weight, size, line height, and letter spacing
+
+## Core Functions
+- `handleChangeSelectedStyle`: Updates selected text styles with new font properties
+- `updateStyle`: Pushes changes to Figma's text styles
+- `checkFontName`: Validates if font families and styles exist in the system
+- `getNameStyle` and `getGroupStyle`: Parse style naming conventions
+
+## Variable Integration
+- Supports binding font properties to Figma variables
+- Handles variables for font family, style, weight, size, line height, and letter spacing
+- Uses `handleFontVariableBinding` to bind variables to text styles
+- `removeVariableFromCache` to remove variable bindings
+
+## Font Weight Handling
+- Uses [getFontWeightValue.ts](mdc:widget-src/hooks/getFontWeightValue.ts) to convert font style names to weights
+- Intelligently matches font weights when changing styles
+- Maintains style attributes (condensed, italic) when changing weights
+
+## Search and Filter
+- `findAll`: Filters text styles based on multiple criteria
+- Supports searching by name, group, family, style, size, line height, and spacing
+- User interface provides flexible search options for managing large style sets
+
