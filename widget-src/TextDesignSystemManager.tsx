@@ -623,44 +623,141 @@ const TextDesignManager = ({ value }: { value: textDesignManagerType }) => {
               };
             } 
             else if (typeof value === "number") {
-              // Tìm font style tương ứng với weight
+              // Phân tích style hiện tại để xác định đặc tính
+              const currentStyle = updatedCache.fontName.style;
+              const isCurrentCondensed = currentStyle.toLowerCase().includes('condensed');
+              const isCurrentItalic = currentStyle.toLowerCase().includes('italic');
+              
+              console.log(`[handleChangeSelectedStyle] Analyzing current style: ${currentStyle}`);
+              console.log(`[handleChangeSelectedStyle] Is condensed: ${isCurrentCondensed}, Is italic: ${isCurrentItalic}`);
+              
+              // Lấy danh sách styles của font hiện tại
               const fontStyles = localFonts
                 .filter(font => font.fontName.family === updatedCache.fontName.family)
                 .map(font => font.fontName.style);
               
-              if (fontStyles.length > 0) {
-                let bestStyleMatch = "Regular";
-                let closestWeight = 400;
+              console.log(`[handleChangeSelectedStyle] Available styles for ${updatedCache.fontName.family}:`, fontStyles);
+              
+              // Tạo danh sách các style phù hợp với weight mới
+              const matchingStyles = fontStyles.map(fontStyle => {
+                const weightInfo = getFontWeightValue(fontStyle);
+                const isCondensed = fontStyle.toLowerCase().includes('condensed');
+                const isItalic = fontStyle.toLowerCase().includes('italic');
                 
-                for (const fontStyle of fontStyles) {
-                  const weightInfo = getFontWeightValue(fontStyle);
-                  if (weightInfo.fontWeight === value) {
-                    bestStyleMatch = fontStyle;
-                    break;
-                  } else if (weightInfo.fontWeight !== undefined) {
-                    const currentDiff = Math.abs(weightInfo.fontWeight - value);
-                    const closestDiff = Math.abs(closestWeight - value);
-                    
-                    if (currentDiff < closestDiff) {
-                      closestWeight = weightInfo.fontWeight;
-                      bestStyleMatch = fontStyle;
-                    }
-                  }
+                // Tính điểm phù hợp dựa vào các đặc tính
+                let matchScore = 0;
+                
+                // +100 điểm nếu weight CHÍNH XÁC
+                if (weightInfo.fontWeight === value) {
+                  matchScore += 100;
+                } else if (weightInfo.fontWeight !== undefined) {
+                  // +50 điểm trừ đi độ chênh lệch nếu weight KHÔNG chính xác
+                  matchScore += 50 - Math.abs(weightInfo.fontWeight - (value as number))/10;
                 }
                 
-                updatedCache.fontName = {
-                  ...updatedCache.fontName,
-                  style: bestStyleMatch
+                // +200 điểm nếu các đặc tính khác GIỐNG NHAU (giữ nguyên condensed/không condensed)
+                if (isCondensed === isCurrentCondensed) {
+                  matchScore += 200;
+                }
+                
+                // +50 điểm nếu giữ đặc tính italic
+                if (isItalic === isCurrentItalic) {
+                  matchScore += 50;
+                }
+                
+                return {
+                  styleName: fontStyle,
+                  score: matchScore,
+                  weight: weightInfo.fontWeight || 400
                 };
-              }
+              })
+              .filter(item => item.weight !== undefined)
+              .sort((a, b) => b.score - a.score); // Sắp xếp theo điểm cao nhất
+              
+              console.log(`[handleChangeSelectedStyle] Matching styles with scores:`, matchingStyles);
+              
+              // Chọn style có điểm cao nhất
+              const bestStyleMatch = matchingStyles.length > 0 ? matchingStyles[0].styleName : "Regular";
+              
+              console.log(`[handleChangeSelectedStyle] Selected best style match: ${bestStyleMatch}`);
+              
+              updatedCache.fontName = {
+                ...updatedCache.fontName,
+                style: bestStyleMatch
+              };
             }
           }
         } else {
           // Cập nhật trực tiếp
-          updatedCache.fontName = {
-            ...updatedCache.fontName,
-            style: typeof checkedStyle.value === 'number' ? String(checkedStyle.value) : checkedStyle.value
-          };
+          if (typeof checkedStyle.value === 'number') {
+            // Xử lý trường hợp weight là số, cần tìm style phù hợp
+            const currentStyle = updatedCache.fontName.style;
+            const isCurrentCondensed = currentStyle.toLowerCase().includes('condensed');
+            const isCurrentItalic = currentStyle.toLowerCase().includes('italic');
+            
+            console.log(`[handleChangeSelectedStyle] Direct update with weight value: ${checkedStyle.value}`);
+            console.log(`[handleChangeSelectedStyle] Current style: ${currentStyle}`);
+            console.log(`[handleChangeSelectedStyle] Is condensed: ${isCurrentCondensed}, Is italic: ${isCurrentItalic}`);
+            
+            // Lấy danh sách styles của font hiện tại
+            const fontStyles = localFonts
+              .filter(font => font.fontName.family === updatedCache.fontName.family)
+              .map(font => font.fontName.style);
+            
+            // Tạo danh sách các style phù hợp với weight mới
+            const matchingStyles = fontStyles.map(fontStyle => {
+              const weightInfo = getFontWeightValue(fontStyle);
+              const isCondensed = fontStyle.toLowerCase().includes('condensed');
+              const isItalic = fontStyle.toLowerCase().includes('italic');
+              
+              // Tính điểm phù hợp dựa vào các đặc tính
+              let matchScore = 0;
+              
+              // +100 điểm nếu weight CHÍNH XÁC
+              if (weightInfo.fontWeight === checkedStyle.value) {
+                matchScore += 100;
+              } else if (weightInfo.fontWeight !== undefined) {
+                // +50 điểm trừ đi độ chênh lệch nếu weight KHÔNG chính xác
+                matchScore += 50 - Math.abs(weightInfo.fontWeight - (checkedStyle.value as number))/10;
+              }
+              
+              // +200 điểm nếu các đặc tính khác GIỐNG NHAU (giữ nguyên condensed/không condensed)
+              if (isCondensed === isCurrentCondensed) {
+                matchScore += 200;
+              }
+              
+              // +50 điểm nếu giữ đặc tính italic
+              if (isItalic === isCurrentItalic) {
+                matchScore += 50;
+              }
+              
+              return {
+                styleName: fontStyle,
+                score: matchScore,
+                weight: weightInfo.fontWeight || 400
+              };
+            })
+            .filter(item => item.weight !== undefined)
+            .sort((a, b) => b.score - a.score); // Sắp xếp theo điểm cao nhất
+            
+            console.log(`[handleChangeSelectedStyle] Matching styles with scores:`, matchingStyles);
+            
+            // Chọn style có điểm cao nhất
+            const bestStyleMatch = matchingStyles.length > 0 ? matchingStyles[0].styleName : "Regular";
+            
+            console.log(`[handleChangeSelectedStyle] Selected best style match: ${bestStyleMatch}`);
+            
+            updatedCache.fontName = {
+              ...updatedCache.fontName,
+              style: bestStyleMatch
+            };
+          } else {
+            // Trường hợp style là chuỗi, cập nhật trực tiếp
+            updatedCache.fontName = {
+              ...updatedCache.fontName,
+              style: checkedStyle.value as string
+            };
+          }
         }
         hasChanges = true;
       }
