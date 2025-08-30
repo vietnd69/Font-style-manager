@@ -594,6 +594,7 @@ function Widget() {
     const clonedWidget = widgetNode.clone();
 
     // Transfer the current state to the cloned widget
+    // Truyền đầy đủ data giống như khi khởi tạo widget và chạy getLocalTextStyle
     clonedWidget.setWidgetSyncedState({
       mode: "view",
       textStyles,
@@ -602,7 +603,16 @@ function Widget() {
       checkedStyle,
       cacheStyle,
       isFirstLoadFont,
+      localFonts,
+      cleanFont,
+      showGroup,
       showStyle: showStyleData,
+      hasReloadLocalFont,
+      isOpenSearchBar,
+      showEditType,
+      localVariableList,
+      currentModeID,
+      checkedFontSize,
     });
 
     // Position the cloned widget beside this widget
@@ -1447,9 +1457,17 @@ function Widget() {
           direction={"vertical"}
           padding={{ bottom: 6 }}
         >
+        <AutoLayout spacing={8}>
           <Text fontSize={46} fontWeight={700} fill={"#000000"}>
             {mode === "edit" ? "FONT STYLES MANAGER" : "FONT STYLES LIST"}
           </Text>
+          {mode === "edit" && textStyles.length > 0 && (
+          <Text fontSize={46} fontWeight={700} fill={"#000000"}>({textStyles.length < 10 ? "0" + textStyles.length : textStyles.length})</Text>
+          )}
+          {mode === "view" && showStyle.length > 0 && (
+            <Text fontSize={46} fontWeight={700} fill={"#000000"}>({showStyle.length < 10 ? "0" + showStyle.length : showStyle.length})</Text>
+          )}
+        </AutoLayout>
           {mode === "edit" ? (
             <Text fontSize={18} fill={"#000000"}>
               Choose styles you want to change
