@@ -2,6 +2,7 @@ const { widget } = figma;
 const {
   AutoLayout,
   Text,
+  Span,
   Rectangle,
   useSyncedState,
   useEffect,
@@ -23,7 +24,12 @@ import {
   listViewDisable,
   listSvg,
   editSvg,
+  noticeActive,
+  noticeDisable,
 } from "./svg";
+
+const PLUGIN_URL =
+  "https://www.figma.com/community/plugin/1695626099709151012/font-style-manager-plugin";
 
 import getFontWeightValue from "./hooks/getFontWeightValue";
 
@@ -505,6 +511,8 @@ function Widget() {
 
   // Core state management
   const [mode, setMode] = useSyncedState<"edit" | "view">("mode", "edit");
+  const [isPluginNoticeHidden, setIsPluginNoticeHidden] =
+    useSyncedState<boolean>("isPluginNoticeHidden", false);
   const [textStyles, setTextStyles] = useSyncedState<textStyleType[]>(
     "textStyles",
     []
@@ -1556,6 +1564,15 @@ function Widget() {
           )}
           <Rectangle width={"fill-parent"} height={1} fill={"#e6e6e6"} />
           <SVG
+            src={isPluginNoticeHidden ? noticeDisable : noticeActive}
+            tooltip={
+              isPluginNoticeHidden
+                ? "Show plugin notice"
+                : "Hide plugin notice"
+            }
+            onClick={() => setIsPluginNoticeHidden(!isPluginNoticeHidden)}
+          />
+          <SVG
             src={coffeeSvg}
             tooltip={"Buy me a coffee"}
             onClick={() =>
@@ -1564,6 +1581,42 @@ function Widget() {
           />
         </AutoLayout>
       </AutoLayout>
+
+      {!isPluginNoticeHidden && (
+        <AutoLayout
+          name={"Plugin notice"}
+          width={"fill-parent"}
+          verticalAlignItems={"center"}
+          spacing={24}
+          padding={{ vertical: 18, horizontal: 24 }}
+          cornerRadius={14}
+          fill={"#F1EEFF"}
+        >
+          <Text
+            width={"fill-parent"}
+            fontSize={24}
+            fill={"#7B61FF"}
+            hoverStyle={{ opacity: 0.7 }}
+            tooltip={"Open on Figma Community"}
+            onClick={() => figma.openExternal(PLUGIN_URL)}
+          >
+            <Span fontWeight={700}>New:</Span> Font Style Manager is now
+            available as a plugin, with more features.{" "}
+            <Span fontWeight={700} textDecoration={"underline"}>
+              Get the plugin →
+            </Span>
+          </Text>
+          <Text
+            fontSize={28}
+            fill={"#7B61FF"}
+            hoverStyle={{ opacity: 0.6 }}
+            tooltip={"Hide"}
+            onClick={() => setIsPluginNoticeHidden(true)}
+          >
+            ✕
+          </Text>
+        </AutoLayout>
+      )}
 
       {mode === "edit" && (
         <TextDesignManager
